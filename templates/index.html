@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="image-grid">
+    {% for screenshot in screenshots %}
+    <div class="grid-item loading">
+        <img 
+            src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" 
+            alt="Shot by {{ screenshot['discord_username'] }}"
+            loading="lazy"
+            onload="this.parentElement.classList.remove('loading')"
+        >
+        <div class="image-info">
+            <p class="username bold underline">By: {{ screenshot['discord_username'] }}</p>
+            {% if screenshot['group_name'] %}
+            <p class="group">Group: {{ screenshot['group_name'] }}</p>
+            {% endif %}
+            {% if screenshot['tags'] %}
+            <div class="tags">
+                {% for tag in screenshot['tags'].split(',') %}
+                <span class="badge bg-primary">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <p class="date">{{ screenshot['upload_date'] }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Lightbox (keeping existing lightbox code) -->
+<div class="lightbox">
+    <div class="close-lightbox">
+        <i class="fas fa-times"></i>
+    </div>
+    <div class="lightbox-nav lightbox-prev">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <img src="" alt="Enlarged view">
+    <div class="lightbox-nav lightbox-next">
+        <i class="fas fa-chevron-right"></i>
+    </div>
+</div>
+
+<script>
+// Add loading class to all grid items initially
+document.querySelectorAll('.grid-item').forEach(item => {
+    item.classList.add('loading');
+});
+
+// Lightbox functionality
+const lightbox = document.querySelector('.lightbox');
+const lightboxImg = lightbox.querySelector('img');
+const gridItems = document.querySelectorAll('.grid-item img');
+let currentImageIndex = 0;
+
+// Open lightbox
+gridItems.forEach((img, index) => {
+    img.addEventListener('click', () => {
+        currentImageIndex = index;
+        lightboxImg.src = img.src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    });
+});
+
+// Close lightbox
+document.querySelector('.close-lightbox').addEventListener('click', () => {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = ''; // Restore scrolling
+});
+
+// Close on background click
+lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
+// Navigation
+document.querySelector('.lightbox-prev').addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentImageIndex = (currentImageIndex - 1 + gridItems.length) % gridItems.length;
+    lightboxImg.src = gridItems[currentImageIndex].src;
+});
+
+document.querySelector('.lightbox-next').addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentImageIndex = (currentImageIndex + 1) % gridItems.length;
+    lightboxImg.src = gridItems[currentImageIndex].src;
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    
+    if (e.key === 'Escape') {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    if (e.key === 'ArrowLeft') {
+        currentImageIndex = (currentImageIndex - 1 + gridItems.length) % gridItems.length;
+        lightboxImg.src = gridItems[currentImageIndex].src;
+    }
+    if (e.key === 'ArrowRight') {
+        currentImageIndex = (currentImageIndex + 1) % gridItems.length;
+        lightboxImg.src = gridItems[currentImageIndex].src;
+    }
+});
+
+if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target.querySelector('img');
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                }
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    document.querySelectorAll('.grid-item').forEach(item => {
+        imageObserver.observe(item);
+    });
+}
+
+/*
+ * Constants
+ */
+
+const Default = {
+    initialZoom: 3,
+    minZoom: 1.25,
+    maxZoom: 4,
+    zoomSpeed: 0.01
+};
+
+/*
+ * Class definition
+ */
+
+class Zoomable {
+    constructor(element, config) {
+        this.element = element;
+        this.config = this._mergeConfig(config);
+
+        const { initialZoom, minZoom, maxZoom } = this.config;
+
+        this.zoomed = false;
+        this.initialZoom = Math.max(Math.min(initialZoom, maxZoom), minZoom);
+        this.zoom = this.initialZoom;
+
+        this.img = element.querySelector(".zoomable__img");
+        this.img.draggable = false;
+        this.element.style.setProperty("--zoom", this.initialZoom);
+
+        this._addEventListeners();
+    }
+
+    static get Default() {
+        return Default;
+    }
+
+    _addEventListeners() {
+        this.element.addEventListener("mouseover", () =>
+            this._handleMouseover()
+        );
+        this.element.addEventListener("mousemove", (evt) =>
+            this._handleMousemove(evt)
+        );
+        this.element.addEventListener("mouseout", () => this._handleMouseout());
+        this.element.addEventListener("wheel", (evt) => this._handleWheel(evt));
+
+        this.element.addEventListener("touchstart", (evt) =>
+            this._handleTouchstart(evt)
+        );
+        this.element.addEventListener("touchmove", (evt) =>
+            this._handleTouchmove(evt)
+        );
+        this.element.addEventListener("touchend", () => this._handleTouchend());
+    }
+
+    _handleMouseover() {
+        if (this.zoomed) {
+            return;
+        }
+
+        this.element.classList.add("zoomable--zoomed");
+
+        this.zoomed = true;
+    }
+
+    _handleMousemove(evt) {
+        if (!this.zoomed) {
+            return;
+        }
+
+        const elPos = this.element.getBoundingClientRect();
+
+        const percentageX = `${
+            ((evt.clientX - elPos.left) * 100) / elPos.width
+        }%`;
+        const percentageY = `${
+            ((evt.clientY - elPos.top) * 100) / elPos.height
+        }%`;
+
+        this.element.style.setProperty("--zoom-pos-x", percentageX);
+        this.element.style.setProperty("--zoom-pos-y", percentageY);
+    }
+
+    _handleMouseout() {
+        if (!this.zoomed) {
+            return;
+        }
+
+        this.element.style.setProperty("--zoom", this.initialZoom);
+        this.element.classList.remove("zoomable--zoomed");
+
+        this.zoomed = false;
+    }
+
+    _handleWheel(evt) {
+        if (!this.zoomed) {
+            return;
+        }
+
+        evt.preventDefault();
+
+        const newZoom = this.zoom + evt.deltaY * (this.config.zoomSpeed * -1);
+        const { minZoom, maxZoom } = this.config;
+
+        this.zoom = Math.max(Math.min(newZoom, maxZoom), minZoom);
+        this.element.style.setProperty("--zoom", this.zoom);
+    }
+
+    _handleTouchstart(evt) {
+        evt.preventDefault();
+
+        this._handleMouseover();
+    }
+
+    _handleTouchmove(evt) {
+        if (!this.zoomed) {
+            return;
+        }
+
+        const elPos = this.element.getBoundingClientRect();
+
+        let percentageX =
+            ((evt.touches[0].clientX - elPos.left) * 100) / elPos.width;
+        let percentageY =
+            ((evt.touches[0].clientY - elPos.top) * 100) / elPos.height;
+
+        percentageX = Math.max(Math.min(percentageX, 100), 0);
+        percentageY = Math.max(Math.min(percentageY, 100), 0);
+
+        this.element.style.setProperty("--zoom-pos-x", `${percentageX}%`);
+        this.element.style.setProperty("--zoom-pos-y", `${percentageY}%`);
+    }
+
+    _handleTouchend(evt) {
+        this._handleMouseout();
+    }
+
+    _mergeConfig(config) {
+        return {
+            ...this.constructor.Default,
+            ...(typeof config === "object" ? config : {})
+        };
+    }
+}
+
+/*
+ * Implementation
+ */
+
+const zoomables = document.querySelectorAll(".lightbox");
+
+for (const el of zoomables) {
+    new Zoomable(el);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const gridItems = document.querySelectorAll('.grid-item img');
+    
+    gridItems.forEach(img => {
+        img.onload = function() {
+            const aspectRatio = this.naturalHeight / this.naturalWidth;
+            const gridItem = this.parentElement;
+            
+            if (aspectRatio > 1.2) { // Tall images
+                gridItem.style.gridRow = 'span 4';
+            } else if (aspectRatio < 0.8) { // Wide images
+                gridItem.style.gridColumn = 'span 4';
+            }
+            
+            gridItem.classList.remove('loading');
+        };
+    });
+});
+</script>
+{% endblock %}

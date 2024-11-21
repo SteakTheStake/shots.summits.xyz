@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (Bootstrap and custom CSS links) ... -->
+    <title>Truth Presets Shots</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main-style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='fontawesome-free-6.5.1-web/css/solid.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='fontawesome-free-6.5.1-web/css/all.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+
+
+    <!-- Discord Meta Tags -->
+    {% if image_filename is defined %}
+        <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image">
+        <meta content="Truth Presets Shot - {{ image_filename }}" property="og:title">
+    {% else %}
+        <meta content="https://i.imgur.com/hxsaduN_d.webp" property="og:image">
+        <meta content="Truth Presets Shots" property="og:title">
+    {% endif %}
+    <meta content="https://shots.truthpresets.com/" property="og:url">
+    <meta content="Official Truth Presets Screenshot Sharing Website" property="og:description">
+    <meta content="#290b6b" data-react-helmet="true" name="theme-color">
+    <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/hxsaduN_d.webp{% endif %}">
+</head>
+<body class="dark">
+<header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="round fill large small-padding">
+        <i class="rounded-0">arrow_back</i>
+        <span class="rounded-0">Home</span>
+      </a>
+      <a href="{{ url_for('upload') }}" class="round fill large small-padding">
+        <i class="rounded-0">upload_file</i>
+        <span class="rounded-0">Upload</span>
+      </a>
+      <h6>Truth Presets Screenshots</h6>
+    </nav>
+</header>
+<div class="full_height" id="particles-js"></div>
+<div class="full_height">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+<!-- JavaScript for interactive elements -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="{{ url_for('static', filename='js/particles3.js') }}"></script>
+</html>

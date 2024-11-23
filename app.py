@@ -12,6 +12,7 @@ from flask import (
     jsonify,
 )
 from functools import wraps
+from requests_oauthlib import OAuth2Session
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import sqlite3
@@ -134,7 +135,21 @@ def create_app():
                 return redirect(url_for('login'))
             return f(*args, **kwargs)
         return decorated_function
+    
+    @app.route('/debug-config')
+    def debug_config():
+        from config import Config  # Import Config class
 
+        config_vars = {
+            'CLIENT_ID': Config.DISCORD_CLIENT_ID,
+            'REDIRECT_URI': Config.DISCORD_REDIRECT_URI,
+            'WEBHOOK_URL': Config.DISCORD_WEBHOOK_URL,
+            'HAS_CLIENT_SECRET': bool(Config.DISCORD_CLIENT_SECRET),
+            'HAS_PUBLIC_KEY': bool(Config.DISCORD_PUBLIC_KEY),
+            'HAS_BOT_TOKEN': bool(Config.DISCORD_BOT_TOKEN)
+        }
+        return jsonify(config_vars)
+    
     @app.route('/login')
     def login():
         discord = make_session()
@@ -345,6 +360,15 @@ def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
 
     return hmac.compare_digest(calculated_signature, signature)
 
+def make_session(token=None, state=None):
+    return OAuth2Session(
+        client_id=Config.DISCORD_CLIENT_ID,
+        token=token,
+        state=state,
+        redirect_uri=Config.DISCORD_REDIRECT_URI,
+        scope=['identify', 'guilds']
+    )
+
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
@@ -426,6 +450,17 @@ def create_app():
             screenshots = cursor.fetchall()
         return render_template('index.html', screenshots=screenshots)
     
+    # Add this to your app.py temporarily to debug
+    @app.route('/config-check')
+    def config_check():
+        return {
+            'client_id': app.config['DISCORD_CLIENT_ID'],
+            'redirect_uri': app.config['DISCORD_REDIRECT_URI'],
+            'api_base': app.config['DISCORD_API_BASE_URL'],
+            'auth_base': app.config['DISCORD_AUTHORIZATION_BASE_URL'],
+            'token_url': app.config['DISCORD_TOKEN_URL']
+        }
+        
     @app.route('/login')
     def login():
         discord = make_session()
@@ -497,7 +532,7 @@ def create_app():
                 return redirect(request.url)
 
         return render_template('upload.html')
-
+    
     @app.route("/shots/<image_filename>")
     def view_image(image_filename):
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
@@ -521,7 +556,9 @@ def create_app():
                 "image_view.html", image_filename=image_filename, image_data=image_data
             )
         return "Image not found", 404
-
+    
+    print("Discord Client ID:", os.getenv('DISCORD_CLIENT_ID'))
+    print("Discord Redirect URI:", os.getenv('DISCORD_REDIRECT_URI'))
     return app
 
 if __name__ == "__main__":

@@ -1,14 +1,14 @@
 particlesJS("particles-js", {
   "particles": {
     "number": {
-      "value": 100,
+      "value": 80,
       "density": {
         "enable": true,
         "value_area": 236.49980291683104
       }
     },
     "color": {
-      "value": "#ffffff"
+      "value": "#FFA500"
     },
     "shape": {
       "type": "edge",
@@ -26,7 +26,7 @@ particlesJS("particles-js", {
       }
     },
     "opacity": {
-      "value": 0.45,
+      "value": 1,
       "random": true,
       "anim": {
         "enable": true,
@@ -36,7 +36,7 @@ particlesJS("particles-js", {
       }
     },
     "size": {
-      "value": 2,
+      "value": 4,
       "random": true,
       "anim": {
         "enable": false,

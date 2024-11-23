@@ -8,6 +8,23 @@
     overflow-y: visible;
 }
 
+.tag_badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: .6875rem;
+    text-transform: none;
+    z-index: 2;
+    padding: 0 .25rem;
+    min-block-size: 1rem;
+    min-inline-size: 1rem;
+    color: var(--font);
+    line-height: normal;
+    border-radius: 1rem;
+    font-family: var(--font);
+}
+
 * {
     font-family: 'Roboto', SansSerif, serif;
     font-weight: 500;
@@ -450,6 +467,10 @@ body.dark {
     padding: 20px 0;
 }
 
+.bg-pill {
+    background-color: #FFA500;
+}
+
 .image-info {
     position: absolute;
     bottom: 0;
@@ -460,14 +481,37 @@ body.dark {
     color: white;
     opacity: 0;
     transition: opacity 0.3s;
+    border-radius: 0;
+}
+
+.fancy-text {
+    color: #ff7f34;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 .image-info .username {
-    font-size: medium;
+    text-decoration: none;
+    font-size: .85rem;
+    background-color: #5865F2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-transform: none;
+    z-index: 2;
+    padding: .25rem .5rem;
+    min-block-size: 1rem;
+    min-inline-size: 1rem;
+    color: var(--font);
+    line-height: normal;
+    border-radius: 1rem;
+    font-family: var(--font);
+
 }
 
 .image-info .group {
-    font-size: medium;
+    font-size: 1.2rem;
+    text-align: left;
 }
 
 .image-info .tags {
@@ -476,6 +520,7 @@ body.dark {
 
 .image-info .date {
     font-size: x-small;
+    opacity: 50%;
 }
 
 .grid-item:hover .image-info {
@@ -516,7 +561,10 @@ body.dark {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
-    padding: 1rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+    padding-left: 8rem;
+    padding-right: 8rem;
 }
 
 .grid-item {

@@ -10,35 +10,34 @@
             onload="this.parentElement.classList.remove('loading')"
         >
         <div class="image-info">
-            <p class="username bold underline">By: {{ screenshot['discord_username'] }}</p>
+            <p class="username bold underline">@{{ screenshot['discord_username'] }}<i class="fa-brands fa-discord small no-round tiny-padding"></i></p>
             {% if screenshot['group_name'] %}
-            <p class="group">Group: {{ screenshot['group_name'] }}</p>
+            <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
             {% endif %}
             {% if screenshot['tags'] %}
             <div class="tags">
                 {% for tag in screenshot['tags'].split(',') %}
-                <span class="badge bg-primary">{{ tag }}</span>
+                <span class="tag_badge bg-pill">{{ tag }}</span>
                 {% endfor %}
             </div>
             {% endif %}
             <p class="date">{{ screenshot['upload_date'] }}</p>
         </div>
     </div>
+    <!-- Lightbox (keeping existing lightbox code) -->
+    <div class="lightbox">
+        <div class="close-lightbox">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="lightbox-nav lightbox-prev">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <img src="" alt="Enlarged view">
+        <div class="lightbox-nav lightbox-next">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
     {% endfor %}
-</div>
-
-<!-- Lightbox (keeping existing lightbox code) -->
-<div class="lightbox">
-    <div class="close-lightbox">
-        <i class="fas fa-times"></i>
-    </div>
-    <div class="lightbox-nav lightbox-prev">
-        <i class="fas fa-chevron-left"></i>
-    </div>
-    <img src="" alt="Enlarged view">
-    <div class="lightbox-nav lightbox-next">
-        <i class="fas fa-chevron-right"></i>
-    </div>
 </div>
 
 <script>

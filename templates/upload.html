@@ -47,12 +47,13 @@
                         </div>
                         
                         <div class="form-group mt-3">
-                            <label class="font-weight-bold large-text" for="group_name"><div class="text-nowrap">Group Theme <muted class="text-muted medium-text">(Optional)</muted></div></label>
+                            <label class="font-weight-bold large-text" for="group_name"><div class="text-nowrap">Image Title</div></label>
                             <input type="text" 
                                 class="form-control bg-dark text-light field textarea border round min" 
                                 id="group_name" 
                                 name="group_name"
-                                placeholder="Enter a group name">
+                                placeholder="Enter a group name"
+                                required>
                         </div>
                         
                         <div class="form-group mt-3">
@@ -70,11 +71,11 @@
                                 class="form-control bg-dark text-light mt-4 rounded border dot_this cursor_pointer" 
                                 id="screenshots" 
                                 name="screenshots[]" 
-                                multiple 
+                                Single 
                                 accept=".png,.jpg,.jpeg,.webp"
                                 required>
-                                <h4>Drop up to 20 screenshots here or click to upload</h4>
-                                <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, Max 8MB per Image</p>
+                                <h4>Drop one screenshot here or click to upload</h4>
+                                <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, Max 10MB per Image</p>
                         </div>
                         <button type="submit" class="responsive fill round border" id="submitButton">
                             <i class="no-round me-2">upload</i>Upload Screenshots

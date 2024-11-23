@@ -5,58 +5,83 @@
         <div class="col-md-8">
             <div class="card bg-dark text-light">
                 <div class="card-header">
-                    <h4 class="mb-0">Upload Screenshots</h4>
+                    <h4 class="mb-0 pricedown">Upload Screenshots</h4>
                 </div>
                 <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
                     <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="discord_username">Discord Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text no-round"><i class="fab fa-discord"></i></span>
-                                <input type="text" 
-                                    class="form-control bg-dark text-light" 
-                                    id="discord_username" 
+                            <label class="font-weight-bold large-text" for="discord_username">Screenshot Taker's Discord Username</label>
+                            <div class="field textarea label prefix border round min show-overflow">
+                                <input type="text"
+                                    class="form-control bg-dark text-light field textarea border round min"
+                                    data-lt-tmp-id="lt-517853"
+                                    spellcheck="false"
+                                    data-gramm="false"
+                                    id="discord_username"
                                     name="discord_username"
+                                    placeholder="Discord Username"
+                                    required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold large-text" for="preset_name">Presets Used</label>
+                            <div class="field textarea label prefix border round min show-overflow">
+                                <input type="check"
+                                    class="form-control bg-dark text-light field textarea border round min"
+                                    data-lt-tmp-id="lt-517853"
+                                    spellcheck="false"
+                                    data-gramm="false"
+                                    id="preset_name"
+                                    name="preset_name"
+                                    placeholder="List one or more preset names in your upload (comma separated)"
                                     required>
                             </div>
                         </div>
                         
                         <div class="form-group mt-3">
-                            <label for="group_name">Group Theme (Optional)</label>
+                            <label class="font-weight-bold large-text" for="group_name"><div class="text-nowrap">Group Theme <muted class="text-muted medium-text">(Optional)</muted></div></label>
                             <input type="text" 
-                                class="form-control bg-dark text-light" 
+                                class="form-control bg-dark text-light field textarea border round min" 
                                 id="group_name" 
                                 name="group_name"
                                 placeholder="Enter a group name">
                         </div>
                         
                         <div class="form-group mt-3">
-                            <label for="tags">Feature Tags (comma-separated)</label>
+                            <label class="font-weight-bold large-text" for="tags"><div class="text-nowrap">Features &amp; Details Tags <muted class="text-muted medium-text">(Optional)</muted></div></label>
                             <input type="text" 
-                                class="form-control bg-dark text-light" 
+                                class="form-control bg-dark text-light field textarea border round min" 
                                 id="tags" 
                                 name="tags"
-                                placeholder="E.g., spruce trees, cave, mountain">
+                                placeholder="NVE, QuantV, FiveM, Single Player (comma separated)">
                         </div>
                         
                         <div class="form-group mt-3 no-scroll">
-                            <label for="screenshots" class="border drophere">Select Images</label>
-                            <h4>Drop up to 20 screenshots here or click to upload</h4>
-                            <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, Max 6MB per Image</p>
+                            <label for="screenshots" class="responsive secondary-container border drophere">Select Images</label>
                             <input type="file" 
-                                class="form-control bg-dark text-light mt-4 rounded border" 
+                                class="form-control bg-dark text-light mt-4 rounded border dot_this cursor_pointer" 
                                 id="screenshots" 
                                 name="screenshots[]" 
                                 multiple 
                                 accept=".png,.jpg,.jpeg,.webp"
                                 required>
+                                <h4>Drop up to 20 screenshots here or click to upload</h4>
+                                <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, Max 8MB per Image</p>
                         </div>
+                        <button type="submit" class="responsive fill round border" id="submitButton">
+                            <i class="no-round me-2">upload</i>Upload Screenshots
+                        </button>
                         <div id="preview" class="mt-3">
                             <!-- Previews will appear here -->
                         </div>
-                        <button type="submit" class="round border" id="submitButton">
-                            <i class="no-round me-2">upload</i>Upload Screenshots
-                        </button>
                     </form>
                 </div>
             </div>

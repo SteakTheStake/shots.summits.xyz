@@ -1,103 +1,110 @@
 particlesJS("particles-js", {
-    "particles": {
-        "number": {
-            "value": 128,
-            "density": {
-                "enable": false,
-                "value_area": 50
-            }
-        },
-        "color": {
-            "value": "#9166a9"
-        },
-        "shape": {
-            "type": ["image", "img"],
-            "image": {
-                "src": "https://raw.githubusercontent.com/SteakTheStake/bonemeal-v2/28ee085435329e49783b3db641dcb03839c4a057/bonemeal/src/ui/img/spark.svg",
-                "width": 1,
-                "height": 1
-            }
-        },
-        "opacity": {
-            "value": 1,
-            "random": true,
-            "anim": {
-                "enable": false,
-                "speed": 1,
-                "opacity_min": 0,
-                "sync": false
-            }
-        },
-        "size": {
-            "value": 55,
-            "random": true,
-            "anim": {
-                "enable": false,
-                "speed": 21.55396073985969,
-                "size_min": 26.34372979316184,
-                "sync": false
-            }
-        },
-        "line_linked": {
-            "enable": false,
-            "distance": 150,
-            "color": "#ffffff",
-            "opacity": 1,
-            "width": 1
-        },
-        "move": {
-            "enable": true,
-            "speed": 18.919984233346483,
-            "direction": "bottom-left",
-            "random": false,
-            "straight": false,
-            "out_mode": "out",
-            "bounce": false,
-            "attract": {
-                "enable": true,
-                "rotateX": 2049.664958612536,
-                "rotateY": 1891.9984233346484
-            }
-        }
+  "particles": {
+    "number": {
+      "value": 100,
+      "density": {
+        "enable": true,
+        "value_area": 236.49980291683104
+      }
     },
-    "interactivity": {
-        "detect_on": "window",
-        "events": {
-          "onhover": {
-            "enable": true,
-            "mode": "repulse"
-          },
-          "onclick": {
-            "enable": false,
-            "mode": "repulse"
-          },
-          "resize": true
-        },
-        "modes": {
-          "grab": {
-            "distance": 400,
-            "line_linked": {
-              "opacity": 0.5
-            }
-          },
-          "bubble": {
-            "distance": 400,
-            "size": 4,
-            "duration": 0.3,
-            "opacity": 1,
-            "speed": 3
-          },
-          "repulse": {
-            "distance": 207.55665897642663,
-            "duration": 0.4
-          },
-          "push": {
-            "particles_nb": 4
-          },
-          "remove": {
-            "particles_nb": 2
-          }
+    "color": {
+      "value": "#ffffff"
+    },
+    "shape": {
+      "type": "edge",
+      "stroke": {
+        "width": 0,
+        "color": "#000000"
+      },
+      "polygon": {
+        "nb_sides": 3
+      },
+      "image": {
+        "src": "img/github.svg",
+        "width": 100,
+        "height": 100
+      }
+    },
+    "opacity": {
+      "value": 0.45,
+      "random": true,
+      "anim": {
+        "enable": true,
+        "speed": 0.7982948422170255,
+        "opacity_min": 0.023948845266510768,
+        "sync": false
+      }
+    },
+    "size": {
+      "value": 2,
+      "random": true,
+      "anim": {
+        "enable": false,
+        "speed": 40,
+        "size_min": 0.1,
+        "sync": false
+      }
+    },
+    "line_linked": {
+      "enable": false,
+      "distance": 31.533307055577477,
+      "color": "#ffffff",
+      "opacity": 0.4,
+      "width": 1
+    },
+    "move": {
+      "enable": true,
+      "speed": 6,
+      "direction": "bottom",
+      "random": true,
+      "straight": false,
+      "out_mode": "bounce",
+      "bounce": false,
+      "attract": {
+        "enable": true,
+        "rotateX": 600,
+        "rotateY": 1200
+      }
+    }
+  },
+  "interactivity": {
+    "detect_on": "window",
+    "events": {
+      "onhover": {
+        "enable": true,
+        "mode": "grab"
+      },
+      "onclick": {
+        "enable": true,
+        "mode": "push"
+      },
+      "resize": true
+    },
+    "modes": {
+      "grab": {
+        "distance": 131.71864896580922,
+        "line_linked": {
+          "opacity": 0
         }
       },
-      "retina_detect": true
-  });
+      "bubble": {
+        "distance": 400,
+        "size": 40,
+        "duration": 2,
+        "opacity": 8,
+        "speed": 3
+      },
+      "repulse": {
+        "distance": 200,
+        "duration": 0.4
+      },
+      "push": {
+        "particles_nb": 4
+      },
+      "remove": {
+        "particles_nb": 2
+      }
+    }
+  },
+  "retina_detect": true
+});

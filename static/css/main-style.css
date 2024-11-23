@@ -1,7 +1,30 @@
+@font-face {
+    font-family: SansSerif;
+    src: url("/static/font/pricedown.otf") format("opentype");
+}
+
+.show-overflow {
+    overflow-x: visible;
+    overflow-y: visible;
+}
+
 * {
-    overflow-x: hidden;
+    font-family: 'Roboto', SansSerif, serif;
+    font-weight: 500;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+.pricedown {
+    font-family: 'Pricedown', SansSerif, serif;
+}
+
+.dot_this {
+    border-style: dotted 4px;
+}
+
+.cursor_pointer {
+    cursor: pointer;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -474,4 +497,166 @@ body.dark {
 .form-select:focus {
     border-color: #666;
     box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+}
+
+/* static/css/main-style.css */
+:root {
+    --primary-color: #290b6b;
+    --bg-dark: #1a1a1a;
+    --text-light: #ffffff;
+}
+
+body.dark {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+}
+
+/* Image Grid Styles */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.grid-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.grid-item.loading {
+    min-height: 200px;
+    background: linear-gradient(110deg, #2c2c2c 8%, #383838 18%, #2c2c2c 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.image-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.grid-item:hover .image-info {
+    transform: translateY(0);
+}
+
+/* Lightbox Styles */
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox img {
+    max-height: 90vh;
+    max-width: 90vw;
+    object-fit: contain;
+}
+
+.close-lightbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    cursor: pointer;
+    font-size: 2rem;
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    cursor: pointer;
+    font-size: 2rem;
+    padding: 1rem;
+}
+
+.lightbox-prev {
+    left: 1rem;
+}
+
+.lightbox-next {
+    right: 1rem;
+}
+
+/* Upload Form Styles */
+.drophere {
+    border: 2px dashed #666;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.drophere:hover {
+    border-color: var(--primary-color);
+    background: rgba(41, 11, 107, 0.1);
+}
+
+.no-round {
+    border-radius: 0 !important;
+}
+
+/* Preview Styles */
+#preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+#preview img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .lightbox-nav {
+        font-size: 1.5rem;
+    }
 }

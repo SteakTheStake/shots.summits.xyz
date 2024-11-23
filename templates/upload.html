@@ -2,10 +2,10 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card bg-dark text-light">
+        <article class="col-md-8 round border small-blur" style="background-color: #ffffff05;">
+            <div class="text-light">
                 <div class="card-header">
-                    <h4 class="mb-0 pricedown">Upload Screenshots</h4>
+                    <h4 class="mb-0 styled_font">Upload A Screenshot</h4>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -18,9 +18,9 @@
                     <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
                         <div class="form-group">
                             <label class="font-weight-bold large-text" for="discord_username">Screenshot Taker's Discord Username</label>
-                            <div class="field textarea label prefix border round min show-overflow">
+                            <div class="field textarea bg-dark label prefix border round min show-overflow">
                                 <input type="text"
-                                    class="form-control bg-dark text-light field textarea border round min"
+                                    class="form-control bg-dark text-light field textarea bg-dark border round min"
                                     data-lt-tmp-id="lt-517853"
                                     spellcheck="false"
                                     data-gramm="false"
@@ -33,9 +33,9 @@
                         
                         <div class="form-group">
                             <label class="font-weight-bold large-text" for="preset_name">Presets Used</label>
-                            <div class="field textarea label prefix border round min show-overflow">
+                            <div class="field textarea bg-dark label prefix border round min show-overflow">
                                 <input type="check"
-                                    class="form-control bg-dark text-light field textarea border round min"
+                                    class="form-control bg-dark text-light field textarea bg-dark border round min"
                                     data-lt-tmp-id="lt-517853"
                                     spellcheck="false"
                                     data-gramm="false"
@@ -49,7 +49,7 @@
                         <div class="form-group mt-3">
                             <label class="font-weight-bold large-text" for="group_name"><div class="text-nowrap">Image Title</div></label>
                             <input type="text" 
-                                class="form-control bg-dark text-light field textarea border round min" 
+                                class="form-control bg-dark text-light field textarea bg-dark border round min" 
                                 id="group_name" 
                                 name="group_name"
                                 placeholder="Enter a group name"
@@ -59,7 +59,7 @@
                         <div class="form-group mt-3">
                             <label class="font-weight-bold large-text" for="tags"><div class="text-nowrap">Features &amp; Details Tags <muted class="text-muted medium-text">(Optional)</muted></div></label>
                             <input type="text" 
-                                class="form-control bg-dark text-light field textarea border round min" 
+                                class="form-control bg-dark text-light field textarea bg-dark border round min" 
                                 id="tags" 
                                 name="tags"
                                 placeholder="NVE, QuantV, FiveM, Single Player (comma separated)">
@@ -72,11 +72,11 @@
                                 id="screenshots" 
                                 name="screenshots[]" 
                                 Single 
-                                accept=".png,.jpg,.jpeg,.webp"
+                                accept=".png,.jpg,.jpeg,.webp,.gif"
                                 required>
-                                <h4>Drop one screenshot here or click to upload</h4>
-                                <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, Max 10MB per Image</p>
                         </div>
+                        <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, GIF, Max 10MB per Image</p>
+                        <progress class="align-content-center bottom-margin top-margin large-margin" value="0" max="100"></progress>
                         <button type="submit" class="responsive fill round border" id="submitButton">
                             <i class="no-round me-2">upload</i>Upload Screenshots
                         </button>
@@ -86,7 +86,7 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </article>
     </div>
 </div>
 
@@ -112,6 +112,48 @@ document.getElementById('screenshots').addEventListener('change', function(e) {
         }
     }
 });
+
+// Get the form, progress bar and submit button elements
+const uploadForm = document.querySelector('form');
+const progressBar = document.querySelector('progress');
+const submitButton = document.querySelector('#submitButton');
+
+// Initially hide the progress bar
+progressBar.style.display = 'none';
+
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // Show progress bar and disable submit button
+    progressBar.style.display = 'block';
+    submitButton.disabled = true;
+
+    // Create FormData object
+    const formData = new FormData(uploadForm);
+    try {
+        const response = await fetch(uploadForm.action, {
+            method: 'POST',
+            body: formData,
+            // This allows us to track upload progress
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                progressBar.value = percentCompleted;
+                progressBar.max = 100;
+            }
+        });
+        if (response.ok) {
+            // Handle successful upload
+            console.log('Upload successful!');
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        // Hide progress bar and re-enable submit button
+        progressBar.style.display = 'none';
+        submitButton.disabled = false;
+    }
+});
 </script>
 <script>
 const uploadForm = new Dropzone("#uploadForm", {
@@ -119,7 +161,7 @@ const uploadForm = new Dropzone("#uploadForm", {
     paramName: "screenshots[]",
     maxFiles: 10,
     maxFilesize: 6,
-    acceptedFiles: ".png,.jpg,.jpeg,.webp",
+    acceptedFiles: ".png,.jpg,.jpeg,.webp,.gif",
     autoProcessQueue: false,
     uploadMultiple: true,
     createImageThumbnails: true,

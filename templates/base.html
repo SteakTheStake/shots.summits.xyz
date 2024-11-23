@@ -27,27 +27,25 @@
         <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image">
         <meta content="Truth Presets Shot - {{ image_filename }}" property="og:title">
     {% else %}
-        <meta content="https://i.imgur.com/hxsaduN_d.webp" property="og:image">
+        <meta content="https://i.imgur.com/8LMplX2.png" property="og:image">
         <meta content="Truth Presets Shots" property="og:title">
     {% endif %}
     <meta content="https://shots.truthpresets.com/" property="og:url">
     <meta content="Official Truth Presets Screenshot Sharing Website" property="og:description">
     <meta content="#FFA500" data-react-helmet="true" name="theme-color">
-    <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/hxsaduN_d.webp{% endif %}">
+    <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/8LMplX2.png{% endif %}">
     {% endblock %}
 </head>
 <body class="dark">
     <header>
         <nav>
             <a href="{{ url_for('index') }}" class="round fill large small-padding">
-                <i class="rounded-0">arrow_back</i>
-                <span class="rounded-0">Home</span>
+                <i class="rounded-0 medium"><img class="max" src="{{ url_for('static', filename="logo.png") }}"></i>
             </a>
             <a href="{{ url_for('upload') }}" class="round fill large small-padding">
-                <i class="rounded-0">upload_file</i>
-                <span class="rounded-0">Upload</span>
+                <i class="rounded-0">upload</i>
             </a>
-            <h6>Truth Presets Screenshots</h6>
+            <h6 class="styled_font center-align middle-align">Truth Presets Screenshots</h6>
         </nav>
     </header>
     

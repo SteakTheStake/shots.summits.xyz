@@ -15,45 +15,45 @@ import sqlite3
 def init_db():
     with sqlite3.connect("screenshots.db") as conn:
         conn.execute(
-            """
-      CREATE TABLE IF NOT EXISTS screenshots (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          filename TEXT NOT NULL,
-          discord_username TEXT NOT NULL,
-          upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          group_id INTEGER,
-          FOREIGN KEY (group_id) REFERENCES screenshot_groups(id)
-      )
-      """
+        """
+        CREATE TABLE IF NOT EXISTS screenshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            discord_username TEXT NOT NULL,
+            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            group_id INTEGER,
+            FOREIGN KEY (group_id) REFERENCES screenshot_groups(id)
+        )
+        """
         )
         conn.execute(
-            """
-      CREATE TABLE IF NOT EXISTS screenshot_groups (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          created_by TEXT NOT NULL,
-          created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-      """
+        """
+        CREATE TABLE IF NOT EXISTS screenshot_groups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
         )
         conn.execute(
-            """
-      CREATE TABLE IF NOT EXISTS tags (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL UNIQUE
-      )
-      """
+        """
+        CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        )
+        """
         )
         conn.execute(
-            """
-      CREATE TABLE IF NOT EXISTS screenshot_tags (
-          screenshot_id INTEGER,
-          tag_id INTEGER,
-          FOREIGN KEY (screenshot_id) REFERENCES screenshots(id),
-          FOREIGN KEY (tag_id) REFERENCES tags(id),
-          PRIMARY KEY (screenshot_id, tag_id)
-      )
-      """
+        """
+        CREATE TABLE IF NOT EXISTS screenshot_tags (
+            screenshot_id INTEGER,
+            tag_id INTEGER,
+            FOREIGN KEY (screenshot_id) REFERENCES screenshots(id),
+            FOREIGN KEY (tag_id) REFERENCES tags(id),
+            PRIMARY KEY (screenshot_id, tag_id)
+        )
+        """
         )
 
 
@@ -121,16 +121,16 @@ def create_app():
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-              SELECT s.filename, s.discord_username, s.upload_date, 
-                      g.name as group_name,
-                      GROUP_CONCAT(t.name) as tags
-              FROM screenshots s
-              LEFT JOIN screenshot_groups g ON s.group_id = g.id
-              LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
-              LEFT JOIN tags t ON st.tag_id = t.id
-              GROUP BY s.id
-              ORDER BY s.upload_date DESC
-          """
+                SELECT s.filename, s.discord_username, s.upload_date, 
+                        g.name as group_name,
+                        GROUP_CONCAT(t.name) as tags
+                FROM screenshots s
+                LEFT JOIN screenshot_groups g ON s.group_id = g.id
+                LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                LEFT JOIN tags t ON st.tag_id = t.id
+                GROUP BY s.id
+                ORDER BY s.upload_date DESC
+                """
             )
             screenshots = cursor.fetchall()
         return render_template("index.html", screenshots=screenshots)
@@ -143,14 +143,14 @@ def create_app():
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute(
                     """
-                  SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
-                  FROM screenshots s
-                  LEFT JOIN screenshot_groups g ON s.group_id = g.id
-                  LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
-                  LEFT JOIN tags t ON st.tag_id = t.id
-                  WHERE s.filename = ?
-                  GROUP BY s.id
-              """,
+                    SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
+                    FROM screenshots s
+                    LEFT JOIN screenshot_groups g ON s.group_id = g.id
+                    LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                    LEFT JOIN tags t ON st.tag_id = t.id
+                    WHERE s.filename = ?
+                    GROUP BY s.id
+                    """,
                     (image_filename,),
                 )
                 image_data = cursor.fetchone()
@@ -185,7 +185,7 @@ def create_app():
                 if file and not allowed_file(file.filename):
                     flash(f'Invalid file type: {file.filename}', 'danger')
                     return redirect(request.url)
-                if file.content_length > 6 * 1024 * 1024:  # 6MB limit
+                if file.content_length > 10 * 1024 * 1024:  # 10MB limit
                     flash(f'File too large: {file.filename}', 'danger')
                     return redirect(request.url)
                     
@@ -250,4 +250,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5500)
+    app.run(port=5500)

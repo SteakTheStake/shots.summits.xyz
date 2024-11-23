@@ -46,6 +46,20 @@
                 <i class="rounded-0 solid_white">upload</i>
             </a>
             <h6 class="styled_font center-align middle-align">Truth Presets Screenshots</h6>
+            {% if 'discord_id' in session %}
+                <div class="user-info">
+                    {% if session.discord_avatar %}
+                        <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
+                            alt="Avatar" class="avatar">
+                    {% endif %}
+                    <span>{{ session.discord_username }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+                </div>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-login">
+                <i class="fab fa-discord"></i> Login with Discord
+            </a>
+        {% endif %}
         </nav>
     </header>
     

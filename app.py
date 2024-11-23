@@ -1,21 +1,27 @@
 # app.py
+import os
 from PIL import Image
 from flask import Flask, Response, render_template, request, redirect, url_for, flash
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from pathlib import Path
-import os
 from datetime import datetime
-import json
 from typing import List, Dict
 import sqlite3
+import hmac
+import hashlib
+import json
+
+DISCORD_WEBHOOK_URL = "YOUR_WEBHOOK_URL"
+DISCORD_APP_ID = "1180699631693348914"
+DISCORD_PUBLIC_KEY = "ca889b7eda1b9025ed5e4fb5a578211aae03be303444bf804ac2279cd2779267"
 
 
 def init_db():
     with sqlite3.connect("screenshots.db") as conn:
         conn.execute(
-        """
+            """
         CREATE TABLE IF NOT EXISTS screenshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
@@ -27,7 +33,7 @@ def init_db():
         """
         )
         conn.execute(
-        """
+            """
         CREATE TABLE IF NOT EXISTS screenshot_groups (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -37,7 +43,7 @@ def init_db():
         """
         )
         conn.execute(
-        """
+            """
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
@@ -45,7 +51,7 @@ def init_db():
         """
         )
         conn.execute(
-        """
+            """
         CREATE TABLE IF NOT EXISTS screenshot_tags (
             screenshot_id INTEGER,
             tag_id INTEGER,
@@ -57,26 +63,55 @@ def init_db():
         )
 
 
+def send_discord_webhook(username: str, action: str, details: dict = None):
+    """
+    Send a webhook to Discord about login/upload events
+    """
+    timestamp = datetime.utcnow().isoformat()
+
+    embed = {
+        "title": f"Screenshot App {action}",
+        "description": f"User: {username}",
+        "color": 0x00FF00 if action == "Login" else 0x0000FF,
+        "timestamp": timestamp,
+        "fields": [],
+    }
+
+    if details:
+        for key, value in details.items():
+            embed["fields"].append({"name": key, "value": str(value), "inline": True})
+
+    payload = {
+        "embeds": [embed],
+        "username": "Screenshot App Bot",
+        "avatar_url": "https://your-app-icon-url.png",  # Optional: Add your app's icon
+    }
+
+    try:
+        response = request.post(DISCORD_WEBHOOK_URL, json=payload)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Failed to send Discord webhook: {e}")
+
+
+def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
+    """
+    Verify that the request came from Discord
+    """
+    message = timestamp + body
+    hex_key = bytes.fromhex(DISCORD_PUBLIC_KEY)
+    signature_bytes = bytes.fromhex(signature)
+
+    calculated_signature = hmac.new(
+        hex_key, message.encode(), hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(calculated_signature, signature)
+
+
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
-    app.secret_key = "DAA212C5778B3F8A4C2A8E6CC4768"
-    init_db()
-
-    # Configuration
-    app.config["UPLOAD_FOLDER"] = "static/images"
-    app.config["THUMBNAIL_FOLDER"] = "static/thumbnails"
-    app.config["ALLOWED_EXTENSIONS"] = {"png", "jpg", "jpeg", "webp"}
-    app.config["CREDENTIALS"] = {"user": generate_password_hash("upload")}
-
-    # Create necessary directories
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-    os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
-
-    def allowed_file(filename):
-        return (
-            "." in filename
-            and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
-        )
+    # ... existing setup code ...
 
     def requires_auth(f):
         @wraps(f)
@@ -84,42 +119,42 @@ def create_app():
             auth = request.authorization
             if not auth or not check_auth(auth.username, auth.password):
                 return authenticate()
+
+            # Send Discord webhook for successful login
+            send_discord_webhook(
+                username=auth.username,
+                action="Login",
+                details={
+                    "IP": request.remote_addr,
+                    "User Agent": request.user_agent.string,
+                },
+            )
             return f(*args, **kwargs)
 
         return decorated
 
-    def check_auth(username, password):
-        return username in app.config["CREDENTIALS"] and check_password_hash(
-            app.config["CREDENTIALS"][username], password
-        )
+    @app.route("/discord-interaction", methods=["POST"])
+    def discord_interaction():
+        # Verify request is from Discord
+        signature = request.headers.get("X-Signature-Ed25519")
+        timestamp = request.headers.get("X-Signature-Timestamp")
 
-    def authenticate():
-        return (
-            "Could not verify your access level for that URL.\n"
-            "You have to login with proper credentials",
-            401,
-            {"WWW-Authenticate": 'Basic realm="Login Required"'},
-        )
+        if not signature or not timestamp:
+            return "Invalid request", 401
 
-    def create_thumbnail(image_path, size=(400, 400)):
-        try:
-            with Image.open(image_path) as img:
-                img.thumbnail(size)
-                thumbnail_name = os.path.basename(image_path)
-                thumbnail_path = os.path.join(
-                    app.config["THUMBNAIL_FOLDER"], thumbnail_name
-                )
-                img.save(thumbnail_path, "WEBP")
-                return thumbnail_name
-        except Exception as e:
-            print(f"Error creating thumbnail: {e}")
-            return None
+        body = request.get_data().decode("utf-8")
 
-    @app.route('/', methods=['POST'])
-    def my_command():
-        if request.json["type"] == 0:
-            return Response(status=204)
+        if not verify_discord_signature(signature, timestamp, body):
+            return "Invalid signature", 401
 
+        data = request.json
+
+        # Handle Discord interactions
+        if data["type"] == 1:  # PING
+            return jsonify({"type": 1})  # PONG
+
+        # Handle other interaction types here
+        return jsonify({"type": 4, "data": {"content": "Command received!"}})
     @app.route("/", methods=["GET"])
     def index():
         with sqlite3.connect("screenshots.db") as conn:

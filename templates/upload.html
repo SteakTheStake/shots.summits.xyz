@@ -5,7 +5,7 @@
         <article class="col-md-8 round border small-blur" style="background-color: #ffffff05;">
             <div class="text-light">
                 <div class="card-header">
-                    <h4 class="mb-0 styled_font">Upload A Screenshot</h4>
+                    <h4 class="mb-0 styled_font">Upload Your Screenshot</h4>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -16,17 +16,15 @@
                         {% endif %}
                     {% endwith %}
                     <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-                        <div class="form-group">
+                        <div class="form-group" style="display:none;">
                             <label class="font-weight-bold large-text" for="discord_username">Screenshot Taker's Discord Username</label>
                             <div class="field textarea bg-dark label prefix border round min show-overflow">
                                 <input type="text"
                                     class="form-control bg-dark text-light field textarea bg-dark border round min"
-                                    data-lt-tmp-id="lt-517853"
-                                    spellcheck="false"
-                                    data-gramm="false"
                                     id="discord_username"
                                     name="discord_username"
-                                    placeholder="Discord Username"
+                                    value="{{ discord_username }}"
+                                    readonly
                                     required>
                             </div>
                         </div>

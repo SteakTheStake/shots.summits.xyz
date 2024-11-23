@@ -178,7 +178,9 @@ def create_app():
             session['discord_id'] = user['id']
             session['discord_username'] = f"{user['username']}#{user['discriminator']}"
             session['discord_avatar'] = user['avatar']
-
+            def callback():
+                user = discord.get(f'{Config.DISCORD_API_BASE_URL}/users/@me').json()
+                session['discord_username'] = user['username']
             flash('Successfully logged in!', 'success')
             return redirect(url_for('index'))
         except Exception as e:
@@ -220,7 +222,7 @@ def create_app():
                 flash(f'Error uploading files: {str(e)}', 'danger')
                 return redirect(request.url)
 
-        return render_template('upload.html')
+        return render_template('upload.html', discord_username=session.get('discord_username'))
 
     @app.route("/shots/<image_filename>")
     def view_image(image_filename):

@@ -502,7 +502,7 @@ body.dark {
 }
 
 .bg-pill {
-    background-color: #FFA500;
+    background-color: #ffa60050;
 }
 
 .image-info {
@@ -555,6 +555,8 @@ body.dark {
 .image-info .date {
     font-size: x-small;
     opacity: 50%;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .grid-item:hover .image-info {
@@ -580,7 +582,7 @@ body.dark {
 
 /* static/css/main-style.css */
 :root {
-    --primary-color: #290b6b;
+    --primary-color: #FFA500;
     --bg-dark: #1a1a1a;
     --text-light: #ffffff;
 }
@@ -647,7 +649,7 @@ body.dark {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.9);
-    z-index: 1000;
+    z-index: 100;
 }
 
 .lightbox.active {
@@ -741,4 +743,97 @@ body.dark {
     .lightbox-nav {
         font-size: 1.5rem;
     }
+}
+
+
+.filter-menu {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	background: var(--bg-color);
+	padding: 1rem;
+	margin-bottom: 1rem;
+	border-bottom: 1px solid var(--border-color);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    outline-style: none;
+    z-index: 1000;
+	}
+	.filter-section {
+	display: flex;
+	flex-direction: initial;
+	gap: 1rem;
+
+	}
+	.filter-toggle {
+	padding: 0.5rem 1rem;
+	border: none;
+	border-radius: 4px;
+	background: #ffa60025;
+    color: #FFA500;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+    mix-blend-mode: overlay;
+    border-radius: 50rem;
+    outline-color: #e2c573;
+    outline-width: 0.2rem;
+    outline-style: solid;
+	}
+	.filter-toggle:hover {
+    outline-color: #ac905c;
+    outline-width: 0.15rem;
+    outline-style: solid;
+    transform: scale(1.1);
+	}
+	.filter-dropdown {
+	display: none;
+	padding: 1rem;
+	background: var(--bg-color-secondary);
+	border-radius: 4px;
+	}
+	.filter-dropdown.show {
+	display: block;
+	}
+	.filter-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0.5rem 0;
+	cursor: pointer;
+	}
+	.tag_badge {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	border-radius: 15px;
+	color: white;
+	font-size: 0.8rem;
+	margin: 0.2rem;
+	}
+	.tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+	margin-top: 0.5rem;
+	}
+
+    .btn_better {
+        border-radius: 50rem;
+        outline-color: #e2c573;
+        outline-width: 0.2rem;
+        outline-style: solid;
+        background: #ffa60025;
+    }
+
+    .btn_better:hover {
+        outline-color: #ac905c;
+        outline-width: 0.15rem;
+        outline-style: solid;
+        background: #ffa60025;
+        transform: scale(1.1);
+    }
+
+.solid_white{
+    color: #FFA500;
 }

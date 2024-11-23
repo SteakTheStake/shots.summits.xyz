@@ -1,6 +1,6 @@
 # app.py
 from PIL import Image
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, Response, render_template, request, redirect, url_for, flash
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -114,6 +114,11 @@ def create_app():
         except Exception as e:
             print(f"Error creating thumbnail: {e}")
             return None
+
+    @app.route('/', methods=['POST'])
+    def my_command():
+        if request.json["type"] == 0:
+            return Response(status=204)
 
     @app.route("/", methods=["GET"])
     def index():

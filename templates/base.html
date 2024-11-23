@@ -39,11 +39,11 @@
 <body class="dark">
     <header>
         <nav>
-            <a href="{{ url_for('index') }}" class="round fill large small-padding">
-                <i class="rounded-0 medium"><img class="max" src="{{ url_for('static', filename="logo.png") }}"></i>
+            <a href="{{ url_for('index') }}" class="round large small-padding btn_better">
+                <i class="rounded-0 solid_white">home</i>
             </a>
-            <a href="{{ url_for('upload') }}" class="round fill large small-padding">
-                <i class="rounded-0">upload</i>
+            <a href="{{ url_for('upload') }}" class="round large small-padding btn_better">
+                <i class="rounded-0 solid_white">upload</i>
             </a>
             <h6 class="styled_font center-align middle-align">Truth Presets Screenshots</h6>
         </nav>
@@ -63,6 +63,7 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <script src="{{ url_for('static', filename='js/particles3.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/image.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

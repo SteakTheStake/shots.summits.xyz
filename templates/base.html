@@ -40,30 +40,36 @@
     <header>
         <nav>
             <a href="{{ url_for('index') }}" class="round large small-padding btn_better">
-                <i class="rounded-0 solid_white">home</i>
-            </a>
-            <a href="{{ url_for('upload') }}" class="round large small-padding btn_better">
-                <i class="rounded-0 solid_white">upload</i>
+                <i class="rounded-0 solid_1">home</i>
             </a>
             <h6 class="styled_font center-align middle-align">Truth Presets Screenshots</h6>
             {% if 'discord_id' in session %}
-                <div class="user-info">
-                    {% if session.discord_avatar %}
-                        <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
-                            alt="Avatar" class="avatar">
-                    {% endif %}
-                    <span>{{ session.discord_username }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
-                </div>
-            {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-login">
-                <i class="fab fa-discord"></i> Login with Discord
+            <div class="user-info">
+                {% if session.discord_avatar %}
+                    <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
+                        alt="Avatar" class="avatar">
+                {% endif %}
+                <span>{{ session.discord_username }}</span>
+                <a href="{{ url_for('upload') }}" class="btn btn-upload round large small-padding btn_better_ds">Upload</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout round large small-padding btn_better_ds">Logout</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Login With</p>
+                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
             </a>
         {% endif %}
-        </nav>
     </header>
     
     <div class="full_height">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
         {% block content %}{% endblock %}
     </div>
     <div class="full_height" id="particles-js"></div>

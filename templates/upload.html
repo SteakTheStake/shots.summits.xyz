@@ -15,37 +15,12 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
-                    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-                        <div class="form-group" style="display:none;">
-                            <label class="font-weight-bold large-text" for="discord_username">Screenshot Taker's Discord Username</label>
-                            <div class="field textarea bg-dark label prefix border round min show-overflow">
-                                <input type="text"
-                                    class="form-control bg-dark text-light field textarea bg-dark border round min"
-                                    id="discord_username"
-                                    name="discord_username"
-                                    value="{{ discord_username }}"
-                                    readonly
-                                    required>
-                            </div>
-                        </div>
+                    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" onsubmit="return uploadFiles()">
                         
-                        <div class="form-group">
-                            <label class="font-weight-bold large-text" for="preset_name">Presets Used</label>
-                            <div class="field textarea bg-dark label prefix border round min show-overflow">
-                                <input type="check"
-                                    class="form-control bg-dark text-light field textarea bg-dark border round min"
-                                    data-lt-tmp-id="lt-517853"
-                                    spellcheck="false"
-                                    data-gramm="false"
-                                    id="preset_name"
-                                    name="preset_name"
-                                    placeholder="List one or more preset names in your upload (comma separated)"
-                                    required>
-                            </div>
-                        </div>
                         
                         <div class="form-group mt-3">
-                            <label class="font-weight-bold large-text" for="group_name"><div class="text-nowrap">Image Title</div></label>
+                            <label class="font-weight-bold large-text" for="group_name">
+                                <div class="text-nowrap">Image Group Title</div></label>
                             <input type="text" 
                                 class="form-control bg-dark text-light field textarea bg-dark border round min" 
                                 id="group_name" 
@@ -55,26 +30,43 @@
                         </div>
                         
                         <div class="form-group mt-3">
-                            <label class="font-weight-bold large-text" for="tags"><div class="text-nowrap">Features &amp; Details Tags <muted class="text-muted medium-text">(Optional)</muted></div></label>
+                            <label class="font-weight-bold large-text" for="tags"><div class="text-nowrap">Features &amp; Details Tags</div></label>
                             <input type="text" 
                                 class="form-control bg-dark text-light field textarea bg-dark border round min" 
                                 id="tags" 
                                 name="tags"
-                                placeholder="NVE, QuantV, FiveM, Single Player (comma separated)">
+                                placeholder="e.g. Iris, Resource Packs, Vanilla, 1.21 (comma separated)" 
+                                required>
                         </div>
                         
-                        <div class="form-group mt-3 no-scroll">
-                            <label for="screenshots" class="responsive secondary-container border drophere">Select Images</label>
+                        <div class="form-group mt-3">
+                            <label class="font-weight-bold large-text" for="preset_name">
+                                <div class="text-nowrap">Resources Used <muted class="text-muted medium-text">(Optional)</muted></div>
+                            </label>
+                            <input type="text"
+                                class="form-control bg-dark text-light field textarea bg-dark border round min"
+                                data-lt-tmp-id="lt-517853"
+                                spellcheck="false"
+                                data-gramm="false"
+                                id="preset_name"
+                                name="preset_name"
+                                placeholder="List one or more resources you've used to create this image (descriptions or links)">
+                        </div>
+                        
+                        <div class="position-relative responsive form-group mt-3 no-scroll">
+                            <label for="screenshots" class="position-relative responsive secondary-container border drophere less_tall"><i class="middle">upload</i></label>
                             <input type="file" 
-                                class="form-control bg-dark text-light mt-4 rounded border dot_this cursor_pointer" 
+                                class="bg-dark text-light rounded border dot_this cursor_pointer" 
                                 id="screenshots" 
                                 name="screenshots[]" 
-                                Single 
+                                multiple 
                                 accept=".png,.jpg,.jpeg,.webp,.gif"
                                 required>
                         </div>
-                        <p class="text-muted">Supported formats: PNG, JPG, JPEG, WEBP, GIF, Max 10MB per Image</p>
-                        <progress class="align-content-center bottom-margin top-margin large-margin" value="0" max="100"></progress>
+                        <p class="text-center small-text small-padding alert-dismissible rounded">Supported formats: PNG, JPG, JPEG, WEBP, GIF. <br>No more than 10 images at a time, 10MB max per Image</p>
+                        <progress>
+                        </progress>
+                        <br>
                         <button type="submit" class="responsive fill round border" id="submitButton">
                             <i class="no-round me-2">upload</i>Upload Screenshots
                         </button>
@@ -158,7 +150,7 @@ const uploadForm = new Dropzone("#uploadForm", {
     url: "{{ url_for('upload') }}",
     paramName: "screenshots[]",
     maxFiles: 10,
-    maxFilesize: 6,
+    maxFilesize: 10,
     acceptedFiles: ".png,.jpg,.jpeg,.webp,.gif",
     autoProcessQueue: false,
     uploadMultiple: true,

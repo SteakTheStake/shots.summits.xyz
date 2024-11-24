@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <!-- Add Filter Menu -->
 <div class="filter-menu">
     <div class="filter-section">
@@ -7,7 +8,13 @@
         <div class="filter-dropdown">
             <h4>Discord Users</h4>
             <div class="user-filters">
-                {% set users = [] %} {% for screenshot in screenshots %} {% if screenshot['discord_username'] not in users %} {% set _ = users.append(screenshot['discord_username']) %} {% endif %} {% endfor %} {% for user in users|sort %}
+                {% set users = [] %}
+                {% for screenshot in screenshots %}
+                    {% if screenshot['discord_username'] not in users %}
+                        {% set _ = users.append(screenshot['discord_username']) %}
+                    {% endif %}
+                {% endfor %}
+                {% for user in users|sort %}
                 <label class="filter-checkbox">
                     <input type="checkbox" data-filter="user" value="{{ user }}" />
                     <i class="fa-brands fa-discord"></i> {{ user }}
@@ -19,8 +26,17 @@
         <div class="filter-dropdown">
             <h4>Tags</h4>
             <div class="tag-filters">
-                {% set all_tags = [] %} {% for screenshot in screenshots %} {% if screenshot['tags'] %} {% for tag in screenshot['tags'].split(',') %} {% if tag.strip() not in all_tags %} {% set _ = all_tags.append(tag.strip()) %} {% endif
-                %} {% endfor %} {% endif %} {% endfor %} {% for tag in all_tags|sort %}
+                {% set all_tags = [] %}
+                {% for screenshot in screenshots %}
+                    {% if screenshot['tags'] %}
+                        {% for tag in screenshot['tags'].split(',') %}
+                            {% if tag.strip() not in all_tags %}
+                                {% set _ = all_tags.append(tag.strip()) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% for tag in all_tags|sort %}
                 <label class="filter-checkbox">
                     <input type="checkbox" data-filter="tag" value="{{ tag }}" />
                     #{{ tag }}
@@ -30,45 +46,92 @@
         </div>
     </div>
 </div>
-<!-- Modify your existing image grid -->
+
+<!-- Image Grid -->
 <div class="image-grid">
     {% for screenshot in screenshots %}
     <div class="grid-item loading" data-user="{{ screenshot['discord_username'] }}" data-tags="{{ screenshot['tags'] if screenshot['tags'] else '' }}">
-        <!-- Your existing image code -->
-        <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" alt="Shot by {{ screenshot['discord_username'] }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
+        <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" 
+            alt="Shot by {{ screenshot['discord_username'] }}" 
+            loading="lazy" 
+            onload="this.parentElement.classList.remove('loading')" />
         <div class="image-info">
-            <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
+                <nav class="auto-width">
+                    <!-- Image Actions -->
+                    <div class="image-actions">
+                        {% if session.discord_username == screenshot.discord_username or user_role in ['admin', 'moderator'] %}
+                        <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn-danger no-round me-2 max medium">Delete</button>
+                        </form>
+                        {% endif %}
+                        <button type="button" class="btn-warning no-round me-2 max medium" data-toggle="modal" data-target="#reportModal-{{ loop.index }}">
+                            Report
+                        </button>
+                    </div>
+                </nav>
+                <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
             {% if screenshot['group_name'] %}
-            <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
-            {% endif %} {% if screenshot['tags'] %}
-            <div class="tags">
-                {% for tag in screenshot['tags'].split(',') %}
-                <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
-                {% endfor %}
-            </div>
+                <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
+            {% endif %}
+            {% if screenshot['tags'] %}
+                <div class="tags">
+                    {% for tag in screenshot['tags'].split(',') %}
+                        <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
+                    {% endfor %}
+                </div>
             {% endif %}
             <p class="username bold underline">
                 @{{ screenshot['discord_username'] }}
                 <i class="fa-brands fa-discord small no-round tiny-padding"></i>
             </p>
         </div>
+
+        <!-- Report Modal for each image -->
+        <div class="modal fade" id="reportModal-{{ loop.index }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Report Image</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <form action="{{ url_for('report_image', filename=screenshot.filename) }}" method="POST">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="reason">Reason for Report</label>
+                                <textarea class="form-control" name="reason" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     {% endfor %}
-    <!-- Image lightbox -->
-    <div class="lightbox">
-        <div class="close-lightbox">
-            <i class="fas fa-times"></i>
-        </div>
-        <div class="lightbox-nav lightbox-prev">
-            <i class="fas fa-chevron-left"></i>
-        </div>
-        <img src="" alt="Enlarged view">
-        <div class="lightbox-nav lightbox-next">
-            <i class="fas fa-chevron-right"></i>
-        </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox">
+    <div class="close-lightbox">
+        <i class="fas fa-times"></i>
+    </div>
+    <div class="lightbox-nav lightbox-prev">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <img src="" alt="Enlarged view">
+    <div class="lightbox-nav lightbox-next">
+        <i class="fas fa-chevron-right"></i>
     </div>
 </div>
+
 <script>
-    
+document.addEventListener("DOMContentLoaded", function () {
+  // Your existing JavaScript code here
+});
 </script>
 {% endblock %}

@@ -66,7 +66,7 @@ progress {
 }
 
 .styled_font {
-    color: #ff7f34;
+    color: #3dc1d4;
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
@@ -519,7 +519,7 @@ body.dark {
 }
 
 .fancy-text {
-    color: #ff7f34;
+    color: #3dc1d4;
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
@@ -582,7 +582,7 @@ body.dark {
 
 /* static/css/main-style.css */
 :root {
-    --primary-color: #FFA500;
+    --primary-color: #8dbdc4;
     --bg-dark: #1a1a1a;
     --text-light: #ffffff;
 }
@@ -769,20 +769,20 @@ body.dark {
 	padding: 0.5rem 1rem;
 	border: none;
 	border-radius: 4px;
-	background: #ffa60025;
-    color: #FFA500;
+	background: #3dd1d425;
+    color: #8dbdc4;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
     mix-blend-mode: overlay;
     border-radius: 50rem;
-    outline-color: #e2c573;
+    outline-color: #3dd1b450;
     outline-width: 0.2rem;
     outline-style: solid;
 	}
 	.filter-toggle:hover {
-    outline-color: #ac905c;
+    outline-color: #3dd1b425;
     outline-width: 0.15rem;
     outline-style: solid;
     transform: scale(1.1);
@@ -820,17 +820,17 @@ body.dark {
 
     .btn_better {
         border-radius: 50rem;
-        outline-color: #e2c573;
+        outline-color: #3dd1b4;
         outline-width: 0.2rem;
         outline-style: solid;
-        background: #ffa60025;
+        background: #3dd1b425;
     }
 
     .btn_better:hover {
-        outline-color: #ac905c;
+        outline-color: #3dd1b4;
         outline-width: 0.15rem;
         outline-style: solid;
-        background: #ffa60025;
+        background: #3dd1b425;
         transform: scale(1.1);
     }
 
@@ -858,7 +858,7 @@ body.dark {
     }
 
     .solid_1 {
-        color: #FFA500;
+        color: #8dbdc4;
     }
 
     .solid_2 {
@@ -960,4 +960,49 @@ color: #721c24;
     width: fit-content;
     display: inline-flex;
     margin: 0.5rem;
+}
+#uploadProgress {
+    width: 100%;
+    height: 20px;
+    margin: 10px 0;
+    display: none;
+}
+
+#uploadStatus {
+    text-align: center;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.less_tall {
+    position: relative;
+    height: 3.5rem;
+    width: fit-content;
+    align-content: center;
+    top: 0;
+}
+.image-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.grid-item:hover .image-actions {
+    opacity: 1;
+}
+
+.image-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.modal {
+    z-index: 1060;
+}
+
+.modal-backdrop {
+    z-index: 1050;
 }

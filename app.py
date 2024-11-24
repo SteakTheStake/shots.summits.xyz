@@ -66,6 +66,24 @@ def init_db():
         )
         """
         )
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS user_roles (
+            discord_id TEXT PRIMARY KEY,
+            role TEXT NOT NULL DEFAULT 'user',
+            assigned_by TEXT,
+            assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS deletion_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            deleted_by TEXT NOT NULL,
+            original_uploader TEXT NOT NULL,
+            deletion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            reason TEXT
+        )
+        """)
 
 
 def send_discord_webhook(username: str, action: str, details: dict = None):
@@ -396,45 +414,240 @@ def create_app():
     
     def handle_upload(files, discord_username, tags, group_name):
         uploaded_files = []
+        processed_files = set()  # Keep track of processed files
+
         with sqlite3.connect('screenshots.db') as conn:
+            # Handle group creation
+            group_id = None
             if group_name:
                 cursor = conn.execute(
                     'INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id',
                     (group_name, discord_username)
                 )
                 group_id = cursor.fetchone()[0]
-            else:
-                group_id = None
 
+            # Process each file
             for file in files:
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(f'shot{int(datetime.now().timestamp())}.webp')
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                if not file or not file.filename:  # Skip empty files
+                    continue
 
-                    img = Image.open(file)
-                    img.save(filepath, 'WEBP')
+                # Generate unique filename using timestamp and random suffix
+                timestamp = datetime.now().timestamp()
+                random_suffix = os.urandom(4).hex()
+                filename = secure_filename(f'shot_{timestamp}_{random_suffix}.webp')
 
-                    cursor = conn.execute(
-                        'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?) RETURNING id',
-                        (filename, discord_username, group_id)
-                    )
-                    screenshot_id = cursor.fetchone()[0]
+                # Check if we've already processed this file
+                if filename in processed_files:
+                    continue
 
-                    for tag in tags:
-                        tag = tag.strip().lower()
-                        if tag:
-                            conn.execute('INSERT OR IGNORE INTO tags (name) VALUES (?)', (tag,))
-                            cursor = conn.execute('SELECT id FROM tags WHERE name = ?', (tag,))
-                            tag_id = cursor.fetchone()[0]
-                            conn.execute(
-                                'INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)',
-                                (screenshot_id, tag_id)
-                            )
+                if allowed_file(file.filename):
+                    try:
+                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-                    uploaded_files.append(filename)
+                        # Save and convert image
+                        with Image.open(file) as img:
+                            # Ensure file pointer is at start
+                            file.seek(0)
+                            # Save as WebP format
+                            img.save(filepath, 'WEBP', quality=85)
+
+                        # Insert screenshot record
+                        cursor = conn.execute(
+                            'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?) RETURNING id',
+                            (filename, discord_username, group_id)
+                        )
+                        screenshot_id = cursor.fetchone()[0]
+
+                        # Handle tags
+                        if tags:
+                            for tag in tags:
+                                tag = tag.strip().lower()
+                                if tag:
+                                    # Insert or get tag
+                                    conn.execute('INSERT OR IGNORE INTO tags (name) VALUES (?)', (tag,))
+                                    cursor = conn.execute('SELECT id FROM tags WHERE name = ?', (tag,))
+                                    tag_id = cursor.fetchone()[0]
+
+                                    # Link tag to screenshot
+                                    conn.execute(
+                                        'INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)',
+                                        (screenshot_id, tag_id)
+                                    )
+
+                        processed_files.add(filename)
+                        uploaded_files.append(filename)
+
+                    except Exception as e:
+                        print(f"Error processing file {file.filename}: {str(e)}")
+                        continue
 
             conn.commit()
+
         return uploaded_files
+    
+    
+    def get_user_role(discord_id):
+        with sqlite3.connect("screenshots.db") as conn:
+            cursor = conn.execute(
+                "SELECT role FROM user_roles WHERE discord_id = ?",
+                (discord_id,)
+            )
+            result = cursor.fetchone()
+            return result[0] if result else 'user'
+        
+    def requires_role(required_role):
+        def decorator(f):
+            @wraps(f)
+            def decorated_function(*args, **kwargs):
+                if 'discord_id' not in session:
+                    flash('Please log in first.', 'danger')
+                    return redirect(url_for('login'))
+
+                user_role = get_user_role(session['discord_id'])
+                role_hierarchy = {
+                    'admin': 3,
+                    'moderator': 2,
+                    'user': 1
+                }
+
+                if role_hierarchy.get(user_role, 0) >= role_hierarchy.get(required_role, 0):
+                    return f(*args, **kwargs)
+                else:
+                    flash('Insufficient permissions.', 'danger')
+                    return redirect(url_for('index'))
+            return decorated_function
+        return decorator
+
+    @app.route('/delete/<filename>', methods=['POST'])
+    @login_required
+    def delete_image(filename):
+        with sqlite3.connect("screenshots.db") as conn:
+            # Check if user owns the image or is admin/moderator
+            cursor = conn.execute(
+                "SELECT discord_username FROM screenshots WHERE filename = ?",
+                (filename,)
+            )
+            result = cursor.fetchone()
+    
+            if not result:
+                flash('Image not found.', 'danger')
+                return redirect(url_for('index'))
+    
+            uploader = result[0]
+            user_role = get_user_role(session['discord_id'])
+    
+            if uploader == session['discord_username'] or user_role in ['admin', 'moderator']:
+                try:
+                    # Log deletion
+                    conn.execute(
+                        """INSERT INTO deletion_log 
+                        (filename, deleted_by, original_uploader, reason) 
+                        VALUES (?, ?, ?, ?)""",
+                        (filename, session['discord_username'], uploader, 
+                        request.form.get('reason', 'User requested deletion'))
+                    )
+    
+                    # Delete from database
+                    conn.execute("DELETE FROM screenshots WHERE filename = ?", (filename,))
+    
+                    # Delete file
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+    
+                    flash('Image deleted successfully.', 'success')
+                except Exception as e:
+                    flash(f'Error deleting image: {str(e)}', 'danger')
+            else:
+                flash('Permission denied.', 'danger')
+    
+        return redirect(url_for('index'))
+    
+    @app.route('/admin/dashboard')
+    @login_required
+    @requires_role('admin')
+    def admin_dashboard():
+        with sqlite3.connect("screenshots.db") as conn:
+            conn.row_factory = sqlite3.Row
+    
+            # Get statistics
+            stats = {
+                'total_images': conn.execute("SELECT COUNT(*) FROM screenshots").fetchone()[0],
+                'total_users': conn.execute(
+                    "SELECT COUNT(DISTINCT discord_username) FROM screenshots"
+                ).fetchone()[0],
+                'recent_uploads': conn.execute(
+                    "SELECT * FROM screenshots ORDER BY upload_date DESC LIMIT 10"
+                ).fetchall(),
+                'deletion_log': conn.execute(
+                    "SELECT * FROM deletion_log ORDER BY deletion_date DESC LIMIT 10"
+                ).fetchall()
+            }
+    
+            # Get user roles
+            users = conn.execute("""
+                SELECT ur.discord_id, ur.role, ur.assigned_date,
+                        COUNT(s.id) as upload_count
+                FROM user_roles ur
+                LEFT JOIN screenshots s ON ur.discord_id = s.discord_username
+                GROUP BY ur.discord_id
+            """).fetchall()
+    
+        return render_template('admin_dashboard.html', stats=stats, users=users)
+    
+    @app.route('/admin/manage_roles', methods=['POST'])
+    @login_required
+    @requires_role('admin')
+    def manage_roles():
+        discord_id = request.form.get('discord_id')
+        new_role = request.form.get('role')
+    
+        if new_role not in ['user', 'moderator', 'admin']:
+            flash('Invalid role specified.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+    
+        with sqlite3.connect("screenshots.db") as conn:
+            conn.execute("""
+                INSERT OR REPLACE INTO user_roles (discord_id, role, assigned_by)
+                VALUES (?, ?, ?)
+            """, (discord_id, new_role, session['discord_username']))
+    
+        flash(f'Role updated successfully for user {discord_id}', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    @app.route('/mod/review')
+    @login_required
+    @requires_role('moderator')
+    def mod_review():
+        with sqlite3.connect("screenshots.db") as conn:
+            conn.row_factory = sqlite3.Row
+            recent_uploads = conn.execute("""
+                SELECT s.*, COUNT(st.tag_id) as tag_count
+                FROM screenshots s
+                LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                GROUP BY s.id
+                ORDER BY s.upload_date DESC
+                LIMIT 50
+            """).fetchall()
+        return render_template('mod_review.html', uploads=recent_uploads)
+    
+    @app.route('/mod/report/<filename>', methods=['POST'])
+    @login_required
+    def report_image(filename):
+        reason = request.form.get('reason', '').strip()
+        if not reason:
+            flash('Please provide a reason for reporting.', 'danger')
+            return redirect(url_for('view_image', image_filename=filename))
+    
+        with sqlite3.connect("screenshots.db") as conn:
+            conn.execute("""
+                INSERT INTO reports (filename, reported_by, reason)
+                VALUES (?, ?, ?)
+            """, (filename, session['discord_username'], reason))
+    
+        flash('Image reported successfully. Moderators will review it.', 'success')
+        return redirect(url_for('view_image', image_filename=filename))
+    
     
     @app.route('/')
     def index():

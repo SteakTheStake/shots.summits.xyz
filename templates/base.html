@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Truth Presets Shots{% endblock %}</title>
+    <title>{% block title %}SummitMC Shots{% endblock %}</title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -25,13 +25,13 @@
     {% block meta_tags %}
     {% if image_filename is defined %}
         <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image">
-        <meta content="Truth Presets Shot - {{ image_filename }}" property="og:title">
+        <meta content="SummitMC Shot - {{ image_filename }}" property="og:title">
     {% else %}
         <meta content="https://i.imgur.com/8LMplX2.png" property="og:image">
-        <meta content="Truth Presets Shots" property="og:title">
+        <meta content="SummitMC Shots" property="og:title">
     {% endif %}
     <meta content="https://shots.truthpresets.com/" property="og:url">
-    <meta content="Official Truth Presets Screenshot Sharing Website" property="og:description">
+    <meta content="Official SummitMC Screenshot Sharing Website" property="og:description">
     <meta content="#FFA500" data-react-helmet="true" name="theme-color">
     <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/8LMplX2.png{% endif %}">
     {% endblock %}
@@ -53,7 +53,7 @@
                     <i class="rounded-0 solid_1">upload</i>
                 </a>
             </div>
-            <h6 class="styled_font center-align middle-align">Truth Presets Shots</h6>
+            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
             <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
                 <i class="rounded-0 solid_1">logout</i>
             </a>
@@ -79,7 +79,7 @@
             <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">upload</i>
             </a>
-            <h6 class="styled_font center-align middle-align">Truth Presets Shots</h6>
+            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
             <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
                 <i class="rounded-0 solid_1">logout</i>
             </a>

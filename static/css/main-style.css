@@ -516,6 +516,7 @@ body.dark {
     opacity: 0;
     transition: opacity 0.3s;
     border-radius: 0;
+    cursor: default;
 }
 
 .fancy-text {

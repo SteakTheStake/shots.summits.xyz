@@ -56,23 +56,10 @@
             loading="lazy" 
             onload="this.parentElement.classList.remove('loading')" />
         <div class="image-info">
-                <nav class="auto-width">
-                    <!-- Image Actions -->
-                    <div class="image-actions">
-                        {% if session.discord_username == screenshot.discord_username or user_role in ['admin', 'moderator'] %}
-                        <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn-danger no-round me-2 max medium">Delete</button>
-                        </form>
-                        {% endif %}
-                        <button type="button" class="btn-warning no-round me-2 max medium" data-toggle="modal" data-target="#reportModal-{{ loop.index }}">
-                            Report
-                        </button>
-                    </div>
-                </nav>
-                <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
             {% if screenshot['group_name'] %}
                 <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
             {% endif %}
+                <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
             {% if screenshot['tags'] %}
                 <div class="tags">
                     {% for tag in screenshot['tags'].split(',') %}
@@ -84,6 +71,20 @@
                 @{{ screenshot['discord_username'] }}
                 <i class="fa-brands fa-discord small no-round tiny-padding"></i>
             </p>
+            <nav class="auto-width">
+                <!-- Image Actions -->
+                <div class="image-actions tiny-padding">
+                    {% if session.discord_username == screenshot.discord_username or user_role in ['admin', 'moderator'] %}
+                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
+                        <span type="submit" class="me-2 max medium bg-transparent text-muted">Delete</span>
+                    </form>
+                    {% endif %}
+                    <span type="button" class="me-2 max medium bg-transparent text-muted" data-toggle="modal" data-target="#reportModal-{{ loop.index }}">
+                        Report
+                    </span>
+                </div>
+            </nav>
+        </div>
         </div>
 
         <!-- Report Modal for each image -->
@@ -91,7 +92,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Report Image</h5>
+                        <h5 class="modal-title text-black-50">Report Image</h5>
                         <button type="button" class="close" data-dismiss="modal">
                             <span>&times;</span>
                         </button>
@@ -99,8 +100,8 @@
                     <form action="{{ url_for('report_image', filename=screenshot.filename) }}" method="POST">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="reason">Reason for Report</label>
-                                <textarea class="form-control" name="reason" required></textarea>
+                                <label for="reason text-black-50">Reason for Report</label>
+                                <textarea class="form-control text-black-50" name="reason" required></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -111,8 +112,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
 </div>
 
 <!-- Lightbox -->

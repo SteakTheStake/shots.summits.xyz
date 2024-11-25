@@ -1,3 +1,5 @@
+static/images
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -160,3 +162,4 @@ cython_debug/
 #.idea/
 screenshots.db
 static/images/Photos-001.zip
+/static/images

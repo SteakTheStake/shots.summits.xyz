@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<article  class="large-margin bg-transparent">
 <div class="admin-dashboard">
     <h2>Admin Dashboard</h2>
 
@@ -11,7 +12,7 @@
 
     <div class="recent-uploads">
         <h3>Recent Uploads</h3>
-        <table class="table">
+        <table class="table white-text">
             <thead>
                 <tr>
                     <th>Filename</th>
@@ -40,7 +41,7 @@
     
     <div class="user-management">
         <h3>User Management</h3>
-        <table class="table">
+        <table class="table white-text">
             <thead>
                 <tr>
                     <th>Discord ID</th>
@@ -72,4 +73,5 @@
         </table>
     </div>
 </div>
+</article>
 {% endblock %}

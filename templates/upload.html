@@ -63,7 +63,7 @@
                                 accept=".png,.jpg,.jpeg,.webp,.gif"
                                 required>
                         </div>
-                        <p class="text-center small-text small-padding alert-dismissible rounded">Supported formats: PNG, JPG, JPEG, WEBP, GIF. <br>No more than 10 images at a time, 10MB max per Image</p>
+                        <p class="text-center small-text small-padding alert-dismissible rounded">Supported formats: PNG, JPG, JPEG, WEBP, GIF. <br>No more than 10 images and or over 24MB</p>
                         <progress>
                         </progress>
                         <br>
@@ -150,7 +150,7 @@ const uploadForm = new Dropzone("#uploadForm", {
     url: "{{ url_for('upload') }}",
     paramName: "screenshots[]",
     maxFiles: 10,
-    maxFilesize: 10,
+    maxFilesize: 24,
     acceptedFiles: ".png,.jpg,.jpeg,.webp,.gif",
     autoProcessQueue: false,
     uploadMultiple: true,

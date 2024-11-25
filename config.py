@@ -25,7 +25,7 @@ class Config:
     UPLOAD_FOLDER = "static/images"
     THUMBNAIL_FOLDER = "static/thumbnails"
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB limit
+    MAX_CONTENT_LENGTH = 24 * 1024 * 1024  # 10MB limit
     
     @property
     def OAUTH2_SCOPES(self):

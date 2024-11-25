@@ -140,83 +140,6 @@ def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
 
     return hmac.compare_digest(calculated_signature, signature)
 
-def create_app():
-    app = Flask(__name__, static_folder="static", static_url_path="/static")
-    app.config.from_object(Config)
-    init_db()
-    
-    # Create necessary directories
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-    os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
-
-    def allowed_file(filename):
-        return (
-            "." in filename
-            and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
-        )
-
-    def login_required(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'discord_id' not in session:
-                return redirect(url_for('login'))
-            return f(*args, **kwargs)
-        return decorated_function
-
-def send_discord_webhook(username: str, action: str, details: dict = None):
-    """
-    Send a webhook to Discord about login/upload events
-    """
-    timestamp = datetime.utcnow().isoformat()
-
-    embed = {
-        "title": f"Screenshot App {action}",
-        "description": f"User: {username}",
-        "color": 0x00FF00 if action == "Login" else 0x0000FF,
-        "timestamp": timestamp,
-        "fields": [],
-    }
-
-    if details:
-        for key, value in details.items():
-            embed["fields"].append({"name": key, "value": str(value), "inline": True})
-
-    payload = {
-        "embeds": [embed],
-        "username": "Screenshot App Bot",
-        "avatar_url": "https://your-app-icon-url.png",
-    }
-
-    try:
-        response = request.post(Config.DISCORD_WEBHOOK_URL, json=payload)
-        response.raise_for_status()
-    except Exception as e:
-        print(f"Failed to send Discord webhook: {e}")
-
-
-def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
-    """
-    Verify that the request came from Discord
-    """
-    message = timestamp + body
-    hex_key = bytes.fromhex(Config.DISCORD_PUBLIC_KEY)
-    signature_bytes = bytes.fromhex(signature)
-
-    calculated_signature = hmac.new(
-        hex_key, message.encode(), hashlib.sha256
-    ).hexdigest()
-
-    return hmac.compare_digest(calculated_signature, signature)
-
-def make_session(token=None, state=None):
-    return OAuth2Session(
-        client_id=Config.DISCORD_CLIENT_ID,
-        token=token,
-        state=state,
-        redirect_uri=Config.DISCORD_REDIRECT_URI,
-        scope=['identify', 'guilds']
-    )
-    
 def ensure_default_roles():
     """
     Ensures default admin and moderator roles are set in the database.
@@ -246,7 +169,7 @@ def ensure_default_roles():
                 INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
             """, (mod['discord_id'], mod['role'], 'system'))
-
+            
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
@@ -302,7 +225,77 @@ def create_app():
                     return redirect(url_for('index'))
             return decorated_function
         return decorator
+    
+    def handle_upload(files, discord_username):
+        uploaded_files = []
+        processed_files = set()
 
+        with sqlite3.connect('screenshots.db') as conn:
+            for index, file in enumerate(files):
+                if not file or not file.filename:
+                    continue
+
+                # Generate unique filename
+                timestamp = datetime.now().timestamp()
+                random_suffix = os.urandom(4).hex()
+                filename = secure_filename(f'shot_{timestamp}_{random_suffix}.webp')
+
+                if filename in processed_files:
+                    continue
+
+                if allowed_file(file.filename):
+                    try:
+                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+                        # Get the metadata for this specific image
+                        group_name = request.form.get('group_name', '')
+                        common_tags = request.form.get('common_tags', '').split(',')
+                        specific_tags = request.form.get(f'tags_{index}', '').split(',')
+                        resources = request.form.get('resources', '')
+
+                        # Combine common and specific tags
+                        all_tags = list(set([tag.strip().lower() for tag in common_tags + specific_tags if tag.strip()]))
+
+                        # Handle group creation if provided
+                        group_id = None
+                        if group_name:
+                            cursor = conn.execute(
+                                'INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id',
+                                (group_name, discord_username)
+                            )
+                            group_id = cursor.fetchone()[0]
+
+                        # Save and convert image
+                        with Image.open(file) as img:
+                            file.seek(0)
+                            img.save(filepath, 'WEBP', quality=85)
+
+                        # Insert screenshot record
+                        cursor = conn.execute(
+                            'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?) RETURNING id',
+                            (filename, discord_username, group_id)
+                        )
+                        screenshot_id = cursor.fetchone()[0]
+
+                        # Handle tags
+                        for tag in all_tags:
+                            conn.execute('INSERT OR IGNORE INTO tags (name) VALUES (?)', (tag,))
+                            cursor = conn.execute('SELECT id FROM tags WHERE name = ?', (tag,))
+                            tag_id = cursor.fetchone()[0]
+                            conn.execute(
+                                'INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)',
+                                (screenshot_id, tag_id)
+                            )
+
+                        processed_files.add(filename)
+                        uploaded_files.append(filename)
+
+                    except Exception as e:
+                        print(f"Error processing file {file.filename}: {str(e)}")
+                        continue
+
+            conn.commit()
+        return uploaded_files
         
     @app.route('/debug-config')
     def debug_config():
@@ -517,6 +510,8 @@ def create_app():
             flash(f'Login failed: {str(e)}', 'danger')
         return redirect(url_for('index'))
 
+    
+
     @app.route('/upload', methods=['GET', 'POST'])
     @login_required
     def upload():
@@ -524,28 +519,27 @@ def create_app():
             if 'screenshots[]' not in request.files:
                 flash('No files uploaded', 'danger')
                 return redirect(request.url)
-
+    
             files = request.files.getlist('screenshots[]')
             discord_username = session['discord_username']
-            tags = request.form.get('tags', '').split(',')
-            group_name = request.form.get('group_name', '')
-
+    
+            # Basic validation
             for file in files:
                 if file and not allowed_file(file.filename):
                     flash(f'Invalid file type: {file.filename}', 'danger')
                     return redirect(request.url)
-                if file.content_length > 24 * 1024 * 1024:
+                if file.content_length and file.content_length > 24 * 1024 * 1024:  # Added content_length check
                     flash(f'File too large: {file.filename}', 'danger')
                     return redirect(request.url)
-
+    
             try:
-                uploaded_files = handle_upload(files, discord_username, tags, group_name)
+                uploaded_files = handle_upload(files, discord_username)
                 flash(f'Successfully uploaded {len(uploaded_files)} files', 'success')
                 return redirect(url_for('index'))
             except Exception as e:
                 flash(f'Error uploading files: {str(e)}', 'danger')
                 return redirect(request.url)
-
+    
         return render_template('upload.html')
     
     @app.route("/shots/<image_filename>")

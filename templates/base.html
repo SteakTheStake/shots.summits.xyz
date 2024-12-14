@@ -39,97 +39,92 @@
 <body class="dark">
     <header class="l">
         <nav style="width: 100%;">
-            {% if 'discord_id' in session %}
-            <div class="user-info vertical-margin">
-                {% if session.discord_avatar %}
-                    <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
-                        alt="Avatar" class="avatar">
-                {% endif %}
-                <span class="styled_font_2 l">{{ session.discord_username }}</span>
-                <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin ">
-                    <i class="rounded-0 solid_1">home</i>
+            {% if 'user_id' in session %}
+                <div class="user-info vertical-margin">    
+                    <!-- Navigation Links for Logged-in Users -->
+                    <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
+                        <i class="rounded-0 solid_1">home</i>
+                    </a>
+                    <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
+                        <i class="rounded-0 solid_1">upload</i>
+                    </a>
+                </div>
+                <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
+    
+                <!-- Logout and Admin Panel Links -->
+                <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
+                    <i class="rounded-0 solid_1">logout</i>
                 </a>
-                <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                    <i class="rounded-0 solid_1">upload</i>
+                <a href="{{ url_for('admin_dashboard') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
+                    <i class="rounded-0 solid_1">admin_panel_settings</i>
                 </a>
-            </div>
-            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
-            <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
-                <i class="rounded-0 solid_1">logout</i>
-            </a>
-            <a href="{{ url_for('admin_dashboard') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
-                <i class="rounded-0 solid_1">admin_panel_settings</i>
-            </a>
-        {% else %}
-            <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                <p class="login_text solid_2">Home</p>
-                <i class="fa-solid fa-house solid_2 show-overflow"></i>
-            </a>
-            <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                <p class="login_text solid_2">Login</p>
-                <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
-            </a>
-        {% endif %}
+                {% else %}
+                <!-- Navigation Links for Guests -->
+                <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Home</p>
+                    <i class="fa-solid fa-house solid_2 show-overflow"></i>
+                </a>
+                <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Login</p>
+                    <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
+                </a>
+            {% endif %}
+        </nav>
     </header>
+    
 
     <nav class="fit_to_width m right-padding left-padding">
-            <header>
-                {% if session.discord_avatar %}
-                    <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
-                        alt="Avatar" class="avatar">
-                {% endif %}
-            </header>
-            {% if 'discord_id' in session %}
-            <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin ">
+        {% if 'user_id' in session %}
+            <!-- Links for Logged-in Users -->
+            <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">home</i>
             </a>
             <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">upload</i>
             </a>
             <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
-            <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
+            <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
                 <i class="rounded-0 solid_1">logout</i>
             </a>
-            {% else %}
-                <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                    <p class="login_text solid_2">Home</p>
-                    <i class="fa-solid fa-house solid_2 show-overflow"></i>
-                </a>
-                <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                    <p class="login_text solid_2">Login</p>
-                    <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
-                </a>
-            {% endif %}
-        </nav>
+        {% else %}
+            <!-- Links for Guests -->
+            <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Home</p>
+                <i class="fa-solid fa-house solid_2 show-overflow"></i>
+            </a>
+            <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Login</p>
+                <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
+            </a>
+        {% endif %}
+    </nav>
+    
 
-        <nav class="fit_to_width s right-padding left-padding">
-                <header>
-                    {% if session.discord_avatar %}
-                        <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" 
-                            alt="Avatar" class="avatar">
-                    {% endif %}
-                </header>
-                {% if 'discord_id' in session %}
-                <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin ">
-                    <i class="rounded-0 solid_1">home</i>
-                </a>
-                <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                    <i class="rounded-0 solid_1">upload</i>
-                </a>
-                <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
-                    <i class="rounded-0 solid_1">logout</i>
-                </a>
-                    {% else %}
-                    <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                        <p class="login_text solid_2">Home</p>
-                        <i class="fa-solid fa-house solid_2 show-overflow"></i>
-                    </a>
-                    <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                        <p class="login_text solid_2">Login</p>
-                        <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
-                    </a>
-                {% endif %}
-            </nav>
+    <nav class="fit_to_width s right-padding left-padding">
+        {% if 'user_id' in session %}
+            <!-- Links for Logged-in Users -->
+            <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
+                <i class="rounded-0 solid_1">home</i>
+            </a>
+            <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
+                <i class="rounded-0 solid_1">upload</i>
+            </a>
+            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
+            <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
+                <i class="rounded-0 solid_1">logout</i>
+            </a>
+        {% else %}
+            <!-- Links for Guests -->
+            <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Home</p>
+                <i class="fa-solid fa-house solid_2 show-overflow"></i>
+            </a>
+            <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Login</p>
+                <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
+            </a>
+        {% endif %}
+    </nav>
         
     
     <div class="full_height">
@@ -146,6 +141,19 @@
     <div class="full_height" id="particles-js"></div>
 
     <!-- JavaScript Dependencies -->
+    <script>
+        fetch('/is_logged_in')
+            .then(response => response.json())
+            .then(data => {
+                if (data.logged_in) {
+                    document.querySelector('.login-btn').style.display = 'none';
+                    document.querySelector('.logout-btn').style.display = 'block';
+                } else {
+                    document.querySelector('.login-btn').style.display = 'block';
+                    document.querySelector('.logout-btn').style.display = 'none';
+                }
+            });
+    </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

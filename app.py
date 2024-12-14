@@ -18,10 +18,9 @@ from datetime import datetime
 import sqlite3
 import hmac
 import hashlib
-from oauth import (
-    make_session,
-)
+from oauth import make_session
 from config import Config
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def init_db():
     with sqlite3.connect("screenshots.db") as conn:
@@ -184,12 +183,10 @@ def ensure_default_roles():
             
 
 def create_app():
-    def add_username_password_routes(app):
-        init_user_table()
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
+    init_user_table()
     init_db()
-    add_username_password_routes(app)
     ensure_default_roles()
     
     # Create necessary directories
@@ -315,23 +312,22 @@ def create_app():
             conn.commit()
         return uploaded_files
     
-    @app.route('/register_username', methods=['GET', 'POST'])
-    def register_username():
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
         if request.method == 'POST':
-            print("Form data:", request.form)
-            
             username = request.form.get('username')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm_password')
             discord_id = request.form.get('discord_id', '')
+
             # Validate input
             if not username or not password:
                 flash('Username and password are required', 'danger')
-                return redirect(url_for('register_username'))
+                return redirect(url_for('register'))
 
             if password != confirm_password:
                 flash('Passwords do not match', 'danger')
-                return redirect(url_for('register_username'))
+                return redirect(url_for('register'))
 
             # Hash the password
             hashed_password = generate_password_hash(password)
@@ -342,7 +338,7 @@ def create_app():
                     cursor = conn.execute("SELECT * FROM users WHERE username = ?", (username,))
                     if cursor.fetchone():
                         flash('Username already exists', 'danger')
-                        return redirect(url_for('register_username'))
+                        return redirect(url_for('register'))
 
                     # Insert new user
                     conn.execute(
@@ -353,15 +349,15 @@ def create_app():
                     return redirect(url_for('login'))
             except sqlite3.IntegrityError:
                 flash('Registration failed', 'danger')
-                return redirect(url_for('register_username'))
+                return redirect(url_for('register'))
 
-        return render_template('register_username.html')
+        return render_template('register.html')
 
-    @app.route('/login_username', methods=['GET', 'POST'])
-    def login_username():
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
         if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
+            username = request.form.get('username')
+            password = request.form.get('password')
 
             try:
                 with sqlite3.connect("screenshots.db") as conn:
@@ -376,13 +372,12 @@ def create_app():
                         return redirect(url_for('index'))
                     else:
                         flash('Invalid username or password', 'danger')
-                        return redirect(url_for('login_username'))
+                        return redirect(url_for('login'))
             except Exception as e:
-                flash('Login error occurred', 'danger')
-                return redirect(url_for('login_username'))
+                flash(f'Login error: {str(e)}', 'danger')
+                return redirect(url_for('login'))
 
-        return render_template('login_username.html')
-        
+        return render_template('login.html')
     @app.route('/debug-config')
     def debug_config():
         from config import Config  # Import Config class
@@ -397,12 +392,11 @@ def create_app():
         }
         return jsonify(config_vars)
     
-    @app.route('/login')
-    def login():
-        discord = make_session()
-        authorization_url, state = discord.authorization_url(app.config['DISCORD_AUTHORIZATION_BASE_URL'])
-        session['oauth2_state'] = state
-        return redirect(authorization_url)
+    @app.route('/is_logged_in', methods=['GET'])
+    def is_logged_in():
+        if 'login' in session:
+            return {'logged_in': True, 'username': session['discord_username']}
+        return {'logged_in': False}
 
     @app.route('/logout')
     def logout():

@@ -61,9 +61,13 @@
                 <i class="rounded-0 solid_1">admin_panel_settings</i>
             </a>
         {% else %}
-            <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                    <p class="login_text solid_2">Login With</p>
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+            <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Home</p>
+                <i class="fa-solid fa-house solid_2 show-overflow"></i>
+            </a>
+            <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                <p class="login_text solid_2">Login</p>
+                <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
             </a>
         {% endif %}
     </header>
@@ -87,9 +91,13 @@
                 <i class="rounded-0 solid_1">logout</i>
             </a>
             {% else %}
-                <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                        <p class="login_text solid_2">Login With</p>
-                        <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Home</p>
+                    <i class="fa-solid fa-house solid_2 show-overflow"></i>
+                </a>
+                <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Login</p>
+                    <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
                 </a>
             {% endif %}
         </nav>
@@ -111,10 +119,14 @@
                 <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
                     <i class="rounded-0 solid_1">logout</i>
                 </a>
-                {% else %}
-                    <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                            <p class="login_text solid_2">Login With</p>
-                            <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                    {% else %}
+                    <a href="{{ url_for('index') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                        <p class="login_text solid_2">Home</p>
+                        <i class="fa-solid fa-house solid_2 show-overflow"></i>
+                    </a>
+                    <a href="{{ url_for('login_username') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                        <p class="login_text solid_2">Login</p>
+                        <i class="fa-solid fa-arrow-right-to-bracket solid_2 show-overflow"></i>
                     </a>
                 {% endif %}
             </nav>
@@ -141,6 +153,7 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <script src="https://kit.fontawesome.com/cd4693caa2.js" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/particles3.js') }}"></script>
     <script src="{{ url_for('static', filename='js/image.js') }}"></script>
     {% block extra_js %}{% endblock %}

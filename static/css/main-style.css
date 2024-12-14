@@ -692,6 +692,17 @@ body.dark {
     right: 1rem;
 }
 
+.donot-wrap-text {
+    white-space: nowrap; 
+}
+
+.donot-wrap-text>p {
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+    display: inline-block;
+    position: relative;
+}
+
 /* Upload Form Styles */
 .drophere {
     border: 2px dashed #666;

@@ -95,6 +95,18 @@ def init_db():
         )
         """)
 
+def init_user_table():
+    """Initialize user table for username/password authentication"""
+    with sqlite3.connect("screenshots.db") as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            discord_id TEXT
+        )
+        """)
+
 def send_discord_webhook(username: str, action: str, details: dict = None):
     """
     Send a webhook to Discord about login/upload events
@@ -170,15 +182,21 @@ def ensure_default_roles():
                 VALUES (?, ?, ?)
             """, (mod['discord_id'], mod['role'], 'system'))
             
+
 def create_app():
+    def add_username_password_routes(app):
+        init_user_table()
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
     init_db()
+    add_username_password_routes(app)
     ensure_default_roles()
     
     # Create necessary directories
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
+
+    
 
     def allowed_file(filename):
         return (
@@ -296,6 +314,74 @@ def create_app():
 
             conn.commit()
         return uploaded_files
+    
+    @app.route('/register_username', methods=['GET', 'POST'])
+    def register_username():
+        if request.method == 'POST':
+            print("Form data:", request.form)
+            
+            username = request.form.get('username')
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+            discord_id = request.form.get('discord_id', '')
+            # Validate input
+            if not username or not password:
+                flash('Username and password are required', 'danger')
+                return redirect(url_for('register_username'))
+
+            if password != confirm_password:
+                flash('Passwords do not match', 'danger')
+                return redirect(url_for('register_username'))
+
+            # Hash the password
+            hashed_password = generate_password_hash(password)
+
+            try:
+                with sqlite3.connect("screenshots.db") as conn:
+                    # Check if username already exists
+                    cursor = conn.execute("SELECT * FROM users WHERE username = ?", (username,))
+                    if cursor.fetchone():
+                        flash('Username already exists', 'danger')
+                        return redirect(url_for('register_username'))
+
+                    # Insert new user
+                    conn.execute(
+                        "INSERT INTO users (username, password, discord_id) VALUES (?, ?, ?)", 
+                        (username, hashed_password, discord_id)
+                    )
+                    flash('Registration successful', 'success')
+                    return redirect(url_for('login'))
+            except sqlite3.IntegrityError:
+                flash('Registration failed', 'danger')
+                return redirect(url_for('register_username'))
+
+        return render_template('register_username.html')
+
+    @app.route('/login_username', methods=['GET', 'POST'])
+    def login_username():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+
+            try:
+                with sqlite3.connect("screenshots.db") as conn:
+                    cursor = conn.execute("SELECT * FROM users WHERE username = ?", (username,))
+                    user = cursor.fetchone()
+
+                    if user and check_password_hash(user[2], password):  # user[2] is the hashed password
+                        # Set session for username login
+                        session['username'] = username
+                        session['login_type'] = 'username'
+                        flash('Successfully logged in!', 'success')
+                        return redirect(url_for('index'))
+                    else:
+                        flash('Invalid username or password', 'danger')
+                        return redirect(url_for('login_username'))
+            except Exception as e:
+                flash('Login error occurred', 'danger')
+                return redirect(url_for('login_username'))
+
+        return render_template('login_username.html')
         
     @app.route('/debug-config')
     def debug_config():

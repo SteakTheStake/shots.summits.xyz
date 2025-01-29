@@ -126,8 +126,8 @@ def send_discord_webhook(username: str, action: str, details: dict = None):
 
     payload = {
         "embeds": [embed],
-        "username": "Shots Bot",
-        "avatar_url": "https://i.imgur.com/hxsaduN.jpeg",
+        "username": "Summit F2",
+        "avatar_url": "https://i.imgur.com/mNrcItL.jpeg",
     }
 
     try:

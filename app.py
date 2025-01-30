@@ -63,79 +63,79 @@ try:
 except Exception as e:
     print(f"Failed to connect: {e}")
 
+from flask import Flask, g
+
+app = Flask(__name__)
+db = DatabaseConnection()
+
+@app.before_request
+def before_request():
+    # Store the database connection in Flask's g object
+    g.db_connection = db
+
+@app.teardown_appcontext
+def teardown_db(exception):
+    # Clean up database resources when the application shuts down
+    db.close()
+
+@app.route('/')
+def index():
+    with g.db_connection.get_connection() as conn:
+        # Your database operations here
+        pass
 
 
-def init_db():
-    with sqlite3.connect("screenshots.db") as conn:
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS screenshots (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            discord_username TEXT NOT NULL,
-            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            group_id INTEGER,
-            FOREIGN KEY (group_id) REFERENCES screenshot_groups(id)
-        )
+class DatabaseConnection:
+    def __init__(self, db_path: str = "database.db"):
+        self.db_path = db_path
+        self._connection = None
+
+    @contextmanager
+    def get_connection(self) -> Generator[sqlite3.Connection, None, None]:
         """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS screenshot_groups (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            created_by TEXT NOT NULL,
-            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        Creates or reuses a database connection using a context manager.
+        This ensures proper connection handling and cleanup.
         """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS tags (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )
+        if self._connection is None:
+            self._connection = sqlite3.connect(
+                self.db_path,
+                detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
+            )
+            self._connection.row_factory = sqlite3.Row
+
+        try:
+            yield self._connection
+        except Exception as e:
+            self._connection.rollback()
+            raise e
+        else:
+            self._connection.commit()
+
+    def close(self) -> None:
         """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS screenshot_tags (
-            screenshot_id INTEGER,
-            tag_id INTEGER,
-            FOREIGN KEY (screenshot_id) REFERENCES screenshots(id),
-            FOREIGN KEY (tag_id) REFERENCES tags(id),
-            PRIMARY KEY (screenshot_id, tag_id)
-        )
+        Explicitly close the database connection when needed
+        (e.g., when shutting down the application)
         """
-        )
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS user_roles (
-            discord_id TEXT PRIMARY KEY,
-            role TEXT NOT NULL DEFAULT 'user',
-            assigned_by TEXT,
-            assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS deletion_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            deleted_by TEXT NOT NULL,
-            original_uploader TEXT NOT NULL,
-            deletion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            reason TEXT
-        )
-        """)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            reported_by TEXT NOT NULL,
-            reason TEXT NOT NULL,
-            report_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status TEXT DEFAULT 'pending'
-        )
-        """)
+        if self._connection is not None:
+            self._connection.close()
+            self._connection = None
+
+# Create a single instance to be used throughout your application
+db = DatabaseConnection()
+
+# Example usage in your application:
+def get_current_time():
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT datetime('now')")
+        return cursor.fetchone()[0]
+
+# When handling web requests:
+def handle_request():
+    with db.get_connection() as conn:
+        # Do all your database operations here
+        # The connection will be reused rather than creating a new one each time
+        pass
 
 def send_discord_webhook(username: str, action: str, details: dict = None):
     """
@@ -611,7 +611,9 @@ def create_app():
     print("Discord Client ID:", os.getenv('DISCORD_CLIENT_ID'))
     print("Discord Redirect URI:", os.getenv('DISCORD_REDIRECT_URI'))
     return app
-
+    
+def cleanup():
+    db.close()
 if __name__ == "__main__":
     app = create_app()
     app.run()

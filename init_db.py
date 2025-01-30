@@ -16,25 +16,28 @@ def init_db():
             group_id INTEGER,
             FOREIGN KEY (group_id) REFERENCES screenshot_groups(id)
         )
-        """)
-        
-        conn.execute("""
+        """
+        )
+        conn.execute(
+            """
         CREATE TABLE IF NOT EXISTS screenshot_groups (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             created_by TEXT NOT NULL,
             created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-        """)
-        
-        conn.execute("""
+        """
+        )
+        conn.execute(
+            """
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
         )
-        """)
-        
-        conn.execute("""
+        """
+        )
+        conn.execute(
+            """
         CREATE TABLE IF NOT EXISTS screenshot_tags (
             screenshot_id INTEGER,
             tag_id INTEGER,
@@ -42,8 +45,8 @@ def init_db():
             FOREIGN KEY (tag_id) REFERENCES tags(id),
             PRIMARY KEY (screenshot_id, tag_id)
         )
-        """)
-        
+        """
+        )
         conn.execute("""
         CREATE TABLE IF NOT EXISTS user_roles (
             discord_id TEXT PRIMARY KEY,
@@ -52,7 +55,6 @@ def init_db():
             assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
-        
         conn.execute("""
         CREATE TABLE IF NOT EXISTS deletion_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +65,6 @@ def init_db():
             reason TEXT
         )
         """)
-        
         conn.execute("""
         CREATE TABLE IF NOT EXISTS reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,3 +101,4 @@ def init_db():
 if __name__ == "__main__":
     init_db()
     print("Database initialized successfully!")
+    cleanup()

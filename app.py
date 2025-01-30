@@ -25,6 +25,8 @@ from config import Config
 import psycopg2
 from dotenv import load_dotenv
 import os
+import psycopg2.extras
+from init_db import init_db
 
 # Load environment variables from .env
 load_dotenv()
@@ -66,6 +68,12 @@ except Exception as e:
 from flask import Flask, g
 
 app = Flask(__name__)
+
+class DatabaseConnection:
+    def __init__(self, db_path: str = "f2.db"):
+        self.db_path = db_path
+        self._connection = None
+
 db = DatabaseConnection()
 
 @app.before_request
@@ -84,44 +92,6 @@ def index():
         # Your database operations here
         pass
 
-
-class DatabaseConnection:
-    def __init__(self, db_path: str = "database.db"):
-        self.db_path = db_path
-        self._connection = None
-
-    @contextmanager
-    def get_connection(self) -> Generator[sqlite3.Connection, None, None]:
-        """
-        Creates or reuses a database connection using a context manager.
-        This ensures proper connection handling and cleanup.
-        """
-        if self._connection is None:
-            self._connection = sqlite3.connect(
-                self.db_path,
-                detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
-            )
-            self._connection.row_factory = sqlite3.Row
-
-        try:
-            yield self._connection
-        except Exception as e:
-            self._connection.rollback()
-            raise e
-        else:
-            self._connection.commit()
-
-    def close(self) -> None:
-        """
-        Explicitly close the database connection when needed
-        (e.g., when shutting down the application)
-        """
-        if self._connection is not None:
-            self._connection.close()
-            self._connection = None
-
-# Create a single instance to be used throughout your application
-db = DatabaseConnection()
 
 # Example usage in your application:
 def get_current_time():
@@ -198,7 +168,7 @@ def ensure_default_roles():
         # {'discord_id': 'mod_id', 'username': 'mod_name', 'role': 'moderator'},
     ]
     
-    with sqlite3.connect("screenshots.db") as conn:
+    with sqlite3.connect("f2.db") as conn:
         # Ensure admin exists
         conn.execute("""
             INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
@@ -237,7 +207,7 @@ def create_app():
         return decorated_function
         
     def get_user_role(discord_id):
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             cursor = conn.execute(
                 "SELECT role FROM user_roles WHERE discord_id = ?",
                 (discord_id,)
@@ -272,7 +242,7 @@ def create_app():
         uploaded_files = []
         processed_files = set()
 
-        with sqlite3.connect('screenshots.db') as conn:
+        with sqlite3.connect('f2.db') as conn:
             for index, file in enumerate(files):
                 if not file or not file.filename:
                     continue
@@ -369,7 +339,7 @@ def create_app():
     @app.route('/delete/<filename>', methods=['POST'])
     @login_required
     def delete_image(filename):
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             # Check if user owns the image or is admin/moderator
             cursor = conn.execute(
                 "SELECT discord_username FROM screenshots WHERE filename = ?",
@@ -415,7 +385,7 @@ def create_app():
     @login_required
     @requires_role('admin')
     def admin_dashboard():
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
     
             # Get statistics
@@ -454,7 +424,7 @@ def create_app():
             flash('Invalid role specified.', 'danger')
             return redirect(url_for('admin_dashboard'))
     
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
@@ -467,7 +437,7 @@ def create_app():
     @login_required
     @requires_role('moderator')
     def mod_review():
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
             recent_uploads = conn.execute("""
                 SELECT s.*, COUNT(st.tag_id) as tag_count
@@ -487,7 +457,7 @@ def create_app():
             flash('Please provide a reason for reporting.', 'danger')
             return redirect(url_for('view_image', image_filename=filename))
     
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.execute("""
                 INSERT INTO reports (filename, reported_by, reason)
                 VALUES (?, ?, ?)
@@ -499,7 +469,7 @@ def create_app():
     
     @app.route('/')
     def index():
-        with sqlite3.connect("screenshots.db") as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute("""
                 SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
@@ -588,7 +558,7 @@ def create_app():
     def view_image(image_filename):
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
         if os.path.exists(image_path):
-            with sqlite3.connect("screenshots.db") as conn:
+            with sqlite3.connect("f2.db") as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute(
                     """

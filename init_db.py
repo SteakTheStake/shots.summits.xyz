@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 def init_db():
-    database_path = "database.db"
+    database_path = "f2.db"
     
     # Create the database and tables
     with sqlite3.connect(database_path) as conn:

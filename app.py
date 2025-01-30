@@ -58,9 +58,9 @@ try:
     print("Current Time:", result)
 
     # Close the cursor and connection
-    cursor.close()
-    connection.close()
-    print("Database connection closed.")
+    # cursor.close()
+    # connection.close()
+    # print("Database connection closed.")
 
 except Exception as e:
     print(f"Failed to connect to database: {e}")

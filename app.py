@@ -47,7 +47,7 @@ try:
         port=PORT,
         dbname=DBNAME
     )
-    print("Connection successful!")
+    print("Successfuly connected to the database!")
     
     # Create a cursor to execute SQL queries
     cursor = connection.cursor()
@@ -60,10 +60,10 @@ try:
     # Close the cursor and connection
     cursor.close()
     connection.close()
-    print("Connection closed.")
+    print("Database connection closed.")
 
 except Exception as e:
-    print(f"Failed to connect: {e}")
+    print(f"Failed to connect to database: {e}")
 
 from flask import Flask, g
 

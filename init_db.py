@@ -1,99 +1,102 @@
-import sqlite3
+# models.py
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, create_engine
+from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
+
+Base = declarative_base()
+
+class Screenshot(Base):
+    __tablename__ = 'screenshots'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    filename = Column(String, nullable=False)
+    discord_username = Column(String, nullable=False)
+    upload_date = Column(DateTime, default=datetime.utcnow)
+    group_id = Column(Integer, ForeignKey('screenshot_groups.id'))
+    
+    # Relationships
+    group = relationship("ScreenshotGroup", back_populates="screenshots")
+    tags = relationship("Tag", secondary="screenshot_tags", back_populates="screenshots")
+
+class ScreenshotGroup(Base):
+    __tablename__ = 'screenshot_groups'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    created_by = Column(String, nullable=False)
+    created_date = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    screenshots = relationship("Screenshot", back_populates="group")
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False, unique=True)
+    
+    # Relationship
+    screenshots = relationship("Screenshot", secondary="screenshot_tags", back_populates="tags")
+
+class ScreenshotTag(Base):
+    __tablename__ = 'screenshot_tags'
+    
+    screenshot_id = Column(Integer, ForeignKey('screenshots.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
+class UserRole(Base):
+    __tablename__ = 'user_roles'
+    
+    discord_id = Column(String, primary_key=True)
+    role = Column(String, nullable=False, default='user')
+    assigned_by = Column(String)
+    assigned_date = Column(DateTime, default=datetime.utcnow)
+
+class DeletionLog(Base):
+    __tablename__ = 'deletion_log'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    filename = Column(String, nullable=False)
+    deleted_by = Column(String, nullable=False)
+    original_uploader = Column(String, nullable=False)
+    deletion_date = Column(DateTime, default=datetime.utcnow)
+    reason = Column(String)
+
+class Report(Base):
+    __tablename__ = 'reports'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    filename = Column(String, nullable=False)
+    reported_by = Column(String, nullable=False)
+    reason = Column(String, nullable=False)
+    report_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, default='pending')
+
+# init_db.py
 import os
+from sqlalchemy import create_engine
+from models import Base
 
 def init_db():
-    database_path = "f2.db"
+    # Create database URL
+    database_path = os.path.abspath("f2.db")
+    database_url = f"sqlite:///{database_path}"
     
-    # Create the database and tables
-    with sqlite3.connect(database_path) as conn:
-        # Create your tables (same as before)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS screenshots (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            discord_username TEXT NOT NULL,
-            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            group_id INTEGER,
-            FOREIGN KEY (group_id) REFERENCES screenshot_groups(id)
-        )
-        """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS screenshot_groups (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            created_by TEXT NOT NULL,
-            created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS tags (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )
-        """
-        )
-        conn.execute(
-            """
-        CREATE TABLE IF NOT EXISTS screenshot_tags (
-            screenshot_id INTEGER,
-            tag_id INTEGER,
-            FOREIGN KEY (screenshot_id) REFERENCES screenshots(id),
-            FOREIGN KEY (tag_id) REFERENCES tags(id),
-            PRIMARY KEY (screenshot_id, tag_id)
-        )
-        """
-        )
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS user_roles (
-            discord_id TEXT PRIMARY KEY,
-            role TEXT NOT NULL DEFAULT 'user',
-            assigned_by TEXT,
-            assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS deletion_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            deleted_by TEXT NOT NULL,
-            original_uploader TEXT NOT NULL,
-            deletion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            reason TEXT
-        )
-        """)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            reported_by TEXT NOT NULL,
-            reason TEXT NOT NULL,
-            report_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status TEXT DEFAULT 'pending'
-        )
-        """)
-        
-        # Make sure to commit the changes
-        conn.commit()
+    # Create engine and tables
+    engine = create_engine(database_url)
+    Base.metadata.create_all(engine)
     
-    # Set file permissions after creating the database
+    # Set file permissions
     try:
-        # 0o666 sets read/write permissions for all users (owner, group, others)
-        # In octal: 666 means rw-rw-rw-
-        os.chmod(database_path, 0o666)
+        os.chmod(database_path, 0o666)  # rw-rw-rw-
         print(f"Successfully set permissions for {database_path}")
     except Exception as e:
         print(f"Error setting permissions: {e}")
     
-    # Also ensure the directory has proper permissions
+    # Set directory permissions
     try:
-        db_directory = os.path.dirname(os.path.abspath(database_path))
-        # 0o775 gives read/write/execute to owner and group, read/execute to others
-        # In octal: 775 means rwxrwxr-x
-        os.chmod(db_directory, 0o775)
+        db_directory = os.path.dirname(database_path)
+        os.chmod(db_directory, 0o775)  # rwxrwxr-x
         print(f"Successfully set permissions for directory: {db_directory}")
     except Exception as e:
         print(f"Error setting directory permissions: {e}")

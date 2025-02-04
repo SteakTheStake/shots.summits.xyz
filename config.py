@@ -2,26 +2,37 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
 # Load environment variables
 load_dotenv()
 
-# Debug print to verify database URL loading
-database_url = os.getenv("DATABASE_URL")
+# Get database URL and ensure it's absolute
+database_path = os.path.abspath("/var/www/summitmc.xyz/f2/f2.db")
+database_url = f"sqlite:///{database_path}"
 print(f"Loading database URL: {database_url}")
 
-# Create SQLAlchemy components outside the Config class since they should be singletons
+# Create engine with correct permissions handling
 engine = create_engine(
     database_url,
-    connect_args={"check_same_thread": False}  # Required for SQLite
+    connect_args={
+        "check_same_thread": False,  # Required for SQLite
+    }
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create session factory with thread safety for Gunicorn
+SessionLocal = scoped_session(sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+))
+
 Base = declarative_base()
+Base.query = SessionLocal.query_property()
 
 class Config:
-    # Database configuration
+    # Your existing configuration...
     SQLALCHEMY_DATABASE_URI = database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

@@ -29,6 +29,9 @@ import psycopg2.extras
 from init_db import init_db
 from flask import Flask
 from config import Config, Base, engine
+from models import Screenshot, ScreenshotGroup, Tag, UserRole
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
 
 # Load environment variables from .env
 load_dotenv()
@@ -72,25 +75,18 @@ from flask import Flask, g
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Create all database tables
-Base.metadata.create_all(bind=engine)
-
-# Create scoped session for thread safety with Gunicorn
+engine = create_engine('sqlite:///f2.db')
 db_session = scoped_session(sessionmaker(bind=engine))
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
-@app.before_request
-def before_request():
-    # Store the database connection in Flask's g object
-    g.db_connection = db
-
-@app.teardown_appcontext
-def teardown_db(exception):
-    # Clean up database resources when the application shuts down
-    db.close()
+# Example route using the models
+@app.route('/screenshots')
+def list_screenshots():
+    screenshots = db_session.query(Screenshot).all()
+    return {'screenshots': [{'filename': s.filename, 'uploader': s.discord_username} for s in screenshots]}
 
 @app.route('/')
 def index():

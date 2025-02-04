@@ -27,6 +27,13 @@ class Config:
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     MAX_CONTENT_LENGTH = 24 * 1024 * 1024  # 10MB limit
     
+    workers = int(os.environ.get('GUNICORN_PROCESSES', '2'))
+    threads = int(os.environ.get('GUNICORN_THREADS', '4'))
+    timeout = int(os.environ.get('GUNICORN_TIMEOUT', '120'))
+    bind = os.environ.get('GUNICORN_BIND', '0.0.0.0:8080')
+    forwarded_allow_ips = '*'
+    secure_scheme_headers = { 'X-Forwarded-Proto': 'https' }
+
     @property
     def OAUTH2_SCOPES(self):
         return ['identify', 'guilds']

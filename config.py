@@ -1,11 +1,31 @@
 # config.py
 import os
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
+# Load environment variables
 load_dotenv()
 
+# Debug print to verify database URL loading
+database_url = os.getenv("DATABASE_URL")
+print(f"Loading database URL: {database_url}")
+
+# Create SQLAlchemy components outside the Config class since they should be singletons
+engine = create_engine(
+    database_url,
+    connect_args={"check_same_thread": False}  # Required for SQLite
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
 class Config:
-    # Flask
+    # Database configuration
+    SQLALCHEMY_DATABASE_URI = database_url
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Your existing configuration
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev')
     
     # Discord OAuth2
@@ -27,6 +47,7 @@ class Config:
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     MAX_CONTENT_LENGTH = 24 * 1024 * 1024  # 10MB limit
     
+    # Gunicorn settings
     workers = int(os.environ.get('GUNICORN_PROCESSES', '2'))
     threads = int(os.environ.get('GUNICORN_THREADS', '4'))
     timeout = int(os.environ.get('GUNICORN_TIMEOUT', '120'))
@@ -37,3 +58,11 @@ class Config:
     @property
     def OAUTH2_SCOPES(self):
         return ['identify', 'guilds']
+
+# Database session dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

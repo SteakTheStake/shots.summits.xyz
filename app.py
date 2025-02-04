@@ -27,6 +27,8 @@ from dotenv import load_dotenv
 import os
 import psycopg2.extras
 from init_db import init_db
+from flask import Flask
+from .config import Config, Base, engine
 
 # Load environment variables from .env
 load_dotenv()
@@ -68,6 +70,10 @@ except Exception as e:
 from flask import Flask, g
 
 app = Flask(__name__)
+app.config.from_object(Config)
+
+# Create all database tables
+Base.metadata.create_all(bind=engine)
 
 class DatabaseConnection:
     def __init__(self, db_path: str = "f2.db"):

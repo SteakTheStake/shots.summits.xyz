@@ -28,7 +28,7 @@ import os
 import psycopg2.extras
 from init_db import init_db
 from flask import Flask
-from .config import Config, Base, engine
+from config import Config, Base, engine
 
 # Load environment variables from .env
 load_dotenv()
@@ -75,12 +75,12 @@ app.config.from_object(Config)
 # Create all database tables
 Base.metadata.create_all(bind=engine)
 
-class DatabaseConnection:
-    def __init__(self, db_path: str = "f2.db"):
-        self.db_path = db_path
-        self._connection = None
+# Create scoped session for thread safety with Gunicorn
+db_session = scoped_session(sessionmaker(bind=engine))
 
-db = DatabaseConnection()
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 @app.before_request
 def before_request():

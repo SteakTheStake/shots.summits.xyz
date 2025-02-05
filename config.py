@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 load_dotenv()
 
 # Get database URL and ensure it's absolute
-database_path = os.path.abspath("/var/www/summitmc.xyz/f2/f2.db")
+database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
 database_url = f"sqlite:///{database_path}"
 print(f"Loading database URL: {database_url}")
 

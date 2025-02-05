@@ -5,7 +5,7 @@ from models import Base
 
 def init_db():
     # Create database URL
-    database_path = os.path.abspath("f2.db")
+    database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
     database_url = f"sqlite:///{database_path}"
     
     # Create engine and tables

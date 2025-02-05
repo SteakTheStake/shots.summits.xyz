@@ -4,8 +4,7 @@ from sqlalchemy import create_engine
 from models import Base
 
 def init_db():
-    database_path = os.environ.get('DATABASE_PATH')
-    
+    database_path = os.path.abspath('/var/www/summitmc.xyz/f2/f2.db')
     # Create database URL
     database_url = f"sqlite:///{database_path}"
     

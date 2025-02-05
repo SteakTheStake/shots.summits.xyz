@@ -1,5 +1,5 @@
 @font-face {
-    font-family: 'minecraft_font', SansSerif, serif SansSerif;
+    font-family: 'minecraft_font', SansSerif, serif;
     src: url("/static/font/minecraft_font.ttf") format("opentype");
 }
 
@@ -62,7 +62,7 @@ progress {
     }
 
 .custom-bg {
-    background-color: #ffffff00; !important
+    background-color: #ffffff00 !important;
 }
 
 .styled_font {

@@ -5,21 +5,21 @@ from models import Base
 
 def init_db():
     # Create database URL
-    database_path = os.path.abspath(os.environ.get('DATABASE_PATH', '/var/www/summitmc.xyz/f2/f2.db'))
+    database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
     database_url = f"sqlite:///{database_path}"
     
     # Create engine and tables
     engine = create_engine(database_url)
     Base.metadata.create_all(engine)
     
-    # Optionally set file permissions (commented out if not necessary)
+    # Set file permissions
     try:
         os.chmod(database_path, 0o666)  # rw-rw-rw-
         print(f"Successfully set permissions for {database_path}")
     except Exception as e:
         print(f"Error setting permissions: {e}")
     
-    # Optionally set directory permissions (commented out if not necessary)
+    # Set directory permissions
     try:
         db_directory = os.path.dirname(database_path)
         os.chmod(db_directory, 0o775)  # rwxrwxr-x

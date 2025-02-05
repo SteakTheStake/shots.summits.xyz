@@ -4,8 +4,9 @@ from sqlalchemy import create_engine
 from models import Base
 
 def init_db():
-    # Create database URL
     database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
+    
+    # Create database URL
     database_url = f"sqlite:///{database_path}"
     
     # Create engine and tables

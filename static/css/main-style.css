@@ -81,6 +81,8 @@
     /* Show the hamburger, hide the .links-container initially */
     .hamburger {
       display: block;
+      color: white;
+      fill: white;
     }
   
     /* By default, hide the links container on mobile */
@@ -88,11 +90,9 @@
       display: none;                /* hidden by default */
       flex-direction: column;       /* vertical layout on mobile */
       align-items: flex-start;      /* or center, as you prefer */
-      background-color: #f8f8f8;    /* optional background */
       width: 100%;                  /* take full width on mobile */
-      margin-top: 1rem;             /* spacing from the logo / hamburger */
+      margin-top: 0.35rem;             /* spacing from the logo / hamburger */
       padding: 1rem;
-      border-top: 1px solid #ccc;   /* optional, to separate from logo */
     }
   
     /* When we add an active or show class, display it flex */
@@ -101,6 +101,18 @@
     }
   }
   
+  /* --- ACTIVE STATE FOR HAMBURGER --- */
+  .hamburger.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }  
 
 /* fonts */
 @font-face {

@@ -72,11 +72,13 @@
                 @{{ screenshot['discord_username'] }}
                 <i class="fa-brands fa-discord small no-round tiny-padding"></i>
             </p>
+            {% endif %}
             {% elif 'guest_id' in session %}
             <p class="username bold underline">
                 @{{ screenshot['guest_username'] }}
                 <i class="fa-regular fa-user small no-round tiny-padding"></i>
             </p>
+            {% endif %}
             <nav class="auto-width">
                 <!-- Image Actions -->
                 <div class="image-actions tiny-padding">

@@ -1,8 +1,3 @@
-@font-face {
-    font-family: 'minecraft_font', SansSerif, serif;
-    src: url("/static/font/minecraft_font.ttf") format("opentype");
-}
-
 .show-overflow {
     overflow-x: visible;
     overflow-y: visible;
@@ -22,11 +17,16 @@
     color: var(--font);
     line-height: normal;
     border-radius: .25rem;
-    font-family: 'minecraft_font', SansSerif, serif var(--font);
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
+    
 }
 
 * {
-    font-family: 'minecraft_font', SansSerif, serif 'Roboto', SansSerif, serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
     font-weight: 500;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
@@ -67,7 +67,9 @@ progress {
 
 .styled_font {
     color: #3dc1d4;
-    font-family: 'minecraft_font', SansSerif, serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
 }
 
 .dot_this {
@@ -149,7 +151,9 @@ progress {
 }
 .back_home_btn div p > code {
     font-size: 1rem;
-    font-family: 'minecraft_font', SansSerif, serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
     color: #185adb;
     font-weight: 600;
 }
@@ -158,7 +162,9 @@ progress {
     background-color: #f9f9f9;
     border: 1px solid #95a3b9;
     border-radius: 6px;
-    font-family: 'minecraft_font', SansSerif, serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
     padding: 0.75em;
     font-size: 0.875rem;
 }
@@ -521,7 +527,9 @@ body.dark {
 
 .fancy-text {
     color: #3dc1d4;
-    font-family: 'minecraft_font', SansSerif, serif'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
 }
 
 .image-info .username {
@@ -540,7 +548,9 @@ body.dark {
     color: var(--font);
     line-height: normal;
     border-radius: 1rem;
-    font-family: 'minecraft_font', SansSerif, serif var(--font);
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
 
 }
 
@@ -946,7 +956,9 @@ color: #721c24;
 
 .styled_font_2 {
     color: #ffffff75;
-    font-family: 'minecraft_font', SansSerif, serif'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
     font-weight: 600;
     font-size: x-large;
     text-align: center;

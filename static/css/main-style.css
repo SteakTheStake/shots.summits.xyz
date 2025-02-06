@@ -107,7 +107,7 @@ progress {
 }
 
 .styled_font_3 {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     color: #3dc1d480;
     font-family: 'Minecraft';
     font-weight: normal;
@@ -118,7 +118,7 @@ progress {
     font-size: 2.5rem;
     color: #3dc1d4;
     font-family: 'Minecraft';
-    font-weight: normal;
+    font-weight: bold;
     font-style: normal;
     text-shadow: 0 5px 15px #3dc1d480;
 }

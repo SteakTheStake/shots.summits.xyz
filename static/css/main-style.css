@@ -23,11 +23,17 @@
     
 }
 
+.text-muted {
+    color: #ffffff50;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     font-family: 'MinecraftiaRegular';
     font-weight: normal;
     font-style: normal;
-    font-weight: 500;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }

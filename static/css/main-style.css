@@ -110,7 +110,7 @@ progress {
     font-family: 'MinecraftiaRegular-nMK1.otf';
     font-weight: normal;
     font-style: normal;
-    box-shadow: 0 5px 15px #3dc1d480;
+    text-shadow: 0 5px 15px #3dc1d480;
 }
 
 .dot_this {

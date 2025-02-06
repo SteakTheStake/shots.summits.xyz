@@ -374,7 +374,7 @@ def create_app():
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
     # os.makedirs(app.config["GUEST_UPLOAD_FOLDER"], exist_ok=True)
-    os.makedirs(app.config["GUEST_THUMBNAIL_FOLDER"], exist_ok=True)
+    # os.makedirs(app.config["GUEST_THUMBNAIL_FOLDER"], exist_ok=True)
 
     def allowed_file(filename):
         return (

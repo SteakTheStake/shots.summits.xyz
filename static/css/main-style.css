@@ -1,79 +1,106 @@
 .site-header {
     width: 100%;
-    /* If you want some padding or background, you can do so here. */
-    /* e.g., padding: 1rem; background-color: #f8f8f8; */
-}
-  
-.header-nav {
-  /* Limit the width to 50% so it only spans to the middle. */
-  width: 50%;
-  /* Align to left (0) and let it stop in the middle. */
-  margin-left: 0;
-  margin-right: auto;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  /* If you want the logo separate from the links, you can add space-between */
-  justify-content: space-between;
-}
-
-.logo-container {
-  /* Keep the logo on the left */
-  display: flex;
-  align-items: center;
-  
-  /* If you want a fixed width or ensure it doesn't shrink: */
-  flex: 0 0 auto;
-}
-
-.links-container {
-  /* This container holds your buttons / user info */
-  display: flex;
-  align-items: center;
-  
-  /* Make all items inside share the remaining space equally */
-  justify-content: space-evenly;
-  
-  /* If you want them to shrink/grow evenly: */
-  flex: 1;
-}
-
-.btn_better,
-.btn_better_alt,
-.btn_better_dsc {
-  /* Your button styling here. Example: */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-
-  /* spacing, backgrounds, etc. */
-  margin-left: 1rem;
-  margin-right: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  /* etc. */
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
-}
-
-  
-@media (max-width: 768px) {
-  .header-nav {
-    width: 100%;
-    flex-direction: column;
-    justify-content: center;
-    display: none;
+    /* e.g., background-color: #f8f8f8; padding: 1rem; */
   }
-}
   
-
+  .header-nav {
+    /* On desktops, only take up 50% (to “stop in the middle”). */
+    width: 50%;
+    margin-left: 0;
+    margin-right: auto;
+  
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* or space-evenly, as needed */
+  
+    position: relative; /* Needed for hamburger positioning if desired */
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+  
+  /* Links container (desktop) */
+  .links-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex: 1;
+  }
+  
+  /* Buttons styling (desktop) */
+  .btn_better,
+  .btn_better_alt,
+  .btn_better_dsc {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    /* More styling if needed */
+  }
+  
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  
+  /* Hamburger button (HIDDEN ON DESKTOP) */
+  .hamburger {
+    display: none;  /* hide hamburger by default for desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* Hamburger lines */
+  .hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px;
+    background: #333; /* adjust color to your preference */
+    transition: all 0.3s ease;
+  }
+  
+  /* --- MOBILE STYLES: max-width 768px --- */
+  @media (max-width: 768px) {
+    /* Expand nav to 100% width on mobile */
+    .header-nav {
+      width: 100%;
+    }
+  
+    /* Show the hamburger, hide the .links-container initially */
+    .hamburger {
+      display: block;
+    }
+  
+    /* By default, hide the links container on mobile */
+    .links-container {
+      display: none;                /* hidden by default */
+      flex-direction: column;       /* vertical layout on mobile */
+      align-items: flex-start;      /* or center, as you prefer */
+      background-color: #f8f8f8;    /* optional background */
+      width: 100%;                  /* take full width on mobile */
+      margin-top: 1rem;             /* spacing from the logo / hamburger */
+      padding: 1rem;
+      border-top: 1px solid #ccc;   /* optional, to separate from logo */
+    }
+  
+    /* When we add an active or show class, display it flex */
+    .links-container.show {
+      display: flex; 
+    }
+  }
+  
 
 /* fonts */
 @font-face {

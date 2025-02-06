@@ -49,6 +49,8 @@
   text-decoration: none;
 
   /* spacing, backgrounds, etc. */
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem;
   border-radius: 4px;
@@ -68,6 +70,13 @@
     width: 100%;
     flex-direction: column;
     justify-content: center;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    display: none;
   }
 }
   

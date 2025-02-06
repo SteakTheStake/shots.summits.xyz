@@ -54,7 +54,6 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <span class="text-muted l large-margin">Current user:</span>
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
                     <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                         <i class="rounded-0 solid_1">upload</i>
@@ -97,7 +96,6 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <span class="text-muted l large-margin">Current user:</span>
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
                     <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                         <i class="rounded-0 solid_1">upload</i>
@@ -140,7 +138,6 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <span class="text-muted l large-margin">Current user:</span>
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
                     <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                         <i class="rounded-0 solid_1">upload</i>

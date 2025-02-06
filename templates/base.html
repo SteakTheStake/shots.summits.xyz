@@ -108,8 +108,8 @@
                   <p class="login_text solid_1">Upload</p>
                   <i class="rounded-0 solid_1 show-overflow">upload</i>
                 </a>
-                <a onclick="disableParticles()" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Disable Particles</p>
+                <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
+                  <p class="login_text solid_1">Toggle Particles</p>
                   <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
                 </a>
           
@@ -154,10 +154,10 @@
             });
           </script>
           <script>
-            function disableParticles() {
+            function toggleParticles() {
               var div = document.getElementById('particles-js');
               if (div) {
-                div.style.display = 'none';
+                div.style.display = div.style.display === 'none' ? 'block' : 'none';
               }
             }
           </script>

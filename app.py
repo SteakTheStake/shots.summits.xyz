@@ -712,6 +712,19 @@ def create_app():
         flash("Image reported successfully. Moderators will review it.", "success")
         return redirect(url_for("view_image", image_filename=filename))
 
+    def get_discord_avatar_url(user_id, user_avatar):
+        if not user_avatar:
+            return "https://cdn.discordapp.com/embed/avatars/0.png"
+        if user_avatar.startswith("a_"):
+            return f"https://cdn.discordapp.com/avatars/{user_id}/{user_avatar}.gif"
+        else:
+            return f"https://cdn.discordapp.com/avatars/{user_id}/{user_avatar}.png"
+
+    @app.context_processor
+    def utility_processor():
+        # This makes the function available to all templates
+        return dict(get_discord_avatar_url=get_discord_avatar_url)
+
     @app.route("/")
     def index():
         if 'discord_id' not in session and 'guest_id' not in session:

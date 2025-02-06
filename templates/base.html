@@ -49,7 +49,7 @@
                 {% if 'discord_id' in session %}
                 <div class="user-info vertical-margin">
                     <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                    <span class="styled_font l">{{ session.discord_username }}</span>
+                    <span class="styled_font large l">{{ session.discord_username }}</span>
                     {% elif 'guest_id' in session %}
                     <span class="styled_font l">{{ session.guest_username }}</span>
                     
@@ -80,7 +80,7 @@
             <header>
                 {% if 'discord_id' in session %}
                 <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font l">{{ session.discord_username }}</span>
+                <span class="styled_font large l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
                 <span class="styled_font l">{{ session.guest_username }}</span>
                 
@@ -110,7 +110,7 @@
             <header>
                 {% if 'discord_id' in session %}
                 <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font l">{{ session.discord_username }}</span>
+                <span class="styled_font large l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
                 <span class="styled_font l">{{ session.guest_username }}</span>
                 

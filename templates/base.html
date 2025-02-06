@@ -139,7 +139,7 @@
                 </a>
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
-                    <img src="https://cdn.discordapp.com/avatars/{user_id}/{user_avatar}.png" alt="Avatar" class="avatar" />
+                    <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
                     <span class="text-muted l">Current user: </span>
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
                     <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">

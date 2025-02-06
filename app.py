@@ -639,6 +639,18 @@ def create_app():
 
         return render_template("admin_dashboard.html", stats=stats, users=users)
 
+    def get_discord_avatar_url(user_id, user_avatar):
+        # If no avatar is set, return a default
+        if not user_avatar:
+            # Return default Discord avatar #0 (there are 5 variants: 0..4)
+            return "https://cdn.discordapp.com/embed/avatars/0.png"
+        
+        # Otherwise check if it's animated
+        if user_avatar.startswith("a_"):
+            return f"https://cdn.discordapp.com/avatars/{user_id}/{user_avatar}.gif"
+        else:
+            return f"https://cdn.discordapp.com/avatars/{user_id}/{user_avatar}.png"
+
     @app.route("/admin/manage_roles", methods=["POST"])
     @login_required
     @requires_role("admin")

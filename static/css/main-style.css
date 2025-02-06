@@ -85,19 +85,19 @@
     /* --- ACTIVE STATE FOR HAMBURGER --- */
     .hamburger.active span:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
-        color: #3dc1d4;
+        background-color: #3dc1d4;
         text-shadow: 0 5px 15px #3dc1d425;
     }
     
     .hamburger.active span:nth-child(2) {
         opacity: 0;
-        color: #3dc1d4;
+        background-color: #3dc1d4;
         text-shadow: 0 5px 15px #3dc1d425;
     }
     
     .hamburger.active span:nth-child(3) {
         transform: translateY(-8px) rotate(-45deg);
-        color: #3dc1d4;
+        background-color: #3dc1d4;
         text-shadow: 0 5px 15px #3dc1d425;
     }  
   

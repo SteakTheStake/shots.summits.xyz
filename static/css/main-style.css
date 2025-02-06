@@ -923,6 +923,7 @@ body.dark {
         position: relative;
         border-radius: 50rem;
         outline-color: #3dd1b4;
+        color: #3dd1b4;
         outline-width: 0.2rem;
         outline-style: solid;
         background: #3dd1b425;
@@ -934,6 +935,7 @@ body.dark {
 
     .btn_better_alt:hover {
         outline-color: #3dd1b4;
+        color: #3dd1b4;
         outline-width: 0.15rem;
         outline-style: solid;
         background: #3dd1b425;

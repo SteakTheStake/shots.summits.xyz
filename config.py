@@ -54,6 +54,7 @@ class Config:
     
     # Upload settings
     UPLOAD_FOLDER = "static/images"
+    GUEST_UPLOAD_FOLDER = "static/guest_uploads"
     THUMBNAIL_FOLDER = "static/thumbnails"
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     MAX_CONTENT_LENGTH = 24 * 1024 * 1024  # 10MB limit

@@ -42,43 +42,219 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 
 MINECRAFT_ADJECTIVES = [
-    "Blaze", "Creeper", "Ender", "Ghastly", "Zombie", "Skeleton", "Wither",
-    "Potion", "Redstone", "Diamond", "Emerald", "Nether", "Villager", "Piglin",
-    "Warped", "Crimson", "Oak", "Birch", "Spruce", "Jungle", "Savanna",
-    "Badlands", "Mesa", "Stronghold", "Biomes", "Oceanic", "Mushroom", "Soul",
-    "Obsidian", "Cobblestone", "Iron", "Gold", "Lapis", "Quartz", "Glowing",
-    "Prismarine", "Amethyst", "Tundra", "Desert", "Alpine", "Swampy", "Elytrian",
-    "Cave", "Lush", "Dripstone", "Harrowing", "Spooky", "Enchanted", "Luminescent",
-    "Farmland", "Mangrove", "Frosted", "Molten", "Endless", "Warden", "Sculk",
-    "Ancient", "TNT", "Beacon", "Turtle", "Honeyed", "Hive", "Sprawling",
-    "Mining", "Enchanting", "Fletching", "Smelting", "Blast", "Trident", "Potato",
-    "Heroic", "Epic", "Illager", "Crossbow", "Axolotl", "Fungal", "Axian",
-    "Fallen", "Overworld", "Bedrock", "Adaptive", "Charged", "Drowned",
-    "Wandering", "Volatile", "Mooshroom", "Slime", "Ravager", "Phantom", "Fierce",
-    "Shulker", "Guardian", "Elder", "Tamed", "Tactical", "Cartographic",
-    "Bamboo", "Frostwalker", "Conduit", "Infinite", "Glimmering", "Verdant",
-    "Illuminated", "Spiked", "Warping", "Bewitched"
+    "Blaze",
+    "Creeper",
+    "Ender",
+    "Ghastly",
+    "Zombie",
+    "Skeleton",
+    "Wither",
+    "Potion",
+    "Redstone",
+    "Diamond",
+    "Emerald",
+    "Nether",
+    "Villager",
+    "Piglin",
+    "Warped",
+    "Crimson",
+    "Oak",
+    "Birch",
+    "Spruce",
+    "Jungle",
+    "Savanna",
+    "Badlands",
+    "Mesa",
+    "Stronghold",
+    "Biomes",
+    "Oceanic",
+    "Mushroom",
+    "Soul",
+    "Obsidian",
+    "Cobblestone",
+    "Iron",
+    "Gold",
+    "Lapis",
+    "Quartz",
+    "Glowing",
+    "Prismarine",
+    "Amethyst",
+    "Tundra",
+    "Desert",
+    "Alpine",
+    "Swampy",
+    "Elytrian",
+    "Cave",
+    "Lush",
+    "Dripstone",
+    "Harrowing",
+    "Spooky",
+    "Enchanted",
+    "Luminescent",
+    "Farmland",
+    "Mangrove",
+    "Frosted",
+    "Molten",
+    "Endless",
+    "Warden",
+    "Sculk",
+    "Ancient",
+    "TNT",
+    "Beacon",
+    "Turtle",
+    "Honeyed",
+    "Hive",
+    "Sprawling",
+    "Mining",
+    "Enchanting",
+    "Fletching",
+    "Smelting",
+    "Blast",
+    "Trident",
+    "Potato",
+    "Heroic",
+    "Epic",
+    "Illager",
+    "Crossbow",
+    "Axolotl",
+    "Fungal",
+    "Axian",
+    "Fallen",
+    "Overworld",
+    "Bedrock",
+    "Adaptive",
+    "Charged",
+    "Drowned",
+    "Wandering",
+    "Volatile",
+    "Mooshroom",
+    "Slime",
+    "Ravager",
+    "Phantom",
+    "Fierce",
+    "Shulker",
+    "Guardian",
+    "Elder",
+    "Tamed",
+    "Tactical",
+    "Cartographic",
+    "Bamboo",
+    "Frostwalker",
+    "Conduit",
+    "Infinite",
+    "Glimmering",
+    "Verdant",
+    "Illuminated",
+    "Spiked",
+    "Warping",
+    "Bewitched",
 ]
 
 MINECRAFT_NOUNS = [
-    "Traveler", "Befriender", "Explorer", "Hunter", "Brewer", "Architect",
-    "Miner", "Crafter", "Adventurer", "Wanderer", "Builder", "Farmer", "Forager",
-    "Smith", "Tamer", "Raider", "Lootmaster", "Fletcher", "Cartographer",
-    "Enchanter", "Defender", "Guardian", "Protector", "Mage", "Archer", "Warrior",
-    "Ranger", "Shaman", "Conjurer", "Gatherer", "Mason", "Shepherd", "Fisherman",
-    "Librarian", "Armorer", "Butcher", "Cleric", "Nitwit", "Bard", "Assassin",
-    "Trickster", "Cultivator", "Blacksmith", "Mechanic", "Inventor", "Stalker",
-    "Duelist", "Assaulter", "Overseer", "Mystic", "Warlord", "Channeler",
-    "Druid", "Pirate", "Captain", "Knight", "Bandit", "Merchant", "Trader",
-    "Pillager", "Illusioner", "Messenger", "Baker", "Chef", "Monarch",
-    "Vindicator", "Beekeeper", "Navigator", "Treasure Hunter", "Shipwright",
-    "Potioner", "Geologist", "Lumberjack", "Scribe", "Geomancer", "Spellbinder",
-    "Phantom Slayer", "Redstoner", "Portal Runner", "Planter", "Beast Tamer",
-    "Warden Watcher", "Endwalker", "Nether Surfer", "Biome Binder",
-    "Darkness Diver", "Soul Seeker", "Lantern Lighter", "Disc Collector",
-    "Pig Rider", "Slime Wrangler", "Engineer", "Potion Brewer", "Dragon Slayer",
-    "Potion Drinker", "Treasure Diver", "Battle Mage", "Spelunker", "Witch Doctor",
-    "Wayfinder", "Stonemason", "Woodsman", "Ringleader", "Torchbearer"
+    "Traveler",
+    "Befriender",
+    "Explorer",
+    "Hunter",
+    "Brewer",
+    "Architect",
+    "Miner",
+    "Crafter",
+    "Adventurer",
+    "Wanderer",
+    "Builder",
+    "Farmer",
+    "Forager",
+    "Smith",
+    "Tamer",
+    "Raider",
+    "Lootmaster",
+    "Fletcher",
+    "Cartographer",
+    "Enchanter",
+    "Defender",
+    "Guardian",
+    "Protector",
+    "Mage",
+    "Archer",
+    "Warrior",
+    "Ranger",
+    "Shaman",
+    "Conjurer",
+    "Gatherer",
+    "Mason",
+    "Shepherd",
+    "Fisherman",
+    "Librarian",
+    "Armorer",
+    "Butcher",
+    "Cleric",
+    "Nitwit",
+    "Bard",
+    "Assassin",
+    "Trickster",
+    "Cultivator",
+    "Blacksmith",
+    "Mechanic",
+    "Inventor",
+    "Stalker",
+    "Duelist",
+    "Assaulter",
+    "Overseer",
+    "Mystic",
+    "Warlord",
+    "Channeler",
+    "Druid",
+    "Pirate",
+    "Captain",
+    "Knight",
+    "Bandit",
+    "Merchant",
+    "Trader",
+    "Pillager",
+    "Illusioner",
+    "Messenger",
+    "Baker",
+    "Chef",
+    "Monarch",
+    "Vindicator",
+    "Beekeeper",
+    "Navigator",
+    "Treasure Hunter",
+    "Shipwright",
+    "Potioner",
+    "Geologist",
+    "Lumberjack",
+    "Scribe",
+    "Geomancer",
+    "Spellbinder",
+    "Phantom Slayer",
+    "Redstoner",
+    "Portal Runner",
+    "Planter",
+    "Beast Tamer",
+    "Warden Watcher",
+    "Endwalker",
+    "Nether Surfer",
+    "Biome Binder",
+    "Darkness Diver",
+    "Soul Seeker",
+    "Lantern Lighter",
+    "Disc Collector",
+    "Pig Rider",
+    "Slime Wrangler",
+    "Engineer",
+    "Potion Brewer",
+    "Dragon Slayer",
+    "Potion Drinker",
+    "Treasure Diver",
+    "Battle Mage",
+    "Spelunker",
+    "Witch Doctor",
+    "Wayfinder",
+    "Stonemason",
+    "Woodsman",
+    "Ringleader",
+    "Torchbearer",
 ]
 
 
@@ -87,6 +263,7 @@ def generate_guest_username():
     noun = random.choice(MINECRAFT_NOUNS)
     return f"{adj} {noun}"
 
+
 # Example usage in your application:
 def get_current_time():
     with db.get_connection() as conn:
@@ -94,12 +271,14 @@ def get_current_time():
         cursor.execute("SELECT datetime('now')")
         return cursor.fetchone()[0]
 
+
 # When handling web requests:
 def handle_request():
     with db.get_connection() as conn:
         # Do all your database operations here
         # The connection will be reused rather than creating a new one each time
         pass
+
 
 def send_discord_webhook(username: str, action: str, details: dict = None):
     """
@@ -146,42 +325,50 @@ def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
 
     return hmac.compare_digest(calculated_signature, signature)
 
+
 def ensure_default_roles():
     """
     Ensures default admin and moderator roles are set in the database.
     Should be called during application initialization.
     """
     default_admin = {
-        'discord_id': '278344153761316864',
-        'username': 'StakeTheSteak',
-        'role': 'admin'
+        "discord_id": "278344153761316864",
+        "username": "StakeTheSteak",
+        "role": "admin",
     }
-    
+
     default_moderators = [
         # Add default moderators here as needed
         # {'discord_id': 'mod_id', 'username': 'mod_name', 'role': 'moderator'},
     ]
-    
+
     with sqlite3.connect("f2.db") as conn:
         # Ensure admin exists
-        conn.execute("""
+        conn.execute(
+            """
             INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
             VALUES (?, ?, ?)
-        """, (default_admin['discord_id'], default_admin['role'], 'system'))
-        
+        """,
+            (default_admin["discord_id"], default_admin["role"], "system"),
+        )
+
         # Ensure moderators exist
         for mod in default_moderators:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
-            """, (mod['discord_id'], mod['role'], 'system'))
+            """,
+                (mod["discord_id"], mod["role"], "system"),
+            )
+
 
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
     init_db()
     ensure_default_roles()
-    
+
     # Create necessary directories
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
@@ -196,59 +383,61 @@ def create_app():
         @wraps(f)
         def decorated_function(*args, **kwargs):
             # If neither a Discord user nor a guest user is present, block access
-            if 'discord_id' not in session and 'guest_id' not in session:
+            if "discord_id" not in session and "guest_id" not in session:
                 flash("Please log in or continue as guest.", "warning")
-                return redirect(url_for('index'))
+                return redirect(url_for("index"))
             return f(*args, **kwargs)
+
         return decorated_function
 
-        
     def get_user_role(discord_id=None, guest_id=None):
         with sqlite3.connect("f2.db") as conn:
             cursor = conn.execute(
-                "SELECT role FROM user_roles WHERE discord_id = ?",
-                (discord_id,)
+                "SELECT role FROM user_roles WHERE discord_id = ?", (discord_id,)
             )
             if guest_id:
-                return 'user'
+                return "user"
             result = cursor.fetchone()
-            return result[0] if result else 'user'
-        
+            return result[0] if result else "user"
+
     def requires_role(required_role):
         def decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
                 # If neither discord_id nor guest_id is in session, block
-                if 'discord_id' not in session and 'guest_id' not in session:
-                    flash('Please log in or continue as guest.', 'danger')
-                    return redirect(url_for('login'))
+                if "discord_id" not in session and "guest_id" not in session:
+                    flash("Please log in or continue as guest.", "danger")
+                    return redirect(url_for("login"))
 
                 # Distinguish between Discord user or guest
-                discord_id = session.get('discord_id')
-                guest_id = session.get('guest_id')
+                discord_id = session.get("discord_id")
+                guest_id = session.get("guest_id")
                 user_role = get_user_role(discord_id, guest_id)
 
                 role_hierarchy = {
-                    'admin': 3,
-                    'moderator': 2,
-                    'user': 1,
-                    'guest': 1  # Treat guest same as normal user, or create a separate tier
+                    "admin": 3,
+                    "moderator": 2,
+                    "user": 1,
+                    "guest": 1,  # Treat guest same as normal user, or create a separate tier
                 }
 
-                if role_hierarchy.get(user_role, 0) >= role_hierarchy.get(required_role, 0):
+                if role_hierarchy.get(user_role, 0) >= role_hierarchy.get(
+                    required_role, 0
+                ):
                     return f(*args, **kwargs)
                 else:
-                    flash('Insufficient permissions.', 'danger')
-                    return redirect(url_for('index'))
+                    flash("Insufficient permissions.", "danger")
+                    return redirect(url_for("index"))
+
             return decorated_function
+
         return decorator
 
-    
     def handle_upload(files, uploader_name):
         uploaded_files = []
         processed_files = set()
 
-        with sqlite3.connect('f2.db') as conn:
+        with sqlite3.connect("f2.db") as conn:
             for index, file in enumerate(files):
                 if not file or not file.filename:
                     continue
@@ -256,55 +445,69 @@ def create_app():
                 # Generate unique filename
                 timestamp = datetime.now().timestamp()
                 random_suffix = os.urandom(4).hex()
-                filename = secure_filename(f'shot_{timestamp}_{random_suffix}.webp')
+                filename = secure_filename(f"shot_{timestamp}_{random_suffix}.webp")
 
                 if filename in processed_files:
                     continue
 
                 if allowed_file(file.filename):
                     try:
-                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
                         # Get form metadata
-                        group_name = request.form.get('group_name', '')
-                        common_tags = request.form.get('common_tags', '').split(',')
-                        specific_tags = request.form.get(f'tags_{index}', '').split(',')
-                        resources = request.form.get('resources', '')
+                        group_name = request.form.get("group_name", "")
+                        common_tags = request.form.get("common_tags", "").split(",")
+                        specific_tags = request.form.get(f"tags_{index}", "").split(",")
+                        resources = request.form.get("resources", "")
 
                         # Combine tags
                         all_tags = list(
-                            set([tag.strip().lower() for tag in (common_tags + specific_tags) if tag.strip()])
+                            set(
+                                [
+                                    tag.strip().lower()
+                                    for tag in (common_tags + specific_tags)
+                                    if tag.strip()
+                                ]
+                            )
                         )
 
                         # Handle group creation if provided
                         group_id = None
                         if group_name:
                             cursor = conn.execute(
-                                'INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id',
-                                (group_name, uploader_name)  # use uploader_name here
+                                "INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id",
+                                (group_name, uploader_name),  # use uploader_name here
                             )
                             group_id = cursor.fetchone()[0]
 
                         # Save and convert image
                         with Image.open(file) as img:
                             file.seek(0)
-                            img.save(filepath, 'WEBP', quality=85)
+                            img.save(filepath, "WEBP", quality=85)
 
                         # Insert screenshot record
                         cursor = conn.execute(
-                            'INSERT INTO screenshots (filename, uploader_name, group_id) VALUES (?, ?, ?)',
-                            (filename, uploader_name, group_id)  # use uploader_name here too
+                            "INSERT INTO screenshots (filename, uploader_name, group_id) VALUES (?, ?, ?)",
+                            (
+                                filename,
+                                uploader_name,
+                                group_id,
+                            ),  # use uploader_name here too
                         )
                         screenshot_id = cursor.fetchone()[0]
 
                         # Handle tags
                         for tag in all_tags:
-                            conn.execute('INSERT OR IGNORE INTO tags (name) VALUES (?)', (tag,))
-                            cursor = conn.execute('SELECT id FROM tags WHERE name = ?', (tag,))
+                            conn.execute(
+                                "INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,)
+                            )
+                            cursor = conn.execute(
+                                "SELECT id FROM tags WHERE name = ?", (tag,)
+                            )
                             tag_id = cursor.fetchone()[0]
                             conn.execute(
-                                'INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)',
-                                (screenshot_id, tag_id)
+                                "INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)",
+                                (screenshot_id, tag_id),
                             )
 
                         processed_files.add(filename)
@@ -318,179 +521,199 @@ def create_app():
 
         return uploaded_files
 
-        
-
-    @app.route('/guest')
+    @app.route("/guest")
     def guest_login():
         # Generate a simple ID for the guest session
-        session['guest_id'] = str(uuid4())  
-        session['guest_username'] = generate_guest_username()
+        session["guest_id"] = str(uuid4())
+        session["guest_username"] = generate_guest_username()
         # This will be used in the rest of the app as if it were their username.
-        session['username'] = session['guest_username']
+        session["username"] = session["guest_username"]
 
         flash(f"You are now browsing as guest: {session['guest_username']}", "success")
-        return redirect(url_for('index'))
-    
-    @app.route('/debug-config')
+        return redirect(url_for("index"))
+
+    @app.route("/debug-config")
     def debug_config():
         from config import Config  # Import Config class
-        
+
         config_vars = {
-            'CLIENT_ID': Config.DISCORD_CLIENT_ID,
-            'REDIRECT_URI': Config.DISCORD_REDIRECT_URI,
-            'WEBHOOK_URL': Config.DISCORD_WEBHOOK_URL,
-            'HAS_CLIENT_SECRET': bool(Config.DISCORD_CLIENT_SECRET),
-            'HAS_PUBLIC_KEY': bool(Config.DISCORD_PUBLIC_KEY),
-            'HAS_BOT_TOKEN': bool(Config.DISCORD_BOT_TOKEN)
+            "CLIENT_ID": Config.DISCORD_CLIENT_ID,
+            "REDIRECT_URI": Config.DISCORD_REDIRECT_URI,
+            "WEBHOOK_URL": Config.DISCORD_WEBHOOK_URL,
+            "HAS_CLIENT_SECRET": bool(Config.DISCORD_CLIENT_SECRET),
+            "HAS_PUBLIC_KEY": bool(Config.DISCORD_PUBLIC_KEY),
+            "HAS_BOT_TOKEN": bool(Config.DISCORD_BOT_TOKEN),
         }
         return jsonify(config_vars)
-    
-    @app.route('/login')
+
+    @app.route("/login")
     def login():
         discord = make_session()
-        authorization_url, state = discord.authorization_url(app.config['DISCORD_AUTHORIZATION_BASE_URL'])
-        session['oauth2_state'] = state
+        authorization_url, state = discord.authorization_url(
+            app.config["DISCORD_AUTHORIZATION_BASE_URL"]
+        )
+        session["oauth2_state"] = state
         return redirect(authorization_url)
 
-    @app.route('/logout')
+    @app.route("/logout")
     def logout():
         session.clear()
-        flash('Successfully logged out!', 'success')
-        return redirect(url_for('index'))
-    
-    @app.route('/delete/<filename>', methods=['POST'])
+        flash("Successfully logged out!", "success")
+        return redirect(url_for("index"))
+
+    @app.route("/delete/<filename>", methods=["POST"])
     @login_required
     def delete_image(filename):
         with sqlite3.connect("f2.db") as conn:
             # Check if user owns the image or is admin/moderator
             cursor = conn.execute(
                 "SELECT discord_username  FROM screenshots WHERE filename = ?",
-                (filename,)
+                (filename,),
             )
             result = cursor.fetchone()
             if not result:
-                flash('Image not found.', 'danger')
-                return redirect(url_for('index'))
-                
+                flash("Image not found.", "danger")
+                return redirect(url_for("index"))
+
             uploader = result[0]
-            user_role = get_user_role(session['discord_id'])
-    
-            if uploader == session['username'] or user_role in ['admin', 'moderator']:
+            user_role = get_user_role(session["discord_id"])
+
+            if uploader == session["username"] or user_role in ["admin", "moderator"]:
                 try:
                     # Log deletion
                     conn.execute(
-                    """INSERT INTO deletion_log 
+                        """INSERT INTO deletion_log 
                     (filename, deleted_by, original_uploader, reason) 
                     VALUES (?, ?, ?, ?)""",
-                    (filename, session['username'], uploader, request.form.get('reason', 'User requested deletion'))
-                )
-    
+                        (
+                            filename,
+                            session["username"],
+                            uploader,
+                            request.form.get("reason", "User requested deletion"),
+                        ),
+                    )
+
                     # Delete from database
-                    conn.execute("DELETE FROM screenshots WHERE filename = ?", (filename,))
-    
+                    conn.execute(
+                        "DELETE FROM screenshots WHERE filename = ?", (filename,)
+                    )
+
                     # Delete file
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                     if os.path.exists(filepath):
                         os.remove(filepath)
-    
-                    flash('Image deleted successfully.', 'success')
+
+                    flash("Image deleted successfully.", "success")
                 except Exception as e:
-                    flash(f'Error deleting image: {str(e)}', 'danger')
+                    flash(f"Error deleting image: {str(e)}", "danger")
             else:
-                flash('Permission denied.', 'danger')
-    
-        return redirect(url_for('index'))
-    
-    @app.route('/admin/dashboard')
+                flash("Permission denied.", "danger")
+
+        return redirect(url_for("index"))
+
+    @app.route("/admin/dashboard")
     @login_required
-    @requires_role('admin')
+    @requires_role("admin")
     def admin_dashboard():
         with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
-    
+
             # Get statistics
             stats = {
-                'total_images': conn.execute("SELECT COUNT(*) FROM screenshots").fetchone()[0],
-                'total_users': conn.execute(
+                "total_images": conn.execute(
+                    "SELECT COUNT(*) FROM screenshots"
+                ).fetchone()[0],
+                "total_users": conn.execute(
                     "SELECT COUNT(DISTINCT discord_username) FROM screenshots"
                 ).fetchone()[0],
-                'recent_uploads': conn.execute(
+                "recent_uploads": conn.execute(
                     "SELECT * FROM screenshots ORDER BY upload_date DESC LIMIT 10"
                 ).fetchall(),
-                'deletion_log': conn.execute(
+                "deletion_log": conn.execute(
                     "SELECT * FROM deletion_log ORDER BY deletion_date DESC LIMIT 10"
-                ).fetchall()
+                ).fetchall(),
             }
-    
+
             # Get user roles
-            users = conn.execute("""
+            users = conn.execute(
+                """
                 SELECT ur.discord_id, ur.role, ur.assigned_date,
                         COUNT(s.id) as upload_count
                 FROM user_roles ur
                 LEFT JOIN screenshots s ON ur.discord_id = s.discord_username
                 GROUP BY ur.discord_id
-            """).fetchall()
-    
-        return render_template('admin_dashboard.html', stats=stats, users=users)
-    
-    @app.route('/admin/manage_roles', methods=['POST'])
+            """
+            ).fetchall()
+
+        return render_template("admin_dashboard.html", stats=stats, users=users)
+
+    @app.route("/admin/manage_roles", methods=["POST"])
     @login_required
-    @requires_role('admin')
+    @requires_role("admin")
     def manage_roles():
-        discord_id = request.form.get('discord_id')
-        new_role = request.form.get('role')
-    
-        if new_role not in ['user', 'moderator', 'admin']:
-            flash('Invalid role specified.', 'danger')
-            return redirect(url_for('admin_dashboard'))
-    
+        discord_id = request.form.get("discord_id")
+        new_role = request.form.get("role")
+
+        if new_role not in ["user", "moderator", "admin"]:
+            flash("Invalid role specified.", "danger")
+            return redirect(url_for("admin_dashboard"))
+
         with sqlite3.connect("f2.db") as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR REPLACE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
-            """, (discord_id, new_role, session['username'])
-    
-        flash(f'Role updated successfully for user {discord_id}', 'success')
-        return redirect(url_for('admin_dashboard'))
-    
-    @app.route('/mod/review')
+            """,
+                (discord_id, new_role, session["username"]),
+            )
+
+        flash(f"Role updated successfully for user {discord_id}", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    @app.route("/mod/review")
     @login_required
-    @requires_role('moderator')
+    @requires_role("moderator")
     def mod_review():
         with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
-            recent_uploads = conn.execute("""
+            recent_uploads = conn.execute(
+                """
                 SELECT s.*, COUNT(st.tag_id) as tag_count
                 FROM screenshots s
                 LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
                 GROUP BY s.id
                 ORDER BY s.upload_date DESC
                 LIMIT 50
-            """).fetchall()
-        return render_template('mod_review.html', uploads=recent_uploads)
-    
-    @app.route('/mod/report/<filename>', methods=['POST'])
+            """
+            ).fetchall()
+        return render_template("mod_review.html", uploads=recent_uploads)
+
+    @app.route("/mod/report/<filename>", methods=["POST"])
     @login_required
     def report_image(filename):
-        reason = request.form.get('reason', '').strip()
+        reason = request.form.get("reason", "").strip()
         if not reason:
-            flash('Please provide a reason for reporting.', 'danger')
-            return redirect(url_for('view_image', image_filename=filename))
-    
+            flash("Please provide a reason for reporting.", "danger")
+            return redirect(url_for("view_image", image_filename=filename))
+
         with sqlite3.connect("f2.db") as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO reports (filename, reported_by, reason)
                 VALUES (?, ?, ?)
-            """, (filename, session['discord_username'], reason))
-    
-        flash('Image reported successfully. Moderators will review it.', 'success')
-        return redirect(url_for('view_image', image_filename=filename))
-    
-    @app.route('/')
+            """,
+                (filename, session["discord_username"], reason),
+            )
+
+        flash("Image reported successfully. Moderators will review it.", "success")
+        return redirect(url_for("view_image", image_filename=filename))
+
+    @app.route("/")
     def index():
         with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
                 FROM screenshots s
                 LEFT JOIN screenshot_groups g ON s.group_id = g.id
@@ -498,83 +721,81 @@ def create_app():
                 LEFT JOIN tags t ON st.tag_id = t.id
                 GROUP BY s.id
                 ORDER BY s.upload_date DESC
-            """)
+            """
+            )
             screenshots = cursor.fetchall()
-        return render_template('index.html', screenshots=screenshots)
-    
+        return render_template("index.html", screenshots=screenshots)
+
     # Add this to your app.py temporarily to debug
-    @app.route('/config-check')
+    @app.route("/config-check")
     def config_check():
         return {
-            'client_id': app.config['DISCORD_CLIENT_ID'],
-            'redirect_uri': app.config['DISCORD_REDIRECT_URI'],
-            'api_base': app.config['DISCORD_API_BASE_URL'],
-            'auth_base': app.config['DISCORD_AUTHORIZATION_BASE_URL'],
-            'token_url': app.config['DISCORD_TOKEN_URL']
+            "client_id": app.config["DISCORD_CLIENT_ID"],
+            "redirect_uri": app.config["DISCORD_REDIRECT_URI"],
+            "api_base": app.config["DISCORD_API_BASE_URL"],
+            "auth_base": app.config["DISCORD_AUTHORIZATION_BASE_URL"],
+            "token_url": app.config["DISCORD_TOKEN_URL"],
         }
-    
-    @app.route('/callback')
+
+    @app.route("/callback")
     def callback():
-        if request.values.get('error'):
-            flash(request.values['error'], 'danger')
-            return redirect(url_for('index'))
+        if request.values.get("error"):
+            flash(request.values["error"], "danger")
+            return redirect(url_for("index"))
 
         try:
-            discord = make_session(state=session.get('oauth2_state'))
+            discord = make_session(state=session.get("oauth2_state"))
             token = discord.fetch_token(
-                app.config['DISCORD_TOKEN_URL'],
-                client_secret=app.config['DISCORD_CLIENT_SECRET'],
-                authorization_response=request.url
+                app.config["DISCORD_TOKEN_URL"],
+                client_secret=app.config["DISCORD_CLIENT_SECRET"],
+                authorization_response=request.url,
             )
-            session['oauth2_token'] = token
+            session["oauth2_token"] = token
 
-            discord = make_session(token=session.get('oauth2_token'))
+            discord = make_session(token=session.get("oauth2_token"))
             user = discord.get(f'{app.config["DISCORD_API_BASE_URL"]}/users/@me').json()
 
-            session['discord_id'] = user['id']
-            session['username'] = f"{user['username']}#{user['discriminator']}"
-            session['avatar'] = user['avatar']
+            session["discord_id"] = user["id"]
+            session["username"] = f"{user['username']}#{user['discriminator']}"
+            session["avatar"] = user["avatar"]
 
-            flash('Successfully logged in!', 'success')
-            return redirect(url_for('index'))
+            flash("Successfully logged in!", "success")
+            return redirect(url_for("index"))
         except Exception as e:
-            flash(f'Login failed: {str(e)}', 'danger')
-        return redirect(url_for('index'))
+            flash(f"Login failed: {str(e)}", "danger")
+        return redirect(url_for("index"))
 
-    
-
-    @app.route('/upload', methods=['GET', 'POST'])
+    @app.route("/upload", methods=["GET", "POST"])
     @login_required
     def upload():
-        if request.method == 'POST':
-            if 'screenshots[]' not in request.files:
-                flash('No files uploaded', 'danger')
+        if request.method == "POST":
+            if "screenshots[]" not in request.files:
+                flash("No files uploaded", "danger")
                 return redirect(request.url)
 
-            files = request.files.getlist('screenshots[]')
-            uploader_name = session.get('username')
+            files = request.files.getlist("screenshots[]")
+            uploader_name = session.get("username")
 
             # Basic validation
             for file in files:
                 if file and not allowed_file(file.filename):
-                    flash(f'Invalid file type: {file.filename}', 'danger')
+                    flash(f"Invalid file type: {file.filename}", "danger")
                     return redirect(request.url)
                 if file.content_length and file.content_length > 24 * 1024 * 1024:
-                    flash(f'File too large: {file.filename}', 'danger')
+                    flash(f"File too large: {file.filename}", "danger")
                     return redirect(request.url)
 
             try:
                 # Pass uploader_name instead of discord_username
                 uploaded_files = handle_upload(files, uploader_name)
-                flash(f'Successfully uploaded {len(uploaded_files)} files', 'success')
-                return redirect(url_for('index'))
+                flash(f"Successfully uploaded {len(uploaded_files)} files", "success")
+                return redirect(url_for("index"))
             except Exception as e:
-                flash(f'Error uploading files: {str(e)}', 'danger')
+                flash(f"Error uploading files: {str(e)}", "danger")
                 return redirect(request.url)
 
-        return render_template('upload.html')
+        return render_template("upload.html")
 
-    
     @app.route("/shots/<image_filename>")
     def view_image(image_filename):
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
@@ -598,13 +819,16 @@ def create_app():
                 "image_view.html", image_filename=image_filename, image_data=image_data
             )
         return "Image not found", 404
-    
-    print("Discord Client ID:", os.getenv('DISCORD_CLIENT_ID'))
-    print("Discord Redirect URI:", os.getenv('DISCORD_REDIRECT_URI'))
+
+    print("Discord Client ID:", os.getenv("DISCORD_CLIENT_ID"))
+    print("Discord Redirect URI:", os.getenv("DISCORD_REDIRECT_URI"))
     return app
-    
+
+
 def cleanup():
     db.close()
+
+
 if __name__ == "__main__":
     app = create_app()
-    app.run(host='5.78.131.18', port=8000)
+    app.run(host="5.78.131.18", port=8000)

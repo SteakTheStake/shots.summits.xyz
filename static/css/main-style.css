@@ -1,20 +1,29 @@
-@font-face { 
-    font-family: 'MinecraftBold-nMK1.otf'; 
-    src: 
-        url("{{ url_for('static', filename='fonts/MinecraftBold-nMK1.otf') }}")  
-        format('opentype'); 
-    font-weight: normal; 
-    font-style: normal; 
+/* fonts */
+@font-face {
+    font-family: 'Minecraft';
+    src: url('Minecraft-Regular.woff2') format('woff2'),
+        url('Minecraft-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
-@font-face { 
-    font-family: 'MinecraftRegular-Bmg3.otf'; 
-    src: 
-        url("{{ url_for('static', filename='fonts/MinecraftRegular-Bmg3.otf') }}")  
-        format('opentype'); 
-    font-weight: normal; 
-    font-style: normal; 
-} 
+@font-face {
+    font-family: 'Minecraft';
+    src: url('Minecraft-Bold.woff2') format('woff2'),
+        url('Minecraft-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* responsive */
+@media (max-width: 959px) {
+    .page {
+        width: auto;
+        margin: 0;
+    }
+}
 
 .show-overflow {
     overflow-x: visible;
@@ -35,21 +44,22 @@
     color: var(--font);
     line-height: normal;
     border-radius: .25rem;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     
 }
 
 .text-muted {
+    font-size: 1rem;
     color: #ffffff50;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
 }
 
 * {
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     -ms-overflow-style: none;  /* IE and Edge */
@@ -91,7 +101,7 @@ progress {
 
 .styled_font {
     color: #3dc1d4;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
 }
@@ -99,7 +109,7 @@ progress {
 .styled_font_3 {
     font-size: 2.5rem;
     color: #3dc1d480;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
 }
@@ -107,7 +117,7 @@ progress {
 .styled_font_4 {
     font-size: 2.5rem;
     color: #3dc1d4;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     text-shadow: 0 5px 15px #3dc1d480;
@@ -192,7 +202,7 @@ progress {
 }
 .back_home_btn div p > code {
     font-size: 1rem;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     color: #185adb;
@@ -203,7 +213,7 @@ progress {
     background-color: #f9f9f9;
     border: 1px solid #95a3b9;
     border-radius: 6px;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     padding: 0.75em;
@@ -568,7 +578,7 @@ body.dark {
 
 .fancy-text {
     color: #3dc1d4;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
 }
@@ -589,7 +599,7 @@ body.dark {
     color: var(--font);
     line-height: normal;
     border-radius: 1rem;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
 
@@ -997,7 +1007,7 @@ color: #721c24;
 
 .styled_font_2 {
     color: #ffffff75;
-    font-family: 'MinecraftiaRegular-nMK1.otf';
+    font-family: 'Minecraft';
     font-weight: normal;
     font-style: normal;
     font-weight: 600;

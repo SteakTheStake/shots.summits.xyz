@@ -33,13 +33,13 @@
         <!-- Discord Meta Tags -->
         {% block meta_tags %} {% if image_filename is defined %}
         <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image" />
-        <meta content="SummitMC F2 - {{ image_filename }}" property="og:title" />
+        <meta content="Summit F2 - {{ image_filename }}" property="og:title" />
         {% else %}
         <meta content="https://i.imgur.com/hxsaduN.jpeg" property="og:image" />
-        <meta content="SummitMC F2" property="og:title" />
+        <meta content="Summit F2" property="og:title" />
         {% endif %}
-        <meta content="https://shots.summitmc.xyz/" property="og:url" />
-        <meta content="Official SummitMC Screenshot Sharing Website" property="og:description" />
+        <meta content="https://f2.summitmc.xyz/" property="og:url" />
+        <meta content="Summit F2 Is A Screenshot Sharing Website" property="og:description" />
         <meta content="#8dbdc4" data-react-helmet="true" name="theme-color" />
         <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/hxsaduN.jpeg{% endif %}" />
         {% endblock %}
@@ -55,8 +55,9 @@
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
-                    <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                        <i class="rounded-0 solid_1">upload</i>
+                    <a href="{{ url_for('upload') }}" class="center-align middle-align round large small-padding btn_better_alt">
+                        <p class="login_text solid_2">Upload</p>
+                        <i class="rounded-0 solid_1 rounded-0 solid_2 show-overflow">upload</i>
                     </a>
                     <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
                         <i class="rounded-0 solid_1">logout</i>
@@ -93,8 +94,9 @@
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
-                    <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                        <i class="rounded-0 solid_1">upload</i>
+                    <a href="{{ url_for('upload') }}" class="center-align middle-align round large small-padding btn_better_alt">
+                        <p class="login_text solid_2">Upload</p>
+                        <i class="rounded-0 solid_1 rounded-0 solid_2 show-overflow">upload</i>
                     </a>
                     <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
                         <i class="rounded-0 solid_1">logout</i>
@@ -131,8 +133,9 @@
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
                     <span class="styled_font_2 l">{{session.discord_username}}</span>
-                    <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                        <i class="rounded-0 solid_1">upload</i>
+                    <a href="{{ url_for('upload') }}" class="center-align middle-align round large small-padding btn_better_alt">
+                        <p class="login_text solid_2">Upload</p>
+                        <i class="rounded-0 solid_1 rounded-0 solid_2 show-overflow">upload</i>
                     </a>
                     <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
                         <i class="rounded-0 solid_1">logout</i>

@@ -78,6 +78,14 @@ progress {
     font-style: normal;
 }
 
+.styled_font_3 {
+    font-size: 2.5rem;
+    color: #3dc1d4;
+    font-family: 'MinecraftiaRegular';
+    font-weight: normal;
+    font-style: normal;
+}
+
 .dot_this {
     border-style: dotted 4px;
 }

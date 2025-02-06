@@ -81,9 +81,25 @@
     /* Show the hamburger, hide the .links-container initially */
     .hamburger {
       display: block;
-      color: white;
-      fill: white;
     }
+    /* --- ACTIVE STATE FOR HAMBURGER --- */
+    .hamburger.active span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+        color: #3dc1d4;
+        text-shadow: 0 5px 15px #3dc1d425;
+    }
+    
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+        color: #3dc1d4;
+        text-shadow: 0 5px 15px #3dc1d425;
+    }
+    
+    .hamburger.active span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+        color: #3dc1d4;
+        text-shadow: 0 5px 15px #3dc1d425;
+    }  
   
     /* By default, hide the links container on mobile */
     .links-container {
@@ -101,18 +117,7 @@
     }
   }
   
-  /* --- ACTIVE STATE FOR HAMBURGER --- */
-  .hamburger.active span:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-  }
   
-  .hamburger.active span:nth-child(2) {
-    opacity: 0;
-  }
-  
-  .hamburger.active span:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-  }  
 
 html, body {
     margin: 0;

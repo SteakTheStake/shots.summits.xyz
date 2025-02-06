@@ -549,4 +549,4 @@ def cleanup():
     db.close()
 if __name__ == "__main__":
     app = create_app()
-    app.run(host='localhost', port=8000)
+    app.run(host='5.78.131.18', port=8000)

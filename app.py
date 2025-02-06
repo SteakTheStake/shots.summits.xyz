@@ -440,86 +440,63 @@ def create_app():
         uploaded_files = []
         processed_files = set()
 
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect('f2.db') as conn:
+            conn.row_factory = sqlite3.Row
             for index, file in enumerate(files):
                 if not file or not file.filename:
                     continue
 
-                # Generate unique filename
-                timestamp = datetime.now().timestamp()
-                random_suffix = os.urandom(4).hex()
-                filename = secure_filename(f"shot_{timestamp}_{random_suffix}.webp")
-
+                filename = secure_filename(f"shot_{datetime.now().timestamp()}_{os.urandom(4).hex()}.webp")
                 if filename in processed_files:
                     continue
 
+                # Save the file to disk
                 if allowed_file(file.filename):
                     try:
-                        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        with Image.open(file) as img:
+                            file.seek(0)
+                            img.save(filepath, 'WEBP', quality=85)
 
-                        # Get form metadata
+                        # Gather form data for group/tags
                         group_name = request.form.get("group_name", "")
                         common_tags = request.form.get("common_tags", "").split(",")
                         specific_tags = request.form.get(f"tags_{index}", "").split(",")
-                        resources = request.form.get("resources", "")
+                        all_tags = list({tag.strip().lower() for tag in (common_tags + specific_tags) if tag.strip()})
 
-                        # Combine tags
-                        all_tags = list(
-                            set(
-                                [
-                                    tag.strip().lower()
-                                    for tag in (common_tags + specific_tags)
-                                    if tag.strip()
-                                ]
-                            )
-                        )
-
-                        # Handle group creation if provided
+                        # Insert or create group
                         group_id = None
                         if group_name:
                             cursor = conn.execute(
                                 "INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id",
-                                (group_name, uploader_name),  # use uploader_name here
+                                (group_name, uploader_name)
                             )
                             group_id = cursor.fetchone()[0]
 
-                        # Save and convert image
-                        with Image.open(file) as img:
-                            file.seek(0)
-                            img.save(filepath, "WEBP", quality=85)
-
-                        # Insert screenshot record
+                        # Insert screenshot row
                         cursor = conn.execute(
-                            "INSERT INTO screenshots (filename, uploader_name, group_id) VALUES (?, ?, ?)",
-                            (
-                                filename,
-                                uploader_name,
-                                group_id,
-                            ),  # use uploader_name here too
+                            "INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?)"
+                            # If your column is really called `uploader_name`, change above line
+                            # to "... (filename, uploader_name, group_id) ..."
+                            , (filename, uploader_name, group_id)
                         )
-                        screenshot_id = cursor.fetchone()[0]
+                        screenshot_id = cursor.lastrowid
 
-                        # Handle tags
+                        # Insert tags
                         for tag in all_tags:
-                            conn.execute(
-                                "INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,)
-                            )
-                            cursor = conn.execute(
-                                "SELECT id FROM tags WHERE name = ?", (tag,)
-                            )
-                            tag_id = cursor.fetchone()[0]
-                            conn.execute(
-                                "INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)",
-                                (screenshot_id, tag_id),
-                            )
+                            conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))
+                            tag_id = conn.execute("SELECT id FROM tags WHERE name = ?", (tag,)).fetchone()[0]
+                            conn.execute("INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)",
+                                        (screenshot_id, tag_id))
 
-                        processed_files.add(filename)
                         uploaded_files.append(filename)
+                        processed_files.add(filename)
 
                     except Exception as e:
                         print(f"Error processing file {file.filename}: {str(e)}")
                         continue
 
+            # Make sure to commit so the inserts persist
             conn.commit()
 
         return uploaded_files

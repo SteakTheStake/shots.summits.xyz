@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}SummitMC Shots{% endblock %}</title>
+    <title>{% block title %}SummitMC F2{% endblock %}</title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -29,10 +29,10 @@
     {% block meta_tags %}
     {% if image_filename is defined %}
         <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image">
-        <meta content="SummitMC Shots - {{ image_filename }}" property="og:title">
+        <meta content="SummitMC F2 - {{ image_filename }}" property="og:title">
     {% else %}
         <meta content="https://i.imgur.com/hxsaduN.jpeg" property="og:image">
-        <meta content="SummitMC Shots" property="og:title">
+        <meta content="SummitMC F2" property="og:title">
     {% endif %}
     <meta content="https://shots.summitmc.xyz/" property="og:url">
     <meta content="Official SummitMC Screenshot Sharing Website" property="og:description">
@@ -57,7 +57,7 @@
                     <i class="rounded-0 solid_1">upload</i>
                 </a>
             </div>
-            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
+            <h6 class="styled_font center-align middle-align">SummitMC F2</h6>
             <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
                 <i class="rounded-0 solid_1">logout</i>
             </a>
@@ -86,11 +86,15 @@
             <a href="{{ url_for('upload') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">upload</i>
             </a>
-            <h6 class="styled_font center-align middle-align">SummitMC Shots</h6>
+            <h6 class="styled_font center-align middle-align">SummitMC F2</h6>
             <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end ">
                 <i class="rounded-0 solid_1">logout</i>
             </a>
             {% else %}
+                <a href="{{ url_for('guest_login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <p class="login_text solid_2">Continue as Guest</p>
+                    <i class="fa-regular fa-user rounded-0 solid_2 show-overflow"></i>
+                </a>
                 <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
                         <p class="login_text solid_2">Login With</p>
                         <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>

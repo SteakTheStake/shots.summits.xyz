@@ -1,7 +1,10 @@
 # init_db.py
 import os
-from sqlalchemy import create_engine
 from models import Base
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
 
 def init_db():
     # Use a default database path if DATABASE_PATH is not set
@@ -11,6 +14,14 @@ def init_db():
     # Create database URL
     database_url = f"sqlite:///{database_path}"
     
+    # Load environment variables
+    load_dotenv()
+
+    # Get database URL and ensure it's absolute
+    database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
+    database_url = f"sqlite:///{database_path}"
+    print(f"Loading database URL: {database_url}")
+
     # Create engine and tables
     engine = create_engine(database_url)
     Base.metadata.create_all(engine)

@@ -29,8 +29,10 @@ from config import Config, Base, engine
 from models import Screenshot, ScreenshotGroup, Tag, UserRole
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
+import random
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
+from uuid import uuid4
 
 # Load .env
 load_dotenv()
@@ -55,6 +57,19 @@ def index():
         # Your database operations here
         pass
 
+MINECRAFT_ADJECTIVES = [
+    "Blaze", "Ender", "Redstone", "Creeper", "Biomes", "Piglin",
+    "Nether", "Villager", "Ghastly", "Potion", "Wither"
+]
+MINECRAFT_NOUNS = [
+    "Traveler", "Befriender", "Explorer", "Hunter", "Brewer", 
+    "Architect", "Miner", "Crafter", "Adventurer"
+]
+
+def generate_guest_username():
+    adj = random.choice(MINECRAFT_ADJECTIVES)
+    noun = random.choice(MINECRAFT_NOUNS)
+    return f"{adj} {noun}"
 
 # Example usage in your application:
 def get_current_time():
@@ -144,7 +159,7 @@ def ensure_default_roles():
                 INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
             """, (mod['discord_id'], mod['role'], 'system'))
-            
+
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(Config)
@@ -164,17 +179,22 @@ def create_app():
     def login_required(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if 'discord_id' not in session:
-                return redirect(url_for('login'))
+            # If neither a Discord user nor a guest user is present, block access
+            if 'discord_id' not in session and 'guest_id' not in session:
+                flash("Please log in or continue as guest.", "warning")
+                return redirect(url_for('index'))
             return f(*args, **kwargs)
         return decorated_function
+
         
-    def get_user_role(discord_id):
+    def get_user_role(discord_id=None, guest_id=None):
         with sqlite3.connect("f2.db") as conn:
             cursor = conn.execute(
                 "SELECT role FROM user_roles WHERE discord_id = ?",
                 (discord_id,)
             )
+            if guest_id:
+                return 'user'
             result = cursor.fetchone()
             return result[0] if result else 'user'
         
@@ -182,15 +202,21 @@ def create_app():
         def decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
-                if 'discord_id' not in session:
-                    flash('Please log in first.', 'danger')
+                # If neither discord_id nor guest_id is in session, block
+                if 'discord_id' not in session and 'guest_id' not in session:
+                    flash('Please log in or continue as guest.', 'danger')
                     return redirect(url_for('login'))
 
-                user_role = get_user_role(session['discord_id'])
+                # Distinguish between Discord user or guest
+                discord_id = session.get('discord_id')
+                guest_id = session.get('guest_id')
+                user_role = get_user_role(discord_id, guest_id)
+
                 role_hierarchy = {
                     'admin': 3,
                     'moderator': 2,
-                    'user': 1
+                    'user': 1,
+                    'guest': 1  # Treat guest same as normal user, or create a separate tier
                 }
 
                 if role_hierarchy.get(user_role, 0) >= role_hierarchy.get(required_role, 0):
@@ -200,8 +226,9 @@ def create_app():
                     return redirect(url_for('index'))
             return decorated_function
         return decorator
+
     
-    def handle_upload(files, discord_username):
+    def handle_upload(files, uploader_name):
         uploaded_files = []
         processed_files = set()
 
@@ -247,8 +274,8 @@ def create_app():
 
                         # Insert screenshot record
                         cursor = conn.execute(
-                            'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?) RETURNING id',
-                            (filename, discord_username, group_id)
+                            'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?)',
+                            (filename, uploader_name, group_id)
                         )
                         screenshot_id = cursor.fetchone()[0]
 
@@ -272,6 +299,18 @@ def create_app():
             conn.commit()
         return uploaded_files
         
+
+    @app.route('/guest')
+    def guest_login():
+        # Generate a simple ID for the guest session
+        session['guest_id'] = str(uuid4())  
+        session['guest_username'] = generate_guest_username()
+        # This will be used in the rest of the app as if it were their username.
+        session['username'] = session['guest_username']
+
+        flash(f"You are now browsing as guest: {session['guest_username']}", "success")
+        return redirect(url_for('index'))
+    
     @app.route('/debug-config')
     def debug_config():
         from config import Config  # Import Config class
@@ -305,7 +344,7 @@ def create_app():
         with sqlite3.connect("f2.db") as conn:
             # Check if user owns the image or is admin/moderator
             cursor = conn.execute(
-                "SELECT discord_username FROM screenshots WHERE filename = ?",
+                "SELECT uploader_name FROM screenshots WHERE filename = ?",
                 (filename,)
             )
             result = cursor.fetchone()
@@ -476,8 +515,8 @@ def create_app():
             user = discord.get(f'{app.config["DISCORD_API_BASE_URL"]}/users/@me').json()
 
             session['discord_id'] = user['id']
-            session['discord_username'] = f"{user['username']}#{user['discriminator']}"
-            session['discord_avatar'] = user['avatar']
+            session['username'] = f"{user['username']}#{user['discriminator']}"
+            session['avatar'] = user['avatar']
 
             flash('Successfully logged in!', 'success')
             return redirect(url_for('index'))
@@ -496,7 +535,7 @@ def create_app():
                 return redirect(request.url)
     
             files = request.files.getlist('screenshots[]')
-            discord_username = session['discord_username']
+            uploader_name = session.get('username')
     
             # Basic validation
             for file in files:

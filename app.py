@@ -11,6 +11,7 @@ from flask import (
     session,
     jsonify,
 )
+from datetime import timedelta
 from functools import wraps
 from requests_oauthlib import OAuth2Session
 from werkzeug.utils import secure_filename
@@ -372,6 +373,8 @@ def create_app():
     # Create necessary directories
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["THUMBNAIL_FOLDER"], exist_ok=True)
+    os.makedirs(app.config["GUEST_UPLOAD_FOLDER"], exist_ok=True)
+    os.makedirs(app.config["GUEST_THUMBNAIL_FOLDER"], exist_ok=True)
 
     def allowed_file(filename):
         return (
@@ -520,17 +523,6 @@ def create_app():
             conn.commit()
 
         return uploaded_files
-
-    @app.route("/guest")
-    def guest_login():
-        # Generate a simple ID for the guest session
-        session["guest_id"] = str(uuid4())
-        session["guest_username"] = generate_guest_username()
-        # This will be used in the rest of the app as if it were their username.
-        session["username"] = session["guest_username"]
-
-        flash(f"You are now browsing as guest: {session['guest_username']}", "success")
-        return redirect(url_for("index"))
 
     @app.route("/debug-config")
     def debug_config():
@@ -710,6 +702,11 @@ def create_app():
 
     @app.route("/")
     def index():
+        if 'discord_id' not in session and 'guest_id' not in session:
+            session['guest_id'] = str(uuid4())
+            session['guest_username'] = generate_guest_username()
+            session['username'] = session['guest_username']
+            session.permanent = True
         with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
@@ -724,7 +721,7 @@ def create_app():
             """
             )
             screenshots = cursor.fetchall()
-        return render_template("index.html", screenshots=screenshots)
+        return render_template('index.html', screenshots=screenshots)
 
     # Add this to your app.py temporarily to debug
     @app.route("/config-check")

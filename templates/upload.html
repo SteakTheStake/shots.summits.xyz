@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
+
+<!-- Show this alert only if user is NOT logged in with Discord -->
+{% if 'discord_id' not in session %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+  <strong>Heads up!</strong><br>
+  It's harder to take credit for your own screenshots if you're not logged in with Discord.
+  <button type="button" class="btn btn-primary mt-2" data-dismiss="alert" aria-label="Close">Ok</button>
+</div>
+{% endif %}
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <article class="col-md-8 round border small-blur" style="background-color: #ffffff05;">

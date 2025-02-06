@@ -49,10 +49,9 @@
   text-decoration: none;
 
   /* spacing, backgrounds, etc. */
-  margin-left: 0.8rem;
-  margin-right: 0.8rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
   padding: 0.5rem 1rem;
-  margin: 0 0.25rem;
   border-radius: 4px;
   /* etc. */
 }

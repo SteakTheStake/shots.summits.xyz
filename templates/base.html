@@ -52,8 +52,7 @@
                     <span class="styled_font_2 l">{{ session.discord_username }}</span>
                     {% elif 'guest_id' in session %}
                     <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                    <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                    <span class="styled_font_2 l text-muted">Not logged in</span>
+                    <i class="fa-regular fa-user"></i>
                     <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                         <i class="rounded-0 solid_1">home</i>
                     </a>
@@ -84,8 +83,7 @@
                 <span class="styled_font_2 l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
                 <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font_2 l text-muted">Not logged in</span>
+                <i class="fa-regular fa-user"></i>
             </header>
             <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">home</i>
@@ -115,8 +113,7 @@
                 <span class="styled_font_2 l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
                 <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font_2 l text-muted">Not logged in</span>
+                <i class="fa-regular fa-user"></i>
             </header>
             <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">home</i>

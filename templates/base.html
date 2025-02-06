@@ -45,45 +45,95 @@
         {% endblock %}
     </head>
     <body class="dark">
-        <header class="l">
-            <nav style="width: 100%;">
-                <h6 class="styled_font_4 center-align middle-align"><?xml version="1.0" encoding="UTF-8"?><svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1143.16 579.51"><defs><style>.cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:40px;}</style></defs><g id="Layer_1-2"><path class="cls-1" d="m20,559.51C454.01,125.5,532.26,20,571.72,20c103.64,0,104.91,88.65,551.44,535.19"/><path class="cls-1" d="m571.72,23.01s89.66,113.76,43.26,160.15c-46.4,46.4-142.85,26.74-159.2,80.27-25.44,83.3,118.22,104.67,118.22,296.07"/></g></svg> F2</h6>
-                <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
-                    <i class="rounded-0 solid_1">home</i>
+        <header class="site-header">
+            <nav class="header-nav">
+              <!-- Left: Logo -->
+              <div class="logo-container">
+                <h6 class="styled_font_4 center-align middle-align">
+                  <?xml version="1.0" encoding="UTF-8"?>
+                  <svg
+                    id="Layer_2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 1143.16 579.51"
+                  >
+                    <!-- ... -->
+                  </svg>
+                  F2
+                </h6>
+              </div>
+          
+              <!-- Right: Buttons row -->
+              <div class="links-container">
+                <!-- Home Button -->
+                <a href="{{ url_for('index') }}"
+                   class="btn_better round large small-padding small-margin"
+                >
+                  <i class="rounded-0 solid_1">home</i>
                 </a>
-                <div class="user-info vertical-margin">
-                    {% if 'discord_id' in session %}
-                    <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <span class="styled_font_2 l">{{session.discord_username}}</span>
-                    <a href="{{ url_for('upload') }}" class="center-align middle-align round large small-padding btn_better_alt">
-                        <p class="login_text solid_1">Upload</p>
-                        <i class="rounded-0 solid_1 rounded-0 solid_1 show-overflow">upload</i>
-                    </a>
-                    <a href="{{ url_for('logout') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
-                        <i class="rounded-0 solid_1">logout</i>
-                    </a>
-                    <a href="{{ url_for('admin_dashboard') }}" class="round large small-padding btn_better small-margin left-margin right-margin float-xl-right align-right justify-content-end">
-                        <i class="rounded-0 solid_1">admin_panel_settings</i>
-                    </a>
-                    {% elif 'guest_id' in session %}
-                    <span class="styled_font_2 l">{{session.guest_username}}</span>
-                </div>
-                <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
-                    <p class="login_text solid_2">Login With</p>
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                </a>
-                <a href="{{ url_for('upload') }}" class="center-align middle-align round large small-padding btn_better_alt">
+                
+                <!-- If user is logged in -->
+                {% if 'discord_id' in session %}
+                  <img
+                    src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}"
+                    alt="Avatar"
+                    class="avatar"
+                  />
+                  <span class="styled_font_2">
+                    {{ session.discord_username }}
+                  </span>
+                  
+                  <a href="{{ url_for('upload') }}"
+                     class="btn_better_alt round large small-padding"
+                  >
                     <p class="login_text solid_1">Upload</p>
-                    <i class="rounded-0 solid_1 rounded-0 solid_1 show-overflow">upload</i>
-                </a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="center-align middle-align round large small-padding btn_better_dsc">
+                    <i class="rounded-0 solid_1 show-overflow">upload</i>
+                  </a>
+                  
+                  <a href="{{ url_for('logout') }}"
+                     class="btn_better round large small-padding small-margin"
+                  >
+                    <i class="rounded-0 solid_1">logout</i>
+                  </a>
+                  
+                  <a href="{{ url_for('admin_dashboard') }}"
+                     class="btn_better round large small-padding small-margin"
+                  >
+                    <i class="rounded-0 solid_1">admin_panel_settings</i>
+                  </a>
+                
+                <!-- If guest -->
+                {% elif 'guest_id' in session %}
+                  <span class="styled_font_2">
+                    {{ session.guest_username }}
+                  </span>
+                  
+                  <a href="{{ url_for('login') }}"
+                     class="btn_better_dsc round large small-padding"
+                  >
                     <p class="login_text solid_2">Login With</p>
                     <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                </a>
+                  </a>
+                  
+                  <a href="{{ url_for('upload') }}"
+                     class="btn_better_alt round large small-padding"
+                  >
+                    <p class="login_text solid_1">Upload</p>
+                    <i class="rounded-0 solid_1 show-overflow">upload</i>
+                  </a>
+                
+                <!-- Otherwise not logged in -->
+                {% else %}
+                  <a href="{{ url_for('login') }}"
+                     class="btn_better_dsc round large small-padding"
+                  >
+                    <p class="login_text solid_2">Login With</p>
+                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                  </a>
                 {% endif %}
+              </div>
             </nav>
-        </header>
+          </header>
+          
 
         <nav class="fit_to_width m right-padding left-padding">
             <header>

@@ -1,3 +1,78 @@
+.site-header {
+    width: 100%;
+    /* If you want some padding or background, you can do so here. */
+    /* e.g., padding: 1rem; background-color: #f8f8f8; */
+}
+  
+.header-nav {
+  /* Limit the width to 50% so it only spans to the middle. */
+  width: 50%;
+  /* Align to left (0) and let it stop in the middle. */
+  margin-left: 0;
+  margin-right: auto;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* If you want the logo separate from the links, you can add space-between */
+  justify-content: space-between;
+}
+
+.logo-container {
+  /* Keep the logo on the left */
+  display: flex;
+  align-items: center;
+  
+  /* If you want a fixed width or ensure it doesn't shrink: */
+  flex: 0 0 auto;
+}
+
+.links-container {
+  /* This container holds your buttons / user info */
+  display: flex;
+  align-items: center;
+  
+  /* Make all items inside share the remaining space equally */
+  justify-content: space-evenly;
+  
+  /* If you want them to shrink/grow evenly: */
+  flex: 1;
+}
+
+.btn_better,
+.btn_better_alt,
+.btn_better_dsc {
+  /* Your button styling here. Example: */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  /* spacing, backgrounds, etc. */
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 4px;
+  /* etc. */
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+  
+@media (max-width: 768px) {
+  .header-nav {
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+  
+
+
 /* fonts */
 @font-face {
     font-family: "Minecraft";

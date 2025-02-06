@@ -67,8 +67,9 @@
     width: 25px;
     height: 3px;
     margin: 5px;
-    background: #333; /* adjust color to your preference */
+    background-color: #3dc1d4;
     transition: all 0.3s ease;
+    text-shadow: 0 5px 15px #3dc1d425;
   }
   
   /* --- MOBILE STYLES: max-width 768px --- */
@@ -85,20 +86,14 @@
     /* --- ACTIVE STATE FOR HAMBURGER --- */
     .hamburger.active span:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
-        background-color: #3dc1d4;
-        text-shadow: 0 5px 15px #3dc1d425;
     }
     
     .hamburger.active span:nth-child(2) {
         opacity: 0;
-        background-color: #3dc1d4;
-        text-shadow: 0 5px 15px #3dc1d425;
     }
     
     .hamburger.active span:nth-child(3) {
         transform: translateY(-8px) rotate(-45deg);
-        background-color: #3dc1d4;
-        text-shadow: 0 5px 15px #3dc1d425;
     }  
   
     /* By default, hide the links container on mobile */

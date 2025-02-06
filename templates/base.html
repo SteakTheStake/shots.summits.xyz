@@ -54,7 +54,7 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <div class="vertical-margin">
+                    <div class="col-md-8">
                         <span class="text-muted l float-xl-left">Current user:</span>
                         <span class="styled_font_2 l">{{session.discord_username}}</span>
                     </div>
@@ -99,7 +99,7 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <div class="vertical-margin">
+                    <div class="col-md-8">
                         <span class="text-muted l float-xl-left">Current user:</span>
                         <span class="styled_font_2 l">{{session.discord_username}}</span>
                     </div>
@@ -144,7 +144,7 @@
                 <div class="user-info vertical-margin">
                     {% if 'discord_id' in session %}
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar">
-                    <div class="vertical-margin">
+                    <div class="col-md-8">
                         <span class="text-muted l float-xl-left">Current user:</span>
                         <span class="styled_font_2 l">{{session.discord_username}}</span>
                     </div>

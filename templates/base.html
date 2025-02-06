@@ -49,10 +49,10 @@
                 {% if 'discord_id' in session %}
                 <div class="user-info vertical-margin">
                     <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                    <span class="styled_font_2 l">{{ session.discord_username }}</span>
+                    <span class="styled_font l">{{ session.discord_username }}</span>
                     {% elif 'guest_id' in session %}
-                    <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                    <i class="fa-regular fa-user"></i>
+                    <span class="styled_font l">{{ session.guest_username }}</span>
+                    
                     <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                         <i class="rounded-0 solid_1">home</i>
                     </a>
@@ -80,10 +80,10 @@
             <header>
                 {% if 'discord_id' in session %}
                 <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font_2 l">{{ session.discord_username }}</span>
+                <span class="styled_font l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
-                <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                <i class="fa-regular fa-user"></i>
+                <span class="styled_font l">{{ session.guest_username }}</span>
+                
             </header>
             <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">home</i>
@@ -110,10 +110,10 @@
             <header>
                 {% if 'discord_id' in session %}
                 <img src="https://cdn.discordapp.com/avatars/{{ session.discord_id }}/{{ session.discord_avatar }}.png" alt="Avatar" class="avatar" />
-                <span class="styled_font_2 l">{{ session.discord_username }}</span>
+                <span class="styled_font l">{{ session.discord_username }}</span>
                 {% elif 'guest_id' in session %}
-                <span class="styled_font_2 l">{{ session.guest_username }}</span>
-                <i class="fa-regular fa-user"></i>
+                <span class="styled_font l">{{ session.guest_username }}</span>
+                
             </header>
             <a href="{{ url_for('index') }}" class="round large small-padding btn_better small-margin left-margin right-margin">
                 <i class="rounded-0 solid_1">home</i>

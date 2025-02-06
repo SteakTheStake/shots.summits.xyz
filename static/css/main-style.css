@@ -919,6 +919,29 @@ body.dark {
         text-decoration: none;
     }
 
+    .btn_better_alt {
+        position: relative;
+        border-radius: 50rem;
+        outline-color: #3dd1b4;
+        outline-width: 0.2rem;
+        outline-style: solid;
+        background: #3dd1b425;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        height: 2.5rem;
+        width: 8rem;
+    }
+
+    .btn_better_alt:hover {
+        outline-color: #3dd1b4;
+        outline-width: 0.15rem;
+        outline-style: solid;
+        background: #3dd1b425;
+        transform: scale(1.1);
+        user-select: none;
+        text-decoration: none;
+    }
+
     .solid_1 {
         color: #8dbdc4;
     }

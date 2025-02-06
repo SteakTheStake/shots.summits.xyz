@@ -68,17 +68,16 @@
                 </div>
             {% endif %}
             
-            <!-- FIXED: One if/elif/endif block for session check -->
-            {% if 'discord_id' in session %}
-                <p class="username bold underline">
-                    @{{ screenshot['discord_username'] }}
-                    <i class="fa-brands fa-discord small no-round tiny-padding"></i>
-                </p>
-            {% elif 'guest_id' in session %}
-                <p class="username bold underline">
-                    @{{ screenshot['guest_username'] }}
-                    <i class="fa-regular fa-user small no-round tiny-padding"></i>
-                </p>
+            {% if screenshot['uploader_type'] == 'discord' %}
+            <p class="username bold underline">
+                @{{ screenshot['discord_username'] }}
+                <i class="fa-brands fa-discord small no-round tiny-padding"></i>
+            </p>
+            {% else %}
+            <p class="username bold underline">
+                @{{ screenshot['discord_username'] }}
+                <i class="fa-regular fa-user small no-round tiny-padding"></i>
+            </p>
             {% endif %}
 
             <nav class="auto-width">

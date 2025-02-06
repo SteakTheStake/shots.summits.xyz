@@ -474,11 +474,11 @@ def create_app():
                             group_id = cursor.fetchone()[0]
 
                         # Insert screenshot row
+                        uploader_type = 'discord' if 'discord_id' in session else 'guest'
                         cursor = conn.execute(
-                            "INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?)"
-                            # If your column is really called `uploader_name`, change above line
-                            # to "... (filename, uploader_name, group_id) ..."
-                            , (filename, uploader_name, group_id)
+                            "INSERT INTO screenshots (filename, discord_username, group_id, uploader_type) "
+                            "VALUES (?, ?, ?, ?)",
+                            (filename, uploader_name, group_id, uploader_type)
                         )
                         screenshot_id = cursor.lastrowid
 
@@ -526,17 +526,25 @@ def create_app():
 
     @app.route("/logout")
     def logout():
-        session.clear()
-        flash("Successfully logged out!", "success")
+        # If user is logged in with Discord, remove those keys
+        if "discord_id" in session:
+            session.pop("discord_id", None)
+            session.pop("username", None)
+            session.pop("avatar", None)
+            flash("Successfully logged out from Discord!", "success")
+        else:
+            # If no Discord login, do nothing special
+            flash("No Discord login found. You remain a guest user.", "info")
+
         return redirect(url_for("index"))
+
 
     @app.route("/delete/<filename>", methods=["POST"])
     @login_required
     def delete_image(filename):
         with sqlite3.connect("f2.db") as conn:
-            # Check if user owns the image or is admin/moderator
             cursor = conn.execute(
-                "SELECT discord_username  FROM screenshots WHERE filename = ?",
+                "SELECT discord_username FROM screenshots WHERE filename = ?",
                 (filename,),
             )
             result = cursor.fetchone()
@@ -545,27 +553,30 @@ def create_app():
                 return redirect(url_for("index"))
 
             uploader = result[0]
-            user_role = get_user_role(session["discord_id"])
+            
+            # Fetch role for either a Discord or guest user
+            discord_id = session.get("discord_id")
+            guest_id = session.get("guest_id")
+            user_role = get_user_role(discord_id, guest_id)
 
-            if uploader == session["username"] or user_role in ["admin", "moderator"]:
+            # Compare with session.get("username"), not "discord_username"
+            if uploader == session.get("username") or user_role in ["admin", "moderator"]:
                 try:
                     # Log deletion
                     conn.execute(
                         """INSERT INTO deletion_log 
-                    (filename, deleted_by, original_uploader, reason) 
-                    VALUES (?, ?, ?, ?)""",
+                        (filename, deleted_by, original_uploader, reason) 
+                        VALUES (?, ?, ?, ?)""",
                         (
                             filename,
-                            session["username"],
+                            session.get("username"),
                             uploader,
                             request.form.get("reason", "User requested deletion"),
                         ),
                     )
 
                     # Delete from database
-                    conn.execute(
-                        "DELETE FROM screenshots WHERE filename = ?", (filename,)
-                    )
+                    conn.execute("DELETE FROM screenshots WHERE filename = ?", (filename,))
 
                     # Delete file
                     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -580,6 +591,7 @@ def create_app():
 
         return redirect(url_for("index"))
 
+
     @app.route("/admin/dashboard")
     @login_required
     @requires_role("admin")
@@ -587,11 +599,8 @@ def create_app():
         with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
 
-            # Get statistics
             stats = {
-                "total_images": conn.execute(
-                    "SELECT COUNT(*) FROM screenshots"
-                ).fetchone()[0],
+                "total_images": conn.execute("SELECT COUNT(*) FROM screenshots").fetchone()[0],
                 "total_users": conn.execute(
                     "SELECT COUNT(DISTINCT discord_username) FROM screenshots"
                 ).fetchone()[0],
@@ -603,15 +612,15 @@ def create_app():
                 ).fetchall(),
             }
 
-            # Get user roles
+            # Only Discord roles are considered in user_roles by default
             users = conn.execute(
                 """
                 SELECT ur.discord_id, ur.role, ur.assigned_date,
-                        COUNT(s.id) as upload_count
+                    COUNT(s.id) AS upload_count
                 FROM user_roles ur
                 LEFT JOIN screenshots s ON ur.discord_id = s.discord_username
                 GROUP BY ur.discord_id
-            """
+                """
             ).fetchall()
 
         return render_template("admin_dashboard.html", stats=stats, users=users)

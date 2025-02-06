@@ -41,30 +41,46 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
-
-# Example route using the models
-@app.route('/screenshots')
-def list_screenshots():
-    screenshots = db_session.query(Screenshot).all()
-    return {'screenshots': [{'filename': s.filename, 'uploader': s.discord_username} for s in screenshots]}
-
-@app.route('/')
-def index():
-    with g.db_connection.get_connection() as conn:
-        # Your database operations here
-        pass
-
 MINECRAFT_ADJECTIVES = [
-    "Blaze", "Ender", "Redstone", "Creeper", "Biomes", "Piglin",
-    "Nether", "Villager", "Ghastly", "Potion", "Wither"
+    "Blaze", "Creeper", "Ender", "Ghastly", "Zombie", "Skeleton", "Wither",
+    "Potion", "Redstone", "Diamond", "Emerald", "Nether", "Villager", "Piglin",
+    "Warped", "Crimson", "Oak", "Birch", "Spruce", "Jungle", "Savanna",
+    "Badlands", "Mesa", "Stronghold", "Biomes", "Oceanic", "Mushroom", "Soul",
+    "Obsidian", "Cobblestone", "Iron", "Gold", "Lapis", "Quartz", "Glowing",
+    "Prismarine", "Amethyst", "Tundra", "Desert", "Alpine", "Swampy", "Elytrian",
+    "Cave", "Lush", "Dripstone", "Harrowing", "Spooky", "Enchanted", "Luminescent",
+    "Farmland", "Mangrove", "Frosted", "Molten", "Endless", "Warden", "Sculk",
+    "Ancient", "TNT", "Beacon", "Turtle", "Honeyed", "Hive", "Sprawling",
+    "Mining", "Enchanting", "Fletching", "Smelting", "Blast", "Trident", "Potato",
+    "Heroic", "Epic", "Illager", "Crossbow", "Axolotl", "Fungal", "Axian",
+    "Fallen", "Overworld", "Bedrock", "Adaptive", "Charged", "Drowned",
+    "Wandering", "Volatile", "Mooshroom", "Slime", "Ravager", "Phantom", "Fierce",
+    "Shulker", "Guardian", "Elder", "Tamed", "Tactical", "Cartographic",
+    "Bamboo", "Frostwalker", "Conduit", "Infinite", "Glimmering", "Verdant",
+    "Illuminated", "Spiked", "Warping", "Bewitched"
 ]
+
 MINECRAFT_NOUNS = [
-    "Traveler", "Befriender", "Explorer", "Hunter", "Brewer", 
-    "Architect", "Miner", "Crafter", "Adventurer"
+    "Traveler", "Befriender", "Explorer", "Hunter", "Brewer", "Architect",
+    "Miner", "Crafter", "Adventurer", "Wanderer", "Builder", "Farmer", "Forager",
+    "Smith", "Tamer", "Raider", "Lootmaster", "Fletcher", "Cartographer",
+    "Enchanter", "Defender", "Guardian", "Protector", "Mage", "Archer", "Warrior",
+    "Ranger", "Shaman", "Conjurer", "Gatherer", "Mason", "Shepherd", "Fisherman",
+    "Librarian", "Armorer", "Butcher", "Cleric", "Nitwit", "Bard", "Assassin",
+    "Trickster", "Cultivator", "Blacksmith", "Mechanic", "Inventor", "Stalker",
+    "Duelist", "Assaulter", "Overseer", "Mystic", "Warlord", "Channeler",
+    "Druid", "Pirate", "Captain", "Knight", "Bandit", "Merchant", "Trader",
+    "Pillager", "Illusioner", "Messenger", "Baker", "Chef", "Monarch",
+    "Vindicator", "Beekeeper", "Navigator", "Treasure Hunter", "Shipwright",
+    "Potioner", "Geologist", "Lumberjack", "Scribe", "Geomancer", "Spellbinder",
+    "Phantom Slayer", "Redstoner", "Portal Runner", "Planter", "Beast Tamer",
+    "Warden Watcher", "Endwalker", "Nether Surfer", "Biome Binder",
+    "Darkness Diver", "Soul Seeker", "Lantern Lighter", "Disc Collector",
+    "Pig Rider", "Slime Wrangler", "Engineer", "Potion Brewer", "Dragon Slayer",
+    "Potion Drinker", "Treasure Diver", "Battle Mage", "Spelunker", "Witch Doctor",
+    "Wayfinder", "Stonemason", "Woodsman", "Ringleader", "Torchbearer"
 ]
+
 
 def generate_guest_username():
     adj = random.choice(MINECRAFT_ADJECTIVES)
@@ -276,7 +292,7 @@ def create_app():
 
                         # Insert screenshot record
                         cursor = conn.execute(
-                            'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?)',
+                            'INSERT INTO screenshots (filename, uploader_name, group_id) VALUES (?, ?, ?)',
                             (filename, uploader_name, group_id)  # use uploader_name here too
                         )
                         screenshot_id = cursor.fetchone()[0]
@@ -348,28 +364,26 @@ def create_app():
         with sqlite3.connect("f2.db") as conn:
             # Check if user owns the image or is admin/moderator
             cursor = conn.execute(
-                "SELECT uploader_name FROM screenshots WHERE filename = ?",
+                "SELECT discord_username  FROM screenshots WHERE filename = ?",
                 (filename,)
             )
             result = cursor.fetchone()
-    
             if not result:
                 flash('Image not found.', 'danger')
                 return redirect(url_for('index'))
-    
+                
             uploader = result[0]
             user_role = get_user_role(session['discord_id'])
     
-            if uploader == session['discord_username'] or user_role in ['admin', 'moderator']:
+            if uploader == session['username'] or user_role in ['admin', 'moderator']:
                 try:
                     # Log deletion
                     conn.execute(
-                        """INSERT INTO deletion_log 
-                        (filename, deleted_by, original_uploader, reason) 
-                        VALUES (?, ?, ?, ?)""",
-                        (filename, session['discord_username'], uploader, 
-                        request.form.get('reason', 'User requested deletion'))
-                    )
+                    """INSERT INTO deletion_log 
+                    (filename, deleted_by, original_uploader, reason) 
+                    VALUES (?, ?, ?, ?)""",
+                    (filename, session['username'], uploader, request.form.get('reason', 'User requested deletion'))
+                )
     
                     # Delete from database
                     conn.execute("DELETE FROM screenshots WHERE filename = ?", (filename,))
@@ -434,7 +448,7 @@ def create_app():
             conn.execute("""
                 INSERT OR REPLACE INTO user_roles (discord_id, role, assigned_by)
                 VALUES (?, ?, ?)
-            """, (discord_id, new_role, session['discord_username']))
+            """, (discord_id, new_role, session['username'])
     
         flash(f'Role updated successfully for user {discord_id}', 'success')
         return redirect(url_for('admin_dashboard'))
@@ -471,7 +485,6 @@ def create_app():
     
         flash('Image reported successfully. Moderators will review it.', 'success')
         return redirect(url_for('view_image', image_filename=filename))
-    
     
     @app.route('/')
     def index():

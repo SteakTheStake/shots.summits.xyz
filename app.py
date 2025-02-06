@@ -249,21 +249,23 @@ def create_app():
                     try:
                         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-                        # Get the metadata for this specific image
+                        # Get form metadata
                         group_name = request.form.get('group_name', '')
                         common_tags = request.form.get('common_tags', '').split(',')
                         specific_tags = request.form.get(f'tags_{index}', '').split(',')
                         resources = request.form.get('resources', '')
 
-                        # Combine common and specific tags
-                        all_tags = list(set([tag.strip().lower() for tag in common_tags + specific_tags if tag.strip()]))
+                        # Combine tags
+                        all_tags = list(
+                            set([tag.strip().lower() for tag in (common_tags + specific_tags) if tag.strip()])
+                        )
 
                         # Handle group creation if provided
                         group_id = None
                         if group_name:
                             cursor = conn.execute(
                                 'INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id',
-                                (group_name, discord_username)
+                                (group_name, uploader_name)  # use uploader_name here
                             )
                             group_id = cursor.fetchone()[0]
 
@@ -275,7 +277,7 @@ def create_app():
                         # Insert screenshot record
                         cursor = conn.execute(
                             'INSERT INTO screenshots (filename, discord_username, group_id) VALUES (?, ?, ?)',
-                            (filename, uploader_name, group_id)
+                            (filename, uploader_name, group_id)  # use uploader_name here too
                         )
                         screenshot_id = cursor.fetchone()[0]
 
@@ -297,7 +299,9 @@ def create_app():
                         continue
 
             conn.commit()
+
         return uploaded_files
+
         
 
     @app.route('/guest')
@@ -533,28 +537,30 @@ def create_app():
             if 'screenshots[]' not in request.files:
                 flash('No files uploaded', 'danger')
                 return redirect(request.url)
-    
+
             files = request.files.getlist('screenshots[]')
             uploader_name = session.get('username')
-    
+
             # Basic validation
             for file in files:
                 if file and not allowed_file(file.filename):
                     flash(f'Invalid file type: {file.filename}', 'danger')
                     return redirect(request.url)
-                if file.content_length and file.content_length > 24 * 1024 * 1024:  # Added content_length check
+                if file.content_length and file.content_length > 24 * 1024 * 1024:
                     flash(f'File too large: {file.filename}', 'danger')
                     return redirect(request.url)
-    
+
             try:
-                uploaded_files = handle_upload(files, discord_username)
+                # Pass uploader_name instead of discord_username
+                uploaded_files = handle_upload(files, uploader_name)
                 flash(f'Successfully uploaded {len(uploaded_files)} files', 'success')
                 return redirect(url_for('index'))
             except Exception as e:
                 flash(f'Error uploading files: {str(e)}', 'danger')
                 return redirect(request.url)
-    
+
         return render_template('upload.html')
+
     
     @app.route("/shots/<image_filename>")
     def view_image(image_filename):

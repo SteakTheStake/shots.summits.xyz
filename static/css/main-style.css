@@ -10,7 +10,7 @@
     margin-right: auto;
   
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: space-between; /* or space-evenly, as needed */
   
@@ -99,7 +99,7 @@
     /* By default, hide the links container on mobile */
     .links-container {
       display: none;                /* hidden by default */
-      flex-direction: column;       /* vertical layout on mobile */
+      flex-direction: row;       /* vertical layout on mobile */
       align-items: flex-start;      /* or center, as you prefer */
       width: 100%;                  /* take full width on mobile */
       margin-top: 0.35rem;             /* spacing from the logo / hamburger */

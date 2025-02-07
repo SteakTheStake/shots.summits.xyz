@@ -960,6 +960,11 @@ body.dark {
     border-radius: 4px;
 }
 
+.text-fit-content {
+    width: fit-content;
+    max-width: 100%;
+}
+
 /* Animation */
 @keyframes shimmer {
     0% {

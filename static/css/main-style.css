@@ -156,6 +156,11 @@ html, body {
     margin-left: 0.05rem;
 }
 
+.stay_aligned span {
+    position: relative;
+    margin-right: 0.5rem;
+}
+
 /* fonts */
 @font-face {
     font-family: "Minecraft";

@@ -5,6 +5,10 @@
     width: 100vw;
     z-index: 1010;
   }
+.on-top {
+    position: fixed;
+    z-index: 1030;
+  }
   
   .header-nav {
     width: 100%;

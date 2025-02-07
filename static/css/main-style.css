@@ -118,8 +118,14 @@
     }
   }
 
-.end-of-row {
-    justify-content: space-between;
+  .end-of-row {
+    right: 10px;
+    position: fixed;
+}
+
+.end-of-row-admin {
+    right: 10px;
+    position: fixed;
 }
 
 .spacer_lr {

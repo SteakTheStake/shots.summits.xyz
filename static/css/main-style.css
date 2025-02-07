@@ -651,8 +651,8 @@ progress {
     }
 
     .close-lightbox {
-        top: 10px;
-        right: 10px;
+        top: 50px;
+        right: 50px;
         font-size: 24px;
         width: 35px;
         height: 35px;
@@ -908,8 +908,8 @@ body.dark {
 
 .close-lightbox {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 2.5rem;
+    right: 2.5rem;
     color: white;
     cursor: pointer;
     font-size: 2rem;

@@ -118,6 +118,14 @@
     }
   }
 
+.end-of-row {
+    justify-content: space-between;
+}
+
+.spacer_lr {
+    margin-left: 0.33rem;
+    margin-right: 0.33rem;
+}
 
 /* --- NAV --- */
 .circle {

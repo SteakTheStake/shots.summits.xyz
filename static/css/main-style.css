@@ -113,7 +113,12 @@
     }
   }
   
-  
+.no-highlight {
+    text-decoration: none;
+    color: inherit;
+    text-underline-offset: none;
+    text-decoration-color: none;
+}  
 
 html, body {
     margin: 0;

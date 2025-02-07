@@ -52,7 +52,7 @@
                 <!-- Home Button -->
                 <a
                   href="{{ url_for('index') }}"
-                  class="btn_better round large small-padding small-margin"
+                  class="no-highlight small-padding small-margin"
                 >
                   <h6 class="styled_font_4 center-align middle-align">
                     F2
@@ -134,14 +134,14 @@
             </header>
           
             <!-- Home button: available for all users -->
-            <a
-              href="{{ url_for('index') }}"
-              class="btn_better round large small-padding small-margin"
-            >
-              <h6 class="styled_font_4 center-align middle-align">
-                F2
-              </h6>
-            </a>
+                <a
+                href="{{ url_for('index') }}"
+                class="no-highlight small-padding small-margin"
+              >
+                <h6 class="styled_font_4 center-align middle-align">
+                  F2
+                </h6>
+              </a>
           
             {% if 'discord_id' in session %}
               {# Logged-in user links #}

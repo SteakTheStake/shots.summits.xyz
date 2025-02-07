@@ -121,12 +121,12 @@
 
   .end-of-row {
     right: 10px;
-    position: fixed;
+    position: absolute;
 }
 
 .end-of-row-admin {
     right: 200px;
-    position: fixed;
+    position: absolute;
 }
 
 .spacer_lr {

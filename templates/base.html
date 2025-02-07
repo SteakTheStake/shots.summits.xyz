@@ -182,7 +182,7 @@
               </span>
             {% elif 'guest_id' in session %}
               {# Guest user links #}
-                <span class="styled_font_2">{{ session.guest_username }}</span>
+                <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
                 <span>
                   <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
                     <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>

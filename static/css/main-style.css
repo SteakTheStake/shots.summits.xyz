@@ -6,8 +6,8 @@
     z-index: 1010;
   }
 .on-top {
-    position: fixed;
-    z-index: 1030;
+    position: relative;
+    z-index: 1050;
   }
   
   .header-nav {

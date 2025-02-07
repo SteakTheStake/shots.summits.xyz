@@ -5,11 +5,7 @@
     width: 100vw;
     z-index: 1010;
   }
-.on-top {
-    position: relative;
-    z-index: 1050;
-  }
-  
+
   .header-nav {
     width: 100%;
     margin-left: 0;
@@ -495,8 +491,9 @@ progress {
 
 .close-lightbox {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 35px;
+    right: 50%;
+    transform: translate(50%, 0%);
     color: white;
     font-size: 30px;
     cursor: pointer;

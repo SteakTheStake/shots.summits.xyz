@@ -48,7 +48,7 @@
 </div>
 
 <!-- Image Grid -->
-<div class="image-grid on-top">
+<div class="image-grid">
     {% for screenshot in screenshots %}
     <div class="grid-item loading" data-user="{{ screenshot['uploader_name'] }}" data-tags="{{ screenshot['tags'] or '' }}">
         <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" 

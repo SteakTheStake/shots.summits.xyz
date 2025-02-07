@@ -440,54 +440,77 @@ def create_app():
         uploaded_files = []
         processed_files = set()
 
-        with sqlite3.connect('f2.db') as conn:
+        with sqlite3.connect("f2.db") as conn:
             conn.row_factory = sqlite3.Row
             for index, file in enumerate(files):
                 if not file or not file.filename:
                     continue
 
-                filename = secure_filename(f"shot_{datetime.now().timestamp()}_{os.urandom(4).hex()}.webp")
+                filename = secure_filename(
+                    f"shot_{datetime.now().timestamp()}_{os.urandom(4).hex()}.webp"
+                )
                 if filename in processed_files:
                     continue
 
-                # Save the file to disk
                 if allowed_file(file.filename):
                     try:
-                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                         with Image.open(file) as img:
                             file.seek(0)
-                            img.save(filepath, 'WEBP', quality=85)
+                            img.save(filepath, "WEBP", quality=85)
 
-                        # Gather form data for group/tags
-                        group_name = request.form.get("group_name", "")
-                        common_tags = request.form.get("common_tags", "").split(",")
-                        specific_tags = request.form.get(f"tags_{index}", "").split(",")
-                        all_tags = list({tag.strip().lower() for tag in (common_tags + specific_tags) if tag.strip()})
+                        # Determine user type and store correct name
+                        if "discord_id" in session:
+                            uploader_type = "discord"
+                            discord_user = session["username"]      # e.g. "Foo#1234"
+                            guest_user = None
+                        else:
+                            uploader_type = "guest"
+                            discord_user = None
+                            # We stored "session['guest_username']" in index()
+                            guest_user = session["guest_username"]
 
                         # Insert or create group
+                        group_name = request.form.get("group_name", "")
                         group_id = None
                         if group_name:
                             cursor = conn.execute(
-                                "INSERT INTO screenshot_groups (name, created_by) VALUES (?, ?) RETURNING id",
-                                (group_name, uploader_name)
+                                """
+                                INSERT INTO screenshot_groups (name, created_by)
+                                VALUES (?, ?) RETURNING id
+                                """,
+                                (group_name, uploader_name),
                             )
                             group_id = cursor.fetchone()[0]
 
-                        # Insert screenshot row
-                        uploader_type = 'discord' if 'discord_id' in session else 'guest'
+                        # Insert into screenshots, now with both discord_username and guest_username
                         cursor = conn.execute(
-                            "INSERT INTO screenshots (filename, discord_username, group_id, uploader_type) "
-                            "VALUES (?, ?, ?, ?)",
-                            (filename, uploader_name, group_id, uploader_type)
+                            """
+                            INSERT INTO screenshots
+                                (filename, discord_username, guest_username,
+                                group_id, uploader_type)
+                            VALUES (?, ?, ?, ?, ?)
+                            """,
+                            (filename, discord_user, guest_user, group_id, uploader_type),
                         )
                         screenshot_id = cursor.lastrowid
 
-                        # Insert tags
+                        # Handle tags
+                        common_tags = request.form.get("common_tags", "").split(",")
+                        specific_tags = request.form.get(f"tags_{index}", "").split(",")
+                        all_tags = list({
+                            tag.strip().lower()
+                            for tag in (common_tags + specific_tags)
+                            if tag.strip()
+                        })
+
                         for tag in all_tags:
                             conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))
                             tag_id = conn.execute("SELECT id FROM tags WHERE name = ?", (tag,)).fetchone()[0]
-                            conn.execute("INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)",
-                                        (screenshot_id, tag_id))
+                            conn.execute(
+                                "INSERT INTO screenshot_tags (screenshot_id, tag_id) VALUES (?, ?)",
+                                (screenshot_id, tag_id),
+                            )
 
                         uploaded_files.append(filename)
                         processed_files.add(filename)
@@ -496,10 +519,10 @@ def create_app():
                         print(f"Error processing file {file.filename}: {str(e)}")
                         continue
 
-            # Make sure to commit so the inserts persist
             conn.commit()
 
         return uploaded_files
+
 
     @app.route("/debug-config")
     def debug_config():
@@ -543,30 +566,37 @@ def create_app():
     @login_required
     def delete_image(filename):
         with sqlite3.connect("f2.db") as conn:
+            conn.row_factory = sqlite3.Row
             cursor = conn.execute(
-                "SELECT discord_username FROM screenshots WHERE filename = ?",
+                "SELECT discord_username, guest_username FROM screenshots WHERE filename = ?",
                 (filename,),
             )
-            result = cursor.fetchone()
-            if not result:
+            row = cursor.fetchone()
+            if not row:
                 flash("Image not found.", "danger")
                 return redirect(url_for("index"))
 
-            uploader = result[0]
-            
-            # Fetch role for either a Discord or guest user
+            # Figure out whether the uploader was a discord user or a guest
+            if row["discord_username"]:
+                uploader = row["discord_username"]
+            else:
+                uploader = row["guest_username"]
+
+            # Check roles
             discord_id = session.get("discord_id")
             guest_id = session.get("guest_id")
             user_role = get_user_role(discord_id, guest_id)
 
-            # Compare with session.get("username"), not "discord_username"
+            # Compare with session['username'], which is assigned to EITHER
+            # 'Foo#1234' (Discord) or 'Blaze Traveler' (Guest)
             if uploader == session.get("username") or user_role in ["admin", "moderator"]:
                 try:
-                    # Log deletion
+                    # Log the deletion
                     conn.execute(
-                        """INSERT INTO deletion_log 
-                        (filename, deleted_by, original_uploader, reason) 
-                        VALUES (?, ?, ?, ?)""",
+                        """
+                        INSERT INTO deletion_log (filename, deleted_by, original_uploader, reason)
+                        VALUES (?, ?, ?, ?)
+                        """,
                         (
                             filename,
                             session.get("username"),
@@ -575,14 +605,15 @@ def create_app():
                         ),
                     )
 
-                    # Delete from database
+                    # Delete from the DB
                     conn.execute("DELETE FROM screenshots WHERE filename = ?", (filename,))
 
-                    # Delete file
+                    # Delete the file on disk
                     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                     if os.path.exists(filepath):
                         os.remove(filepath)
 
+                    conn.commit()
                     flash("Image deleted successfully.", "success")
                 except Exception as e:
                     flash(f"Error deleting image: {str(e)}", "danger")
@@ -590,6 +621,7 @@ def create_app():
                 flash("Permission denied.", "danger")
 
         return redirect(url_for("index"))
+
 
 
     @app.route("/admin/dashboard")
@@ -722,7 +754,12 @@ def create_app():
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-                SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
+                SELECT
+                  s.id,
+                  s.filename,
+                  COALESCE(s.discord_username, s.guest_username) AS uploader_name,
+                  g.name AS group_name,
+                  GROUP_CONCAT(t.name) AS tags
                 FROM screenshots s
                 LEFT JOIN screenshot_groups g ON s.group_id = g.id
                 LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id

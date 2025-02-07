@@ -10,8 +10,8 @@
             <div class="user-filters">
                 {% set users = [] %}
                 {% for screenshot in screenshots %}
-                    {% if screenshot['discord_username'] not in users %}
-                        {% set _ = users.append(screenshot['discord_username']) %}
+                    {% if screenshot['uploader_name'] not in users %}
+                        {% set _ = users.append(screenshot['uploader_name']) %}
                     {% endif %}
                 {% endfor %}
                 {% for user in users|sort %}
@@ -50,9 +50,9 @@
 <!-- Image Grid -->
 <div class="image-grid">
     {% for screenshot in screenshots %}
-    <div class="grid-item loading" data-user="{{ screenshot['discord_username'] }}" data-tags="{{ screenshot['tags'] or '' }}">
+    <div class="grid-item loading" data-user="{{ screenshot['uploader_name'] }}" data-tags="{{ screenshot['tags'] or '' }}">
         <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" 
-             alt="Shot by {{ screenshot['discord_username'] }}"
+             alt="Shot by {{ screenshot['uploader_name'] }}"
              loading="lazy"
              onload="this.parentElement.classList.remove('loading')" />
         <div class="image-info">
@@ -70,19 +70,19 @@
             
             {% if screenshot['uploader_type'] == 'discord' %}
             <p class="username bold underline">
-                @{{ screenshot['discord_username'] }}
+                @{{ screenshot['uploader_name'] }}
                 <i class="fa-brands fa-discord small no-round tiny-padding"></i>
             </p>
             {% else %}
             <p class="username bold underline">
-                @{{ screenshot['discord_username'] }}
+                @{{ screenshot['uploader_name'] }}
                 <i class="fa-regular fa-user small no-round tiny-padding"></i>
             </p>
             {% endif %}
 
             <nav class="auto-width">
                 <div class="image-actions tiny-padding">
-                    {% if session.discord_username == screenshot.discord_username or user_role in ['admin', 'moderator'] %}
+                    {% if session.uploader_name == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
                     <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
                         <span type="submit" class="me-2 max medium bg-transparent text-muted">Delete</span>
                     </form>

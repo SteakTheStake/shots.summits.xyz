@@ -49,9 +49,15 @@
             <nav class="header-nav">
               <!-- Left: Logo -->
               <div class="logo-container">
-                <h6 class="styled_font_4 center-align middle-align">
-                  F2
-                </h6>
+                <!-- Home Button -->
+                <a
+                  href="{{ url_for('index') }}"
+                  class="btn_better round large small-padding small-margin"
+                >
+                  <h6 class="styled_font_4 center-align middle-align">
+                    F2
+                  </h6>
+                </a>
               </div>
           
               <!-- Hamburger Menu Button (VISIBLE ONLY ON MOBILE) -->
@@ -63,14 +69,6 @@
           
               <!-- Right: Links Container -->
               <div class="links-container" id="nav-menu">
-                <!-- Home Button -->
-                <a
-                  href="{{ url_for('index') }}"
-                  class="btn_better round large small-padding small-margin"
-                >
-                  <i class="rounded-0 solid_1">home</i>
-                </a>
-          
                 <!-- If user is logged in -->
                 {% if 'discord_id' in session %}
                 <img
@@ -128,55 +126,63 @@
               {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #}
               {% if 'discord_id' in session %}
                 <img class="circle" src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}">
+                <span class="styled_font_2">{{ session['discord_username'] }}</span>
               {% else %}
-                <img class="circle" src="/favicon.png">
+                <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}">
+                <span class="styled_font_2">{{ session.guest_username }}</span>
               {% endif %}
             </header>
           
             <!-- Home button: available for all users -->
-            <a href="{{ url_for('index') }}">
-              <i>home</i>
-              <span>Home</span>
+            <a
+              href="{{ url_for('index') }}"
+              class="btn_better round large small-padding small-margin"
+            >
+              <h6 class="styled_font_4 center-align middle-align">
+                F2
+              </h6>
             </a>
           
             {% if 'discord_id' in session %}
               {# Logged-in user links #}
-              <a href="{{ url_for('upload') }}">
-                <i>upload</i>
-                <span>Upload</span>
+              <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
+                <p class="login_text solid_1">Upload</p>
+                <i class="rounded-0 solid_1 show-overflow">upload</i>
               </a>
-              <a href="{{ url_for('logout') }}">
-                <i>logout</i>
-                <span>Logout</span>
+              <a href="{{ url_for('logout') }}" class="btn_better round large small-padding small-margin">
+                <i class="rounded-0 solid_1">logout</i>
               </a>
-              <a href="{{ url_for('admin_dashboard') }}">
-                <i>admin_panel_settings</i>
-                <span>Admin</span>
+              <a
+                href="{{ url_for('admin_dashboard') }}"
+                class="btn_better round large small-padding small-margin"
+              >
+                <i class="rounded-0 solid_1">admin_panel_settings</i>
               </a>
-              <a onclick="toggleParticles()">
-                <i>hand_sparkles</i>
-                <span>Toggle Particles</span>
+              <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
+                <p class="login_text solid_1">Toggle Particles</p>
+                <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
               </a>
             {% elif 'guest_id' in session %}
               {# Guest user links #}
-              <a href="{{ url_for('login') }}">
-                <i>discord</i>
-                <span>Login With</span>
-              </a>
-              <a href="{{ url_for('upload') }}">
-                <i>upload</i>
-                <span>Upload</span>
-              </a>
-              <a onclick="toggleParticles()">
-                <i>hand_sparkles</i>
-                <span>Toggle Particles</span>
-              </a>
+                <span class="styled_font_2">{{ session.guest_username }}</span>
+                <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
+                  <p class="login_text solid_2">Login With</p>
+                  <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                </a>
+                <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
+                  <p class="login_text solid_1">Upload</p>
+                  <i class="rounded-0 solid_1 show-overflow">upload</i>
+                </a>
+                <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
+                  <p class="login_text solid_1">Toggle Particles</p>
+                  <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                </a>
             {% else %}
               {# Not logged in: only show the login button #}
-              <a href="{{ url_for('login') }}">
-                <i>discord</i>
-                <span>Login With</span>
-              </a>
+                <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
+                  <p class="login_text solid_2">Login With</p>
+                  <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                </a>
             {% endif %}
           </nav>
           

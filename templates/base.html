@@ -129,7 +129,6 @@
                 <span class="styled_font_2">{{ session['discord_username'] }}</span>
               {% else %}
                 <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}">
-                <span class="styled_font_2">{{ session.guest_username }}</span>
               {% endif %}
             </header>
             {% if 'discord_id' in session %}

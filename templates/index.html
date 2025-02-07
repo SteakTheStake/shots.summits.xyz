@@ -47,59 +47,63 @@
     </div>
 </div>
 
-<!-- Image Grid -->
-{% for screenshot in screenshots %}
-<div class="grid-item loading"
-     data-user="{{ screenshot['uploader_name'] }}"
-     data-tags="{{ screenshot['tags'] or '' }}"
-     data-date="{{ screenshot['upload_date'] or '' }}"
-     data-group="{{ screenshot['group_name'] or '' }}">
-  <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}"
-       alt="Shot by {{ screenshot['uploader_name'] }}"
-       loading="lazy"
-       onload="this.parentElement.classList.remove('loading')" />
-        <div class="image-info">
-            {% if screenshot['group_name'] %}
-            <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
-            {% endif %}
-            
-            <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
-            
-            {% if screenshot['tags'] %}
-            <div class="tags">
-                {% for tag in screenshot['tags'].split(',') %}
-                <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-            
-            <p class="username bold underline">
-                @{{ screenshot['uploader_name'] }}
-                <i class="fa-regular fa-user small no-round tiny-padding"></i>
-            </p>
-            
-            <nav class="auto-width">
-                <div class="image-actions tiny-padding">
-                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
-                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}"
-                        method="POST" class="d-inline">
-                        <button type="submit" class="btn_better_del_mobile">Delete</button>
-                    </form>
-                    {% endif %}
-                </div>
-            </nav>
+<!-- Single Grid Container -->
+<div class="image-grid">
+    {% for screenshot in screenshots %}
+    <div class="grid-item loading"
+         data-user="{{ screenshot['uploader_name'] }}"
+         data-tags="{{ screenshot['tags'] or '' }}"
+         data-date="{{ screenshot['upload_date'] or '' }}"
+         data-group="{{ screenshot['group_name'] or '' }}">
+  
+      <!-- The screenshot image -->
+      <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}"
+           alt="Shot by {{ screenshot['uploader_name'] }}"
+           loading="lazy"
+           onload="this.parentElement.classList.remove('loading')" />
+  
+      <!-- Info overlay -->
+      <div class="image-info">
+        {% if screenshot['group_name'] %}
+        <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
+        {% endif %}
+        
+        <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
+        
+        {% if screenshot['tags'] %}
+        <div class="tags">
+          {% for tag in screenshot['tags'].split(',') %}
+          <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
+          {% endfor %}
         </div>
-    </div>
-
-
-    <!-- Report Modal for each image -->
-    <!--
-    <div class="modal fade" id="reportModal-{{ loop.index }}" tabindex="-1">
+        {% endif %}
+        
+        <p class="username bold underline">
+          @{{ screenshot['uploader_name'] }}
+          <i class="fa-regular fa-user small no-round tiny-padding"></i>
+        </p>
+        
+        <nav class="auto-width">
+          <div class="image-actions tiny-padding">
+            {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+            <form action="{{ url_for('delete_image', filename=screenshot.filename) }}"
+                  method="POST" class="d-inline">
+              <button type="submit" class="btn_better_del_mobile">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </nav>
+      </div>
+      
+      <!-- Optional: A modal for reporting, if you want to include it here
+      <div class="modal fade" id="reportModal-{{ loop.index }}" tabindex="-1">
         ...
+      </div>
+      -->
+  
     </div>
-    -->
-</div>
-{% endfor %}
+    {% endfor %}
+  </div>  
 
 
 <!-- Lightbox -->

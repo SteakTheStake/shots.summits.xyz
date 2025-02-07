@@ -149,8 +149,8 @@ html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow-x: hidden; 
-    overflow-y: scroll; 
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 .stay_aligned {
@@ -311,8 +311,6 @@ progress {
 .full_height {
     position: relative; 
     top: 6rem;
-    width: auto;
-    height: 100vh;
 }
 
 .back_home_btn {
@@ -436,250 +434,6 @@ progress {
         transform: scale(1);
     }
 }
-
-/* Add to your main-style.css */
-.grid-item {
-    cursor: pointer; /* Magnifier cursor */
-    width: 250px;
-    transform-origin: var(--zoom-pos-x, 0%) var(--zoom-pos-y, 0%);
-    transition: transform 0.15s linear;
-}
-
-.zoomable--zoomed .grid-item {
-  cursor: zoom-in;
-  transform: scale(var(--zoom, 2));
-}
-
-.lightbox {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    cursor: zoom-out;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    justify-content: center;
-    align-items: center;
-}
-
-.lightbox.active {
-    display: flex;
-    opacity: 1;
-}
-
-.lightbox img {
-    max-width: 90vw;
-    max-height: 90vh;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-.close-lightbox {
-    position: static;
-    top: 65px;
-    right: 100px;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
-    z-index: 10000;
-}
-
-.lightbox-nav {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
-    z-index: 10000;
-}
-
-.lightbox-prev {
-    left: 25px;
-}
-
-.lightbox-next {
-    right: 25px;
-}
-
-    rid-item {
-    padding: 1rem;
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #000;
-    background-color: #141015;
-    border-radius: 10px;
-}
-
-    pan-2 {
-    grid-column-end: span 2;
-    grid-row-end: span 2;
-}
-
-    pan-3 {
-    grid-column-end: span 3;
-    grid-row-end: span 4;
-}
-
-.zoomable__img {
-  transform-origin: var(--zoom-pos-x, 0%) var(--zoom-pos-y, 0%);
-  transition: transform 0.15s linear;
-}
-.zoomable--zoomed .zoomable__img {
-  cursor: zoom-in;
-  transform: scale(var(--zoom, 2));
-}
-
-/* Grid Container */
-.image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    grid-auto-rows: 1fr;
-    gap: 16px;
-    padding: 16px;
-}
-
-/* Grid Items */
-.grid-item {
-    position: relative;
-    width: 30rem;
-    height: 20rem;
-    min-height: 200px;
-    transition: transform 0.2s ease;
-    cursor: pointer;
-    background: rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin-bottom: 12.5rem;
-}
-
-.grid-item img {
-    position: absolute;
-    width: auto;
-    height: auto;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-/* Optional hover effect */
-.grid-item:hover {
-    transform: scale(1.02);
-}
-
-/* For larger screens, adjust the grid columns */
-@media (min-width: 993px) {
-    .image-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    }
-}
-
-/* For very large screens */
-@media (min-width: 1200px) {
-    .image-grid {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    }
-}
-
-/* Loading state */
-.grid-item.loading {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { background-color: rgba(0, 0, 0, 0.1); }
-    50% { background-color: rgba(0, 0, 0, 0.2); }
-    100% { background-color: rgba(0, 0, 0, 0.1); }
-}
-
-/* Loading State */
-.grid-item.loading {
-    background: #f0f0f0;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-/* Responsive Lightbox Improvements */
-.lightbox img {
-    max-width: 95%;
-    max-height: 95vh;
-    object-fit: contain;
-}
-
-/* Mobile-friendly navigation */
-@media (max-width: 993px) {
-    .image-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        padding: 10px;
-    }
-
-    .lightbox-nav {
-        font-size: 24px;
-        padding: 12px;
-    }
-
-    .close-lightbox {
-        top: 65px;
-        right: 100px;
-        font-size: 24px;
-        width: 35px;
-        height: 35px;
-    }
-}
-
-/* Touch-friendly improvements */
-@media (hover: none) {
-    .grid-item:active {
-        transform: scale(0.98);
-    }
-}
-
-.lightbox-info {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    color: #fff;
-    background-color: rgba(0,0,0,0.4);
-    padding: 1rem;
-    border-radius: 4px;
-    text-align: center;
-  }
-  
-  /* A small style for tag badges */
-  .tag-badge {
-    display: inline-block;
-    background-color: #333;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    margin: 0 0.25rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-  }
-  
 
 /* ---- particles.js container ---- */
 
@@ -837,7 +591,6 @@ progress {
     box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
 }
 
-/* static/css/main-style.css */
 :root {
     --primary-color: #8dbdc4;
     --bg-dark: #1a1a1a;
@@ -848,106 +601,232 @@ body.dark {
     background-color: var(--bg-dark);
     color: var(--text-light);
 }
-
-/* Image Grid Styles */
-.image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-    padding-left: 8rem;
-    padding-right: 8rem;
-    margin: 2rem;
-}
-
-.grid-item {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    transition: transform 0.3s ease;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.grid-item.loading {
+/* Shimmer Animation (for .grid-item.loading) */
+@keyframes shimmer {
+    0% {
+      background-position: 0% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  
+  /* LOADING STATE */
+  .grid-item.loading {
     min-height: 200px;
     background: linear-gradient(110deg, #2c2c2c 8%, #383838 18%, #2c2c2c 33%);
     background-size: 200% 100%;
     animation: shimmer 1.5s linear infinite;
-}
-
-.grid-item img {
+  }
+  
+  /* Grid Container */
+  .image-grid {
+    display: grid;
+    gap: 1rem;
+    /* On larger screens, exactly 3 columns (each at least 280px wide if possible) */
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
+    margin: 2rem;
+    padding: 2rem;
+  }
+  
+  /* The regular grid items */
+  .grid-item {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .grid-item:hover {
+    transform: scale(1.02);
+  }
+  
+  /* The actual image */
+  .grid-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.image-info {
+  }
+  
+  /* A "placeholder" item can be styled to look blank or invisible */
+  .grid-item.placeholder {
+    background: transparent;
+    pointer-events: none; /* So it doesn't act clickable */
+  }
+  
+  /* RESPONSIVE - On smaller screens, auto-fit columns down as needed */
+  @media (max-width: 992px) {
+    .image-grid {
+      /* auto-fit so we gracefully reduce columns on tablets/phones */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+  }
+  
+  
+  /* Loading state (optional) */
+  .grid-item.loading {
+    background: linear-gradient(110deg, #2c2c2c 8%, #383838 18%, #2c2c2c 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: 0% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  
+  /* .image-info overlay on hover (optional) */
+  .image-info {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     padding: 1rem;
     background: rgba(0, 0, 0, 0.7);
     transform: translateY(100%);
     transition: transform 0.3s ease;
-}
-
-.grid-item:hover .image-info {
+  }
+  .grid-item:hover .image-info {
     transform: translateY(0);
-}
-
-/* Lightbox Styles */
-.lightbox {
+  }
+  
+  /* Responsive tweak for smaller screens if needed */
+  @media (max-width: 600px) {
+    .image-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      /* 
+        Now the columns can shrink down to 150px. 
+        Adjust or remove if you prefer a different mobile breakpoint.
+      */
+    }
+  }
+  
+  /* LIGHTBOX */
+  .lightbox {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; 
+    left: 0; 
+    right: 0; 
     bottom: 0;
     background: rgba(0, 0, 0, 0.9);
-    z-index: 100;
-}
-
-.lightbox.active {
+    z-index: 9999;
+    transition: opacity 0.3s ease;
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox.active {
     display: flex;
+    opacity: 1;
     align-items: center;
     justify-content: center;
-}
-
-.lightbox img {
-    max-height: 90vh;
-    max-width: 90vw;
-    object-fit: contain;
-}
-
-.close-lightbox {
+  }
+  
+  /* LIGHTBOX NAV + CLOSE BUTTONS */
+  .close-lightbox {
     position: absolute;
     top: 11.6rem;
     right: 4rem;
     color: white;
+    font-size: 30px;
     cursor: pointer;
-    font-size: 2rem;
-}
-
-.lightbox-nav {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    z-index: 10000;
+  }
+  
+  .lightbox-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     color: white;
+    font-size: 30px;
     cursor: pointer;
-    font-size: 2rem;
-    padding: 1rem;
-}
-
-.lightbox-prev {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    z-index: 10000;
+  }
+  .lightbox-prev {
     left: 1rem;
-}
-
-.lightbox-next {
+  }
+  .lightbox-next {
     right: 1rem;
-}
+  }
+  
+  /* LIGHTBOX IMAGE */
+  .lightbox img {
+    max-width: 95%;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+  
+  /* LIGHTBOX INFO (if you add dynamic data at the bottom) */
+  .lightbox-info {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    color: #fff;
+    background-color: rgba(0,0,0,0.4);
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  /* TAG BADGE (used in .lightbox-info or .image-info) */
+  .tag-badge {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+  
+  /* MEDIA QUERIES (Mobile-friendly) */
+  @media (max-width: 993px) {
+    .image-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      padding: 10px;
+      margin: 1rem;
+    }
+    .lightbox-nav {
+      font-size: 24px;
+      padding: 12px;
+    }
+    .close-lightbox {
+      top: 65px;
+      right: 100px;
+      font-size: 24px;
+      width: 35px;
+      height: 35px;
+    }
+  }
+  
+  /* Touch-friendly improvement for pressed grid items */
+  @media (hover: none) {
+    .grid-item:active {
+      transform: scale(0.98);
+    }
+  }
+  
 
 /* Upload Form Styles */
 .drophere {
@@ -1205,7 +1084,7 @@ body.dark {
         outline-width: 0.1rem;
         outline-style: solid;
         background: #d13d3d25;
-        width: 25rem;
+        width: auto;
     }
 
     .btn_better_del_mobile:hover {

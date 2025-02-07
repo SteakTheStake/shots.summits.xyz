@@ -121,7 +121,7 @@
               </div>
             </nav>
           </header>
-          <nav class="m l right">
+          <nav class="s right">
             <header>
               {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #}
               {% if 'discord_id' in session %}
@@ -132,17 +132,6 @@
                 <span class="styled_font_2">{{ session.guest_username }}</span>
               {% endif %}
             </header>
-          
-            <!-- Home button: available for all users -->
-                <a
-                href="{{ url_for('index') }}"
-                class="no-highlight small-padding small-margin"
-              >
-                <h6 class="styled_font_4 center-align middle-align">
-                  F2
-                </h6>
-              </a>
-          
             {% if 'discord_id' in session %}
               {# Logged-in user links #}
               <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">

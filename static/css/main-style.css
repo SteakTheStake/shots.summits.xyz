@@ -76,9 +76,6 @@
 
 
   @media only screen and (min-width: 601px) and (max-width: 992px) {
-      .s:not(.m), .l:not(.m), .s.l:not(.m) {
-          display: visible;
-      }
       /* Expand nav to 100% width on mobile */
     .header-nav {
         width: 100%;

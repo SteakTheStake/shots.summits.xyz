@@ -80,7 +80,7 @@
       width: 100%;
     }
   
-    /* Show the hamburger, hide the .links-container initially */
+    /* Show the hamburger, hide the .links-container_mobile initially */
     .hamburger {
       display: block;
     }
@@ -98,7 +98,7 @@
     }  
   
     /* By default, hide the links container on mobile */
-    .links-container {
+    .links-container_mobile {
       display: none;
       flex-direction: row;
       align-items: flex-start;
@@ -108,7 +108,7 @@
     }
   
     /* When we add an active or show class, display it flex */
-    .links-container.show {
+    .links-container_mobile.show {
       display: flex; 
     }
   }

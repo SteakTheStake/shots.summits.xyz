@@ -491,9 +491,8 @@ progress {
 
 .close-lightbox {
     position: fixed;
-    top: 35px;
-    right: 50%;
-    transform: translate(50%, 0%);
+    top: 50px;
+    right: 50px;
     color: white;
     font-size: 30px;
     cursor: pointer;
@@ -523,11 +522,11 @@ progress {
 }
 
 .lightbox-prev {
-    left: 20px;
+    left: 25px;
 }
 
 .lightbox-next {
-    right: 20px;
+    right: 25px;
 }
 
     rid-item {

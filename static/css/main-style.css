@@ -1139,9 +1139,11 @@ body.dark {
     }
 
     .login_text_mobile {
-        font-size: 1.2rem;
+        font-size: 0.6rem;
         padding-left: 0.1rem;
         padding-right: 0.1rem;
+        text-align: center;
+        width: 100%;
     }
 
 

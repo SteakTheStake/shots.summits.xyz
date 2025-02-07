@@ -149,6 +149,7 @@ html, body {
 }
 
 .stay_aligned {
+    position: relative;
     display: flex;
     align-items: start;
     margin-right: 1rem;

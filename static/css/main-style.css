@@ -120,13 +120,11 @@
   }
 
   .end-of-row {
-    right: 10px;
-    position: absolute;
+    width: 3rem;
 }
 
 .end-of-row-admin {
-    right: 200px;
-    position: absolute;
+    width: 3rem;
 }
 
 .spacer_lr {

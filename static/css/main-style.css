@@ -1039,7 +1039,7 @@ body.dark {
         outline-width: 0.15rem;
         outline-style: solid;
         background: #5865F225;
-        transform: scale(1.1);
+        transform: scale(1.05);
         user-select: none;
         text-decoration: none;
     }
@@ -1066,7 +1066,57 @@ body.dark {
         outline-width: 0.15rem;
         outline-style: solid;
         background: #3dd1b425;
-        transform: scale(1.1);
+        transform: scale(1.05);
+        user-select: none;
+        text-decoration: none;
+    }
+
+    .btn_better_dsc_mobile {
+        position: relative;
+        border-radius: 50rem;
+        outline-color: #5865F2;
+        outline-width: 0.1rem;
+        outline-style: solid;
+        background: #5865F225;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        height: 3rem;
+        width: 3rem;
+    }
+
+    .btn_better_dsc_mobile:hover {
+        outline-color: #7d88fb;
+        outline-width: 0.08rem;
+        outline-style: solid;
+        background: #5865F225;
+        transform: scale(1.01);
+        user-select: none;
+        text-decoration: none;
+    }
+
+    .btn_better_alt_mobile {
+        position: relative;
+        border-radius: 50rem;
+        outline-color: #3dd1b4;
+        color: #3dd1b4;
+        fill: #3dd1b4;
+        outline-width: 0.1rem;
+        outline-style: solid;
+        background: #3dd1b425;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        height: 3rem;
+        width: 3rem;
+    }
+
+    .btn_better_alt_mobile:hover {
+        outline-color: #3dd1b4;
+        color: #3dd1b4;
+        fill: #3dd1b4;
+        outline-width: 0.08rem;
+        outline-style: solid;
+        background: #3dd1b425;
+        transform: scale(1.01);
         user-select: none;
         text-decoration: none;
     }
@@ -1080,6 +1130,12 @@ body.dark {
     }
 
     .login_text {
+        padding-left: 0.1rem;
+        padding-right: 0.1rem;
+    }
+
+    .login_text_mobile {
+        font-size: 1.2rem;
         padding-left: 0.1rem;
         padding-right: 0.1rem;
     }

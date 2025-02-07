@@ -68,7 +68,7 @@
               </button>
           
               <!-- Right: Links Container -->
-              <div class="links-container" id="nav-menu">
+              <div class="links-container">
                 <!-- If user is logged in -->
                 {% if 'discord_id' in session %}
                 <img
@@ -121,7 +121,7 @@
               </div>
             </nav>
           </header>
-          <nav class="s right">
+          <nav class="s right" id="nav-menu">
             <header>
               {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #}
               {% if 'discord_id' in session %}
@@ -134,8 +134,8 @@
             </header>
             {% if 'discord_id' in session %}
               {# Logged-in user links #}
-              <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
-                <p class="login_text solid_1">Upload</p>
+              <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                <p class="login_text_mobile solid_1">Upload</p>
                 <i class="rounded-0 solid_1 show-overflow">upload</i>
               </a>
               <a href="{{ url_for('logout') }}" class="btn_better round large small-padding small-margin">
@@ -147,29 +147,29 @@
               >
                 <i class="rounded-0 solid_1">admin_panel_settings</i>
               </a>
-              <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
-                <p class="login_text solid_1">Toggle Particles</p>
+              <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                <p class="login_text_mobile solid_1">Toggle Particles</p>
                 <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
               </a>
             {% elif 'guest_id' in session %}
               {# Guest user links #}
                 <span class="styled_font_2">{{ session.guest_username }}</span>
-                <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
-                  <p class="login_text solid_2">Login With</p>
+                <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
+                  <p class="login_text_mobile solid_2">Login With</p>
                   <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                 </a>
-                <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Upload</p>
+                <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                  <p class="login_text_mobile solid_1">Upload</p>
                   <i class="rounded-0 solid_1 show-overflow">upload</i>
                 </a>
-                <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Toggle Particles</p>
+                <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                  <p class="login_text_mobile solid_1">Toggle Particles</p>
                   <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
                 </a>
             {% else %}
               {# Not logged in: only show the login button #}
-                <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
-                  <p class="login_text solid_2">Login With</p>
+                <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
+                  <p class="login_text_mobile solid_2">Login With</p>
                   <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                 </a>
             {% endif %}

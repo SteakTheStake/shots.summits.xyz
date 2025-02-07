@@ -1,3 +1,9 @@
+.on-top {
+    position: absolute;
+    width: 100vw;
+    z-index: 1020;
+  }
+  
 .site-header {
     position: absolute;
     top: 0;

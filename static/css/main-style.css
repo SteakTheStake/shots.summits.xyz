@@ -151,8 +151,8 @@ html, body {
 .stay_aligned {
     display: flex;
     align-items: start;
-    margin-right: 0.35rem;
-    margin-left: 0.15rem;
+    margin-right: 1rem;
+    margin-left: 0.05rem;
 }
 
 /* fonts */

@@ -59,6 +59,7 @@
     background: none;
     border: none;
     cursor: pointer;
+    animation: none;
   }
   
   /* Hamburger lines */

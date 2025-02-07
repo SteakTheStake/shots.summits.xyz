@@ -116,6 +116,10 @@
       display: flex; 
     }
   }
+
+nav:is(.left, .right) {
+  inline-size: 12rem !important;
+}
   
 .no-highlight {
     text-decoration: none;

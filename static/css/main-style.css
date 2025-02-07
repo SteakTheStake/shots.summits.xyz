@@ -1103,8 +1103,8 @@ body.dark {
         background: #5865F225;
         padding-top: 1rem;
         padding-bottom: 1rem;
-        height: 1rem;
-        width: 10rem;
+        height: 3rem;
+        width: 11rem;
     }
 
     .btn_better_dsc_mobile:hover {
@@ -1128,8 +1128,8 @@ body.dark {
         background: #3dd1b425;
         padding-top: 1rem;
         padding-bottom: 1rem;
-        height: 1rem;
-        width: 10rem;
+        height: 3rem;
+        width: 11rem;
     }
 
     .btn_better_alt_mobile:hover {

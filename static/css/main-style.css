@@ -6,11 +6,9 @@
   }
   
   .header-nav {
-    /* On desktops, only take up 50% (to “stop in the middle”). */
-    width: 75%;
+    width: 100%;
     margin-left: 0;
     margin-right: auto;
-  
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -115,7 +113,7 @@
   
     /* When we add an active or show class, display it flex */
     .links-container_mobile.show {
-        position: initial;
+        position: relative;
         display: flex;
         z-index: 1000;
     }
@@ -167,6 +165,13 @@ html, body {
     font-weight: bold;
     font-style: normal;
     font-display: swap;
+}
+
+
+@media only screen and (min-width: 601px) and (max-width: 992px) {
+    .s:not(.m), .l:not(.m), .s.l:not(.m) {
+      display: visible;
+    }
 }
 
 /* responsive */

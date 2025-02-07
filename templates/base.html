@@ -77,39 +77,55 @@
                   class="avatar"
                 />
                 <span class="styled_font_2">{{ session['discord_username'] }}</span>
-                <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Upload</p>
-                  <i class="rounded-0 solid_1 show-overflow">upload</i>
-                </a>
-                <a href="{{ url_for('logout') }}" class="btn_better round large small-padding small-margin">
-                  <i class="rounded-0 solid_1">logout</i>
-                </a>
-                <a
-                  href="{{ url_for('admin_dashboard') }}"
-                  class="btn_better round large small-padding small-margin"
-                >
-                  <i class="rounded-0 solid_1">admin_panel_settings</i>
-                </a>
-                <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Toggle Particles</p>
-                  <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                </a>
+                <span>
+                  <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                    <i class="rounded-0 solid_1 show-overflow">upload</i>
+                    <p class="login_text_mobile solid_1">Upload</p>
+                  </a>
+                </span>
+                <span>
+                  <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
+                    <i class="rounded-0 solid_1">logout</i>
+                    <p class="login_text_mobile solid_1">Logout</p>
+                  </a>
+                </span>
+                <span>
+                  <a
+                    href="{{ url_for('admin_dashboard') }}"
+                    class="btn_better_alt_mobile round large small-padding"
+                  >
+                    <i class="rounded-0 solid_1">admin_panel_settings</i>
+                    <p class="login_text_mobile solid_1">Admin Panel</p>
+                  </a>
+                </span>
+                <span>
+                  <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                    <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                    <p class="login_text_mobile solid_1">Toggle Particles</p>
+                  </a>
+                </span>
           
                 <!-- If guest -->
                 {% elif 'guest_id' in session %}
                 <span class="styled_font_2">{{ session.guest_username }}</span>
-                <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
-                  <p class="login_text solid_2">Login With</p>
-                  <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                </a>
-                <a href="{{ url_for('upload') }}" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Upload</p>
-                  <i class="rounded-0 solid_1 show-overflow">upload</i>
-                </a>
-                <a onclick="toggleParticles()" class="btn_better_alt round large small-padding">
-                  <p class="login_text solid_1">Toggle Particles</p>
-                  <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                </a>
+                <span>
+                  <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                    <i class="rounded-0 solid_1 show-overflow">upload</i>
+                    <p class="login_text_mobile solid_1">Upload</p>
+                  </a>
+                </span>
+                <span>
+                  <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
+                    <i class="rounded-0 solid_1">logout</i>
+                    <p class="login_text_mobile solid_1">Logout</p>
+                  </a>
+                </span>
+                <span>
+                  <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                    <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                    <p class="login_text_mobile solid_1">Toggle Particles</p>
+                  </a>
+                </span>
           
                 <!-- Otherwise not logged in -->
                 {% else %}

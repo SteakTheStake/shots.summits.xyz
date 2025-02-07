@@ -1,11 +1,13 @@
 .site-header {
+    position: fixed;
+    top: 0;
     width: 100%;
-    /* e.g., background-color: #f8f8f8; padding: 1rem; */
+    z-index: 1010;
   }
   
   .header-nav {
     /* On desktops, only take up 50% (to “stop in the middle”). */
-    width: 50%;
+    width: 75%;
     margin-left: 0;
     margin-right: auto;
   
@@ -113,11 +115,14 @@
   
     /* When we add an active or show class, display it flex */
     .links-container_mobile.show {
-      display: flex; 
+        position: initial;
+        display: flex;
+        z-index: 1000;
     }
   }
 
 
+/* --- NAV --- */
 .circle {
     display: inline-block;
     margin-right: 1rem;

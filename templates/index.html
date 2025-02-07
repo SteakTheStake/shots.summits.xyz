@@ -6,7 +6,7 @@
         <button class="filter-toggle"><i class="fas fa-filter"></i> Filters</button>
         <!-- Users Filter -->
         <div class="filter-dropdown">
-            <h4>Discord Users</h4>
+            <h4>Users</h4>
             <div class="user-filters">
                 {% set users = [] %}
                 {% for screenshot in screenshots %}
@@ -17,7 +17,7 @@
                 {% for user in users|sort %}
                 <label class="filter-checkbox">
                     <input type="checkbox" data-filter="user" value="{{ user }}" />
-                    <i class="fa-brands fa-discord"></i> {{ user }}
+                    <i class="fa-regular fa-user small no-round tiny-padding"></i> {{ user }}
                 </label>
                 {% endfor %}
             </div>
@@ -48,54 +48,49 @@
 </div>
 
 <!-- Image Grid -->
-<div class="image-grid">
-    {% for screenshot in screenshots %}
-    <div class="grid-item loading" data-user="{{ screenshot['uploader_name'] }}" data-tags="{{ screenshot['tags'] or '' }}">
-        <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" 
-             alt="Shot by {{ screenshot['uploader_name'] }}"
-             loading="lazy"
-             onload="this.parentElement.classList.remove('loading')" />
+{% for screenshot in screenshots %}
+<div class="grid-item loading"
+     data-user="{{ screenshot['uploader_name'] }}"
+     data-tags="{{ screenshot['tags'] or '' }}"
+     data-date="{{ screenshot['upload_date'] or '' }}"
+     data-group="{{ screenshot['group_name'] or '' }}">
+  <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}"
+       alt="Shot by {{ screenshot['uploader_name'] }}"
+       loading="lazy"
+       onload="this.parentElement.classList.remove('loading')" />
         <div class="image-info">
             {% if screenshot['group_name'] %}
-                <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
-            {% endif %}
-            <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
-            {% if screenshot['tags'] %}
-                <div class="tags">
-                    {% for tag in screenshot['tags'].split(',') %}
-                        <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
-                    {% endfor %}
-                </div>
+            <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
             {% endif %}
             
-            {% if screenshot['uploader_type'] == 'discord' %}
-            <p class="username bold underline">
-                @{{ screenshot['uploader_name'] }}
-                <i class="fa-brands fa-discord small no-round tiny-padding"></i>
-            </p>
-            {% else %}
+            <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
+            
+            {% if screenshot['tags'] %}
+            <div class="tags">
+                {% for tag in screenshot['tags'].split(',') %}
+                <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
             <p class="username bold underline">
                 @{{ screenshot['uploader_name'] }}
                 <i class="fa-regular fa-user small no-round tiny-padding"></i>
             </p>
-            {% endif %}
-
+            
             <nav class="auto-width">
                 <div class="image-actions tiny-padding">
-                    {% if session.uploader_name == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
-                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
-                        <span type="submit" class="me-2 max medium bg-transparent text-muted">Delete</span>
+                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}"
+                        method="POST" class="d-inline">
+                        <button type="submit" class="btn_better_del_mobile">Delete</button>
                     </form>
                     {% endif %}
-                    <!--
-                    <span type="button" class="me-2 max medium bg-transparent text-muted" data-toggle="modal" data-target="#reportModal-{{ loop.index }}">
-                        Report
-                    </span>
-                    -->
                 </div>
             </nav>
         </div>
     </div>
+
 
     <!-- Report Modal for each image -->
     <!--
@@ -103,8 +98,8 @@
         ...
     </div>
     -->
-    {% endfor %}
 </div>
+{% endfor %}
 
 
 <!-- Lightbox -->
@@ -115,11 +110,19 @@
     <div class="lightbox-nav lightbox-prev">
         <i class="fas fa-chevron-left"></i>
     </div>
+    
+    <!-- The image displayed in the lightbox -->
     <img src="" alt="Enlarged view">
+    
     <div class="lightbox-nav lightbox-next">
         <i class="fas fa-chevron-right"></i>
     </div>
+
+    <!-- The info container at the bottom of the lightbox -->
+    <div class="lightbox-info"></div>
 </div>
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {

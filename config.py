@@ -13,6 +13,7 @@ database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
 database_url = f"sqlite:///{database_path}"
 print(f"Loading database URL: {database_url}")
 
+
 # Create engine with correct permissions handling
 engine = create_engine(
     database_url,
@@ -35,7 +36,9 @@ class Config:
     # Your existing configuration...
     SQLALCHEMY_DATABASE_URI = database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+    DATABASE_PATH = os.path.abspath(
+        os.getenv("DATABASE_PATH", "C:/var/www/summitmc.xyz/f2/f2.db")
+    )
     # Your existing configuration
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev')
     

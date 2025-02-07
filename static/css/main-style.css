@@ -480,9 +480,9 @@ progress {
 }
 
 .close-lightbox {
-    position: fixed;
-    top: 50px;
-    right: 50px;
+    position: static;
+    top: 65px;
+    right: 100px;
     color: white;
     font-size: 30px;
     cursor: pointer;
@@ -560,8 +560,8 @@ progress {
 /* Grid Items */
 .grid-item {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 30rem;
+    height: 20rem;
     min-height: 200px;
     transition: transform 0.2s ease;
     cursor: pointer;
@@ -572,8 +572,8 @@ progress {
 
 .grid-item img {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: auto;
+    height: auto;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
@@ -641,8 +641,8 @@ progress {
     }
 
     .close-lightbox {
-        top: 50px;
-        right: 50px;
+        top: 65px;
+        right: 100px;
         font-size: 24px;
         width: 35px;
         height: 35px;
@@ -655,6 +655,31 @@ progress {
         transform: scale(0.98);
     }
 }
+
+.lightbox-info {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    color: #fff;
+    background-color: rgba(0,0,0,0.4);
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  /* A small style for tag badges */
+  .tag-badge {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+  
 
 /* ---- particles.js container ---- */
 
@@ -833,6 +858,7 @@ body.dark {
     padding-bottom: 4rem;
     padding-left: 8rem;
     padding-right: 8rem;
+    margin: 2rem;
 }
 
 .grid-item {
@@ -898,8 +924,8 @@ body.dark {
 
 .close-lightbox {
     position: absolute;
-    top: 2.5rem;
-    right: 2.5rem;
+    top: 11.6rem;
+    right: 4rem;
     color: white;
     cursor: pointer;
     font-size: 2rem;
@@ -1170,28 +1196,25 @@ body.dark {
         text-decoration: none;
     }
 
-    .btn_better_alt2_mobile {
+    .btn_better_del_mobile {
         position: relative;
         border-radius: 50rem;
-        outline-color: #3dd1b4;
-        color: #3dd1b4;
-        fill: #3dd1b4;
+        outline-color: #d13d3d;
+        color: #d13d3d;
+        fill: #d13d3d;
         outline-width: 0.1rem;
         outline-style: solid;
-        background: #3dd1b425;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        height: 3rem;
-        width: 3rem;
+        background: #d13d3d25;
+        width: 25rem;
     }
 
-    .btn_better_alt2_mobile:hover {
-        outline-color: #3dd1b4;
-        color: #3dd1b4;
-        fill: #3dd1b4;
+    .btn_better_del_mobile:hover {
+        outline-color: #d13d3d;
+        color: #d13d3d;
+        fill: #d13d3d;
         outline-width: 0.08rem;
         outline-style: solid;
-        background: #3dd1b425;
+        background: #d13d3d25;
         transform: scale(1.01);
         user-select: none;
         text-decoration: none;

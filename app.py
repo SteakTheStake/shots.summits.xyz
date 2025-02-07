@@ -328,30 +328,16 @@ def verify_discord_signature(signature: str, timestamp: str, body: str) -> bool:
 
 
 def ensure_default_roles():
-    """
-    Ensures default admin and moderator roles are set in the database.
-    Should be called during application initialization.
-    """
-    default_admin = {
-        "discord_id": "278344153761316864",
-        "username": "StakeTheSteak",
-        "role": "admin",
-    }
-
-    default_moderators = [
-        # Add default moderators here as needed
-        # {'discord_id': 'mod_id', 'username': 'mod_name', 'role': 'moderator'},
-    ]
-
-    with sqlite3.connect("f2.db") as conn:
-        # Ensure admin exists
+    with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.execute(
             """
             INSERT OR IGNORE INTO user_roles (discord_id, role, assigned_by)
             VALUES (?, ?, ?)
-        """,
-            (default_admin["discord_id"], default_admin["role"], "system"),
+            """,
+            ("278344153761316864", "admin", "system"),
         )
+
+        default_moderators = []
 
         # Ensure moderators exist
         for mod in default_moderators:
@@ -394,7 +380,7 @@ def create_app():
         return decorated_function
 
     def get_user_role(discord_id=None, guest_id=None):
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             cursor = conn.execute(
                 "SELECT role FROM user_roles WHERE discord_id = ?", (discord_id,)
             )
@@ -440,7 +426,7 @@ def create_app():
         uploaded_files = []
         processed_files = set()
 
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
             for index, file in enumerate(files):
                 if not file or not file.filename:
@@ -565,7 +551,7 @@ def create_app():
     @app.route("/delete/<filename>", methods=["POST"])
     @login_required
     def delete_image(filename):
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 "SELECT discord_username, guest_username FROM screenshots WHERE filename = ?",
@@ -628,7 +614,7 @@ def create_app():
     @login_required
     @requires_role("admin")
     def admin_dashboard():
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
 
             stats = {
@@ -680,7 +666,7 @@ def create_app():
             flash("Invalid role specified.", "danger")
             return redirect(url_for("admin_dashboard"))
 
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO user_roles (discord_id, role, assigned_by)
@@ -696,7 +682,7 @@ def create_app():
     @login_required
     @requires_role("moderator")
     def mod_review():
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
             recent_uploads = conn.execute(
                 """
@@ -718,7 +704,7 @@ def create_app():
             flash("Please provide a reason for reporting.", "danger")
             return redirect(url_for("view_image", image_filename=filename))
 
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.execute(
                 """
                 INSERT INTO reports (filename, reported_by, reason)
@@ -750,7 +736,7 @@ def create_app():
             session['guest_username'] = generate_guest_username()
             session['username'] = session['guest_username']
             session.permanent = True
-        with sqlite3.connect("f2.db") as conn:
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
@@ -845,7 +831,7 @@ def create_app():
     def view_image(image_filename):
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], image_filename)
         if os.path.exists(image_path):
-            with sqlite3.connect("f2.db") as conn:
+            with sqlite3.connect(Config.DATABASE_PATH) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute(
                     """
@@ -876,4 +862,4 @@ def cleanup():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="5.78.131.18", port=8000)
+    app.run(host="0.0.0.0", port=8000)

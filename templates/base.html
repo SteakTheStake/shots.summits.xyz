@@ -66,7 +66,7 @@
                 <span></span>
                 <span></span>
               </button>
-          
+              
               <!-- Right: Links Container -->
               <div class="links-container">
                 <!-- If user is logged in -->
@@ -95,7 +95,6 @@
                     <p class="login_text_mobile solid_1">Logout</p>
                   </a>
                 </span>
-          
                 <!-- If guest -->
                 {% elif 'guest_id' in session %}
                 <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
@@ -117,7 +116,6 @@
                     <p class="login_text_mobile solid_1">Toggle Particles</p>
                   </a>
                 </span>
-          
                 <!-- Otherwise not logged in -->
                 {% else %}
                 <span class="spacer_lr">
@@ -226,10 +224,33 @@
             });
           </script>
           <script>
+            // 1. On page load, read localStorage and set initial display state
+            document.addEventListener("DOMContentLoaded", function () {
+              const div = document.getElementById("particles-js");
+              if (!div) return;
+              
+              // If localStorage says "false", hide the particles div
+              const storedPreference = localStorage.getItem("particlesEnabled");
+              if (storedPreference === "false") {
+                div.style.display = "none";
+              } else {
+                // Otherwise default to show
+                div.style.display = "block";
+              }
+            });
+          
+            // 2. The original toggle function, but with localStorage
             function toggleParticles() {
-              var div = document.getElementById('particles-js');
-              if (div) {
-                div.style.display = div.style.display === 'none' ? 'block' : 'none';
+              const div = document.getElementById("particles-js");
+              if (!div) return;
+          
+              // If currently hidden, show and store "true"; otherwise hide and store "false"
+              if (div.style.display === "none") {
+                div.style.display = "block";
+                localStorage.setItem("particlesEnabled", "true");
+              } else {
+                div.style.display = "none";
+                localStorage.setItem("particlesEnabled", "false");
               }
             }
           </script>

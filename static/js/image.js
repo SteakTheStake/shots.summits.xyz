@@ -34,15 +34,49 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize lightbox functionality
     function initLightbox() {
         const allImages = document.querySelectorAll(".grid-item img");
-
+        const lightbox = document.querySelector(".lightbox");
+        const lightboxImg = lightbox.querySelector("img");
+        const lightboxInfo = lightbox.querySelector(".lightbox-info");
+        let currentImageIndex = 0;
+    
         allImages.forEach((img) => {
             img.addEventListener("click", () => {
-                // Find index among visible images
+                // 1) Figure out which images are "visible" (handled by your existing code)
                 currentImageIndex = visibleImages.indexOf(img);
                 if (currentImageIndex !== -1) {
+                    // 2) Show image in lightbox
                     lightboxImg.src = img.src;
                     lightbox.classList.add("active");
                     document.body.style.overflow = "hidden";
+    
+                    // 3) Populate .lightbox-info
+                    const parentItem = img.closest(".grid-item");
+                    if (parentItem) {
+                        const user = parentItem.dataset.user || "Unknown User";
+                        const date = parentItem.dataset.date || "Unknown Date";
+                        const group = parentItem.dataset.group || "";
+                        const rawTags = parentItem.dataset.tags || "";
+                        
+                        // Turn tags into an array
+                        const tagList = rawTags.split(",").map(t => t.trim()).filter(Boolean);
+    
+                        // Build any HTML you want
+                        let infoHTML = `<p><strong>Uploaded By:</strong> ${user}</p>`;
+                        if (group) {
+                            infoHTML += `<p><strong>Group:</strong> ${group}</p>`;
+                        }
+                        infoHTML += `<p><strong>Date:</strong> ${date}</p>`;
+                        
+                        if (tagList.length > 0) {
+                            infoHTML += `<div class="tag-section"><strong>Tags:</strong> `;
+                            tagList.forEach(tag => {
+                                infoHTML += `<span class="tag-badge">#${tag}</span> `;
+                            });
+                            infoHTML += `</div>`;
+                        }
+                        // Finally, place that HTML in the lightbox-info container
+                        lightboxInfo.innerHTML = infoHTML;
+                    }
                 }
             });
         });

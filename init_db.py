@@ -1,45 +1,122 @@
-# init_db.py
 import os
-from models import Base
+import sqlite3
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
 
 def init_db():
-    # Use a default database path if DATABASE_PATH is not set
-    default_path = "/var/www/summitmc.xyz/f2/f2.db"
-    database_path = os.environ.get('DATABASE_PATH', default_path)
-    database_path = os.path.abspath(database_path)
-    # Create database URL
-    database_url = f"sqlite:///{database_path}"
-    
-    # Load environment variables
+    """
+    Creates (if missing) the core tables needed by the screenshot app.
+    Sets permissions on the database file and directory.
+    """
+
+    # 1. Load environment variables
     load_dotenv()
 
-    # Get database URL and ensure it's absolute
-    database_path = os.path.abspath(os.environ.get('DATABASE_PATH'))
-    database_url = f"sqlite:///{database_path}"
-    print(f"Loading database URL: {database_url}")
+    # 2. Provide a default path if DATABASE_PATH is not in the environment
+    default_db_path = "/var/www/summitmc.xyz/f2/f2.db"
+    db_path = os.getenv("DATABASE_PATH", default_db_path)
+    db_path = os.path.abspath(db_path)
 
-    # Create engine and tables
-    engine = create_engine(database_url)
-    Base.metadata.create_all(engine)
-    
-    # Set file permissions
+    # 3. Ensure directory exists
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+    print(f"Initializing database at: {db_path}")
+
+    # 4. Create and connect to the SQLite database
+    with sqlite3.connect(db_path) as conn:
+        # -- 4a. Create screenshots table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS screenshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT NOT NULL,
+                discord_username TEXT,
+                guest_username TEXT,
+                group_id INTEGER,
+                uploader_type TEXT,
+                upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # -- 4b. Create screenshot_groups table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS screenshot_groups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                created_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # -- 4c. Create tags table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL
+            )
+        """)
+
+        # -- 4d. Create screenshot_tags linking table (many-to-many)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS screenshot_tags (
+                screenshot_id INTEGER NOT NULL,
+                tag_id INTEGER NOT NULL,
+                PRIMARY KEY (screenshot_id, tag_id),
+                FOREIGN KEY (screenshot_id) REFERENCES screenshots(id),
+                FOREIGN KEY (tag_id) REFERENCES tags(id)
+            )
+        """)
+
+        # -- 4e. Create user_roles table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_roles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                discord_id TEXT NOT NULL,
+                role TEXT NOT NULL,
+                assigned_by TEXT,
+                assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # -- 4f. Create deletion_log table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS deletion_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT NOT NULL,
+                deleted_by TEXT,
+                original_uploader TEXT,
+                reason TEXT,
+                deletion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # -- 4g. Create reports table (optional, if you use it)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT,
+                reported_by TEXT,
+                reason TEXT,
+                reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        conn.commit()
+        print("All tables created or verified successfully.")
+
+    # 5. (Optional) Set file permissions
     try:
-        os.chmod(database_path, 0o666)  # rw-rw-rw-
-        print(f"Successfully set permissions for {database_path}")
+        os.chmod(db_path, 0o666)  # rw-rw-rw-
+        print(f"Successfully set file permissions for: {db_path}")
     except Exception as e:
-        print(f"Error setting permissions: {e}")
-    
-    # Set directory permissions
+        print(f"Error setting file permissions: {e}")
+
+    # 6. (Optional) Set directory permissions
     try:
-        db_directory = os.path.dirname(database_path)
+        db_directory = os.path.dirname(db_path)
         os.chmod(db_directory, 0o775)  # rwxrwxr-x
-        print(f"Successfully set permissions for directory: {db_directory}")
+        print(f"Successfully set directory permissions for: {db_directory}")
     except Exception as e:
         print(f"Error setting directory permissions: {e}")
+
 
 if __name__ == "__main__":
     init_db()

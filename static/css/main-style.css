@@ -148,6 +148,13 @@ html, body {
     overflow: hidden;
 }
 
+.stay_aligned {
+    display: flex;
+    align-items: start;
+    margin-right: 0.35rem;
+    margin-left: 0.15rem;
+}
+
 /* fonts */
 @font-face {
     font-family: "Minecraft";

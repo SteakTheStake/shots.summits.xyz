@@ -1,9 +1,7 @@
-{% extends "base.html" %}
-
-{% block content %}
-    <!-- Add this to image_view.html -->
+{% extends "base.html" %} {% block content %}
+<!-- Image Actions -->
 <div class="image-actions">
-    {% if session.discord_username == image_data.discord_username or user_role in ['admin', 'moderator'] %}
+    {% if session.get('username') == image_data.uploader_name or user_role in ['admin', 'moderator'] %}
     <form action="{{ url_for('delete_image', filename=image_filename) }}" method="POST" class="d-inline">
         <button type="submit" class="btn btn-danger">Delete Image</button>
     </form>
@@ -15,20 +13,20 @@
 </div>
 
 <!-- Report Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark text-light">
             <div class="modal-header">
-                <h5 class="modal-title">Report Image</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                <h5 class="modal-title" id="reportModalLabel">Report Image</h5>
+                <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <form action="{{ url_for('report_image', filename=image_filename) }}" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="reason">Reason for Report</label>
-                        <textarea class="form-control" name="reason" required></textarea>
+                        <label for="reason" class="font-weight-bold">Reason for Report</label>
+                        <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -1,110 +1,112 @@
-{% extends "base.html" %}
-{% block content %}
-<!-- Add Filter Menu -->
-<div class="filter-menu">
-    <div class="filter-section">
-        <button class="filter-toggle"><i class="fas fa-filter"></i> Filters</button>
-        <!-- Users Filter -->
-        <div class="filter-dropdown">
-            <h4>Users</h4>
-            <div class="user-filters">
-                {% set users = [] %}
-                {% for screenshot in screenshots %}
-                    {% if screenshot['uploader_name'] not in users %}
-                        {% set _ = users.append(screenshot['uploader_name']) %}
-                    {% endif %}
-                {% endfor %}
-                {% for user in users|sort %}
-                <label class="filter-checkbox">
-                    <input type="checkbox" data-filter="user" value="{{ user }}" />
-                    <i class="fa-regular fa-user small no-round tiny-padding"></i> {{ user }}
-                </label>
-                {% endfor %}
+{% extends "base.html" %} {% block content %}
+<!-- Modal for Tag Selection with Search and Deselect All -->
+<div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="tagModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal_centered modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tagModalLabel">Select Tags</h5>
+                <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </div>
-        <!-- Tags Filter -->
-        <div class="filter-dropdown">
-            <h4>Tags</h4>
-            <div class="tag-filters">
-                {% set all_tags = [] %}
-                {% for screenshot in screenshots %}
-                    {% if screenshot['tags'] %}
-                        {% for tag in screenshot['tags'].split(',') %}
-                            {% if tag.strip() not in all_tags %}
-                                {% set _ = all_tags.append(tag.strip()) %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
-                {% for tag in all_tags|sort %}
-                <label class="filter-checkbox">
-                    <input type="checkbox" data-filter="tag" value="{{ tag }}" />
-                    #{{ tag }}
-                </label>
-                {% endfor %}
+            <div class="modal-body">
+                <!-- Search Bar & Deselect All Button -->
+                <div class="form-group">
+                    <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" id="deselectAllBtn">Deselect All</button>
+                </div>
+                <!-- Container for Tag Bubbles -->
+                <div id="tagBubbleContainer" class="d-flex flex-wrap"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Filter Menu Section -->
+<div class="filter-menu">
+    <div class="filter-section">
+        <!-- Hidden input for modal-based tag selection -->
+        <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
+        <!-- Button to open modal for selecting tags -->
+        <button type="button" id="openTagModalBtn" class="filter-toggle">
+            <i class="fas fa-filter"></i> Filters
+        </button>
+    </div>
+    <!-- This container shows a summary of currently selected tags (optional) -->
+    <div id="selectedTagDisplay" class="mt-2 text-light"></div>
+</div>
+
 <!-- Single Grid Container -->
 <div class="image-grid">
     {% for screenshot in screenshots %}
-    <div class="grid-item loading"
-         data-user="{{ screenshot['uploader_name'] }}"
-         data-tags="{{ screenshot['tags'] or '' }}"
-         data-date="{{ screenshot['upload_date'] or '' }}"
-         data-group="{{ screenshot['group_name'] or '' }}">
-  
-      <!-- The screenshot image -->
-      <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}"
-           alt="Shot by {{ screenshot['uploader_name'] }}"
-           loading="lazy"
-           onload="this.parentElement.classList.remove('loading')" />
-  
-      <!-- Info overlay -->
-      <div class="image-info">
-        {% if screenshot['group_name'] %}
-        <p class="group fancy-text">{{ screenshot['group_name'] }}</p>
-        {% endif %}
-        
-        <p class="date small no-padding no-margin">{{ screenshot['upload_date'] }}</p>
-        
-        {% if screenshot['tags'] %}
-        <div class="tags">
-          {% for tag in screenshot['tags'].split(',') %}
-          <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
-          {% endfor %}
-        </div>
-        {% endif %}
-        
-        <p class="username bold underline">
-          @{{ screenshot['uploader_name'] }}
-          <i class="fa-regular fa-user small no-round tiny-padding"></i>
-        </p>
-        
-        <nav class="auto-width">
-          <div class="image-actions tiny-padding">
-            {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
-            <form action="{{ url_for('delete_image', filename=screenshot.filename) }}"
-                  method="POST" class="d-inline">
-              <button type="submit" class="btn_better_del_mobile">Delete</button>
-            </form>
+    <div class="grid-item loading" data-user="{{ screenshot['uploader_name'] }}" data-tags="{{ screenshot['tags'] or '' }}" data-date="{{ screenshot['upload_date'] or '' }}" data-group="{{ screenshot['group_name'] or '' }}">
+        <!-- The screenshot image -->
+        <img src="{{ url_for('static', filename='images/' + screenshot['filename']) }}" alt="Shot by {{ screenshot['uploader_name'] }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
+
+        <!-- Info overlay -->
+        <div class="image-info">
+            {% if screenshot.group_name %}
+            <p class="group fancy-text">{{ screenshot.group_name }}</p>
+            {% endif %} {# Removed the date display #} {#
+            <p class="date small no-padding no-margin">{{ screenshot.upload_date }}</p>
+            #} {% if screenshot.tags %}
+            <div class="tags">
+                {% for tag in screenshot.tags.split(',') %}
+                <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
             {% endif %}
-          </div>
-        </nav>
-      </div>
-      
-      <!-- Optional: A modal for reporting, if you want to include it here
-      <div class="modal fade" id="reportModal-{{ loop.index }}" tabindex="-1">
-        ...
-      </div>
-      -->
-  
+
+            <p class="username bold underline">
+                @{{ screenshot.uploader_name }}
+                <i class="fa-regular fa-user small no-round tiny-padding"></i>
+            </p>
+
+            <nav class="auto-width">
+                <div class="image-actions tiny-padding">
+                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
+                        Report
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Report Modal for this screenshot -->
+    <div class="modal fade" id="reportModal-{{ screenshot.id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ screenshot.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel-{{ screenshot.id }}">Report Image</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ url_for('report_image', filename=screenshot.filename) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="reason-{{ screenshot.id }}" class="font-weight-bold">Reason for Report</label>
+                            <textarea class="form-control" name="reason" id="reason-{{ screenshot.id }}" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Submit Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     {% endfor %}
-  </div>  
-
+</div>
 
 <!-- Lightbox -->
 <div class="lightbox">
@@ -114,10 +116,10 @@
     <div class="lightbox-nav lightbox-prev">
         <i class="fas fa-chevron-left"></i>
     </div>
-    
+
     <!-- The image displayed in the lightbox -->
-    <img src="" alt="Enlarged view">
-    
+    <img src="" alt="Enlarged view" />
+
     <div class="lightbox-nav lightbox-next">
         <i class="fas fa-chevron-right"></i>
     </div>
@@ -125,12 +127,154 @@
     <!-- The info container at the bottom of the lightbox -->
     <div class="lightbox-info"></div>
 </div>
-
-
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  // Your existing JavaScript code here
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        // Global variable to hold selected tag IDs as strings.
+        let selectedTagIds = new Set();
+
+        // Our preapprovedTags array is built from the server data:
+        const preapprovedTags = [
+        {% for tag in preapproved_tags %}
+            { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+        {% endfor %}
+        ];
+
+        /**
+         * Build the tag bubbles into the container, using the global selectedTagIds
+         * to mark which bubbles are selected.
+         * @param {string} filter - Optional filter string to match tag names.
+         */
+        function buildTagBubbles(filter = '') {
+            const container = document.getElementById('tagBubbleContainer');
+            container.innerHTML = ''; // Clear any existing bubbles
+
+            preapprovedTags.forEach(tag => {
+                // Check if tag name matches the filter (case-insensitive)
+                if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
+                    const bubble = document.createElement('div');
+                    bubble.classList.add('tag-bubble');
+                    bubble.setAttribute('data-id', tag.id);
+                    bubble.textContent = tag.name;
+
+                    // Mark as selected if this tag's id is in our global set
+                    if (selectedTagIds.has(String(tag.id))) {
+                        bubble.classList.add('selected');
+                    }
+
+                    // Toggle selection on click and update the global set accordingly
+                    bubble.addEventListener('click', function() {
+                        const tagId = bubble.getAttribute('data-id');
+                        if (bubble.classList.contains('selected')) {
+                            bubble.classList.remove('selected');
+                            selectedTagIds.delete(String(tagId));
+                        } else {
+                            bubble.classList.add('selected');
+                            selectedTagIds.add(String(tagId));
+                        }
+                    });
+
+                    container.appendChild(bubble);
+                }
+            });
+        }
+
+        // When the "Select Tags" button is clicked, open the modal and initialize the selection.
+        document.getElementById('openTagModalBtn').addEventListener('click', function() {
+            // When opening, initialize our global variable from the hidden input (if any).
+            const hiddenVal = document.getElementById('selectedCommonTags').value;
+            if (hiddenVal) {
+                hiddenVal.split(',').forEach(id => selectedTagIds.add(id));
+            }
+            buildTagBubbles(); // Build without a filter
+            $('#tagModal').modal('show');
+        });
+
+        // Filter tag bubbles as the user types in the search field.
+        document.getElementById('tagSearch').addEventListener('input', function() {
+            const filter = this.value;
+            buildTagBubbles(filter);
+        });
+
+        // Deselect all button clears the global selection and rebuilds the bubbles.
+        document.getElementById('deselectAllBtn').addEventListener('click', function() {
+            selectedTagIds.clear();
+            const filter = document.getElementById('tagSearch').value;
+            buildTagBubbles(filter);
+        });
+
+        // When the user clicks "Done", update the hidden input and display the selected tag names.
+        document.getElementById('saveTagSelection').addEventListener('click', function() {
+            // Update the hidden input with the selected tag IDs (comma-separated)
+            document.getElementById('selectedCommonTags').value = Array.from(selectedTagIds).join(',');
+
+            // Optionally update a display area with the selected tag names
+            const selectedBubbles = document.querySelectorAll('#tagBubbleContainer .tag-bubble.selected');
+            const display = document.getElementById('selectedTagDisplay');
+            display.innerHTML = selectedBubbles.length
+                ? Array.from(selectedBubbles).map(b => b.textContent).join(', ')
+                : '<em>No tags selected</em>';
+
+            $('#tagModal').modal('hide');
+        });
+    });
 </script>
+<!-- JavaScript to filter images based on selected tags -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function that applies the tag filters to the image grid
+        function filterImages() {
+            // Get all checked tag filter values (converted to lowercase)
+            const selectedTags = Array.from(document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]:checked')).map((cb) => cb.value.toLowerCase());
+
+            // Get all image grid items (assumed to have a 'data-tags' attribute)
+            const gridItems = document.querySelectorAll(".image-grid .grid-item");
+            gridItems.forEach((item) => {
+                // Split the data-tags attribute into an array and trim whitespace
+                const itemTags = item.getAttribute("data-tags")
+                    ? item
+                          .getAttribute("data-tags")
+                          .split(",")
+                          .map((t) => t.trim().toLowerCase())
+                    : [];
+
+                // If no tags are selected, show the image; otherwise, show only if at least one tag matches.
+                if (selectedTags.length === 0) {
+                    item.style.display = "";
+                } else {
+                    const hasTag = selectedTags.some((tag) => itemTags.includes(tag));
+                    item.style.display = hasTag ? "" : "none";
+                }
+            });
+        }
+
+        // Attach change event listeners to each tag checkbox.
+        const tagCheckboxes = document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]');
+        tagCheckboxes.forEach((cb) => {
+            cb.addEventListener("change", filterImages);
+        });
+
+        // Filter the checkboxes based on the search bar input.
+        const tagFilterSearch = document.getElementById("tagFilterSearch");
+        tagFilterSearch.addEventListener("input", function () {
+            const filterValue = this.value.toLowerCase();
+            const checkboxes = document.querySelectorAll("#tagFiltersContainer .tag-checkbox");
+            checkboxes.forEach((cb) => {
+                // Show or hide each checkbox based on whether its label contains the search text.
+                const labelText = cb.textContent.toLowerCase();
+                cb.style.display = labelText.includes(filterValue) ? "block" : "none";
+            });
+            // Reapply the image filter.
+            filterImages();
+        });
+
+        // "Deselect All" button clears all tag checkboxes.
+        document.getElementById("deselectAllTagsBtn").addEventListener("click", function () {
+            document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]').forEach((cb) => {
+                cb.checked = false;
+            });
+            filterImages(); // Show all images when no tags are selected.
+        });
+    });
+</script>
+
 {% endblock %}

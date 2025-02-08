@@ -17,8 +17,8 @@
         <link href="{{ url_for('static', filename='fontawesome-free-6.5.1-web/css/all.css') }}" rel="stylesheet" />
         <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet" />
         <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" />
-        <link rel="preload" href="{{ url_for('static', filename='fonts/Minecraft-Bold.woff2') }}" as="font" type="font/woff2" crossorigin>
-        <link rel="preload" href="{{ url_for('static', filename='fonts/Minecraft-Regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="{{ url_for('static', filename='fonts/Minecraft-Bold.woff2') }}" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="{{ url_for('static', filename='fonts/Minecraft-Regular.woff2') }}" as="font" type="font/woff2" crossorigin />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -35,165 +35,152 @@
         <meta content="{{ url_for('static', filename='images/' + image_filename) }}" property="og:image" />
         <meta content="Summit F2 - {{ image_filename }}" property="og:title" />
         {% else %}
-        <meta content="https://i.imgur.com/hxsaduN.jpeg" property="og:image" />
+        <meta content="https://i.imgur.com/zPGyQJg.jpeg" property="og:image" />
         <meta content="Summit F2" property="og:title" />
         {% endif %}
         <meta content="https://f2.summitmc.xyz/" property="og:url" />
         <meta content="Summit F2 Is A Screenshot Sharing Website" property="og:description" />
         <meta content="#8dbdc4" data-react-helmet="true" name="theme-color" />
-        <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/hxsaduN.jpeg{% endif %}" />
+        <meta name="twitter:card" content="{% if image_filename is defined %}{{ url_for('static', filename='images/' + image_filename) }}{% else %}https://i.imgur.com/zPGyQJg.jpeg{% endif %}" />
         {% endblock %}
     </head>
     <body class="dark">
         <header class="site-header">
             <nav class="header-nav">
-              <!-- Left: Logo -->
-              <div class="logo-container">
-                <!-- Home Button -->
-                <a
-                  href="{{ url_for('index') }}"
-                  class="no-highlight small-padding small-margin"
-                >
-                  <h6 class="styled_font_4 center-align middle-align">
-                    F2
-                  </h6>
-                </a>
-              </div>
-          
-              <!-- Hamburger Menu Button (VISIBLE ONLY ON MOBILE) -->
-              <button class="hamburger styled_font_4" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
-              
-              <!-- Right: Links Container -->
-              <div class="links-container">
-                <!-- If user is logged in -->
-                {% if 'discord_id' in session %}
-                <img
-                  src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}"
-                  alt="Avatar"
-                  class="avatar"
-                />
-                <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
-                <span class="spacer_lr">
-                  <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
-                    <i class="rounded-0 solid_1 show-overflow">upload</i>
-                    <p class="login_text_mobile solid_1">Upload</p>
-                  </a>
-                </span>
-                <span class="spacer_lr">
-                  <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
-                    <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Toggle Particles</p>
-                  </a>
-                </span>
-                <span class="spacer_lr">
-                  <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
-                    <i class="rounded-0 solid_1">logout</i>
-                    <p class="login_text_mobile solid_1">Logout</p>
-                  </a>
-                </span>
-                <!-- If guest -->
-                {% elif 'guest_id' in session %}
-                <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
-                <span class="spacer_lr">
-                  <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Login With</p>
-                  </a>
-                </span>
-                <span class="spacer_lr">
-                  <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
-                    <i class="rounded-0 solid_1 show-overflow">upload</i>
-                    <p class="login_text_mobile solid_1">Upload</p>
-                  </a>
-                </span>
-                <span class="spacer_lr">
-                  <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
-                    <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Toggle Particles</p>
-                  </a>
-                </span>
-                <!-- Otherwise not logged in -->
-                {% else %}
-                <span class="spacer_lr">
-                  <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
-                    <p class="login_text solid_2">Login With</p>
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                  </a>
-                </span>
-                {% endif %}
-              </div>
+                <!-- Left: Logo -->
+                <div class="logo-container">
+                    <!-- Home Button -->
+                    <a href="{{ url_for('index') }}" class="no-highlight small-padding small-margin">
+                        <h6 class="styled_font_4 center-align middle-align">
+                            F2
+                        </h6>
+                    </a>
+                </div>
+
+                <!-- Hamburger Menu Button (VISIBLE ONLY ON MOBILE) -->
+                <button class="hamburger styled_font_4" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <!-- Right: Links Container -->
+                <div class="links-container">
+                    <!-- If user is logged in -->
+                    {% if 'discord_id' in session %}
+                    <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar" />
+                    <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">upload</i>
+                            <p class="login_text_mobile solid_1">Upload</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
+                        <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                            <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                            <p class="login_text_mobile solid_1">Toggle Particles</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1">logout</i>
+                            <p class="login_text_mobile solid_1">Logout</p>
+                        </a>
+                    </span>
+                    <!-- If guest -->
+                    {% elif 'guest_id' in session %}
+                    <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
+                            <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                            <p class="login_text_mobile solid_1">Login With</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">upload</i>
+                            <p class="login_text_mobile solid_1">Upload</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
+                        <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                            <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                            <p class="login_text_mobile solid_1">Toggle Particles</p>
+                        </a>
+                    </span>
+                    <!-- Otherwise not logged in -->
+                    {% else %}
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
+                            <p class="login_text solid_2">Login With</p>
+                            <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                        </a>
+                    </span>
+                    {% endif %}
+                </div>
             </nav>
-          </header>
-          <!-- MOBILE ONLY -->
-          <nav class="s m right links-container_mobile" id="nav-menu">
+        </header>
+        <!-- MOBILE ONLY -->
+        <nav class="s m right links-container_mobile" id="nav-menu">
             <header>
-              {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #}
-              {% if 'discord_id' in session %}
-                <img class="circle" src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}">
+                {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #} {% if 'discord_id' in session %}
+                <img class="circle" src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" />
                 <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
-              {% else %}
-                <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}">
-              {% endif %}
+                {% else %}
+                <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}" />
+                {% endif %}
             </header>
             <div class="flex row wrap stay_aligned">
-            {% if 'discord_id' in session %}
-              {# Logged-in user links #}
-              <span>
-                <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
-                  <i class="rounded-0 solid_1 show-overflow">upload</i>
-                  <p class="login_text_mobile solid_1">Upload</p>
-                </a>
-              </span>
-              <span>
-                <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
-                  <i class="rounded-0 solid_1">logout</i>
-                  <p class="login_text_mobile solid_1">Logout</p>
-                </a>
-              </span>
-              <span>
-                <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
-                  <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                  <p class="login_text_mobile solid_1">Toggle Particles</p>
-                </a>
-              </span>
-            {% elif 'guest_id' in session %}
-              {# Guest user links #}
+                {% if 'discord_id' in session %} {# Logged-in user links #}
+                <span>
+                    <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">upload</i>
+                        <p class="login_text_mobile solid_1">Upload</p>
+                    </a>
+                </span>
+                <span>
+                    <a href="{{ url_for('logout') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1">logout</i>
+                        <p class="login_text_mobile solid_1">Logout</p>
+                    </a>
+                </span>
+                <span>
+                    <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                        <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                        <p class="login_text_mobile solid_1">Toggle Particles</p>
+                    </a>
+                </span>
+                {% elif 'guest_id' in session %} {# Guest user links #}
                 <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
                 <span>
-                  <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Login With</p>
-                  </a>
+                    <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
+                        <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                        <p class="login_text_mobile solid_1">Login With</p>
+                    </a>
                 </span>
                 <span>
-                  <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
-                    <i class="rounded-0 solid_1 show-overflow">upload</i>
-                    <p class="login_text_mobile solid_1">Upload</p>
-                  </a>
+                    <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">upload</i>
+                        <p class="login_text_mobile solid_1">Upload</p>
+                    </a>
                 </span>
                 <span>
-                  <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
-                    <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Toggle Particles</p>
-                  </a>
+                    <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                        <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                        <p class="login_text_mobile solid_1">Toggle Particles</p>
+                    </a>
                 </span>
-            {% else %}
-              {# Not logged in: only show the login button #}
+                {% else %} {# Not logged in: only show the login button #}
                 <span>
-                  <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
-                    <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
-                    <p class="login_text_mobile solid_1">Login With</p>
-                  </a>
+                    <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
+                        <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
+                        <p class="login_text_mobile solid_1">Login With</p>
+                    </a>
                 </span>
-            {% endif %}
+                {% endif %}
             </div>
-          </nav>
-          
-          
+        </nav>
 
         <div class="full_height">
             {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
@@ -213,47 +200,47 @@
         <script src="{{ url_for('static', filename='js/particles3.js') }}"></script>
         <script src="{{ url_for('static', filename='js/image.js') }}"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              const hamburger = document.getElementById('hamburger');
-              const navMenu = document.getElementById('nav-menu');
-          
-              hamburger.addEventListener('click', () => {
-                // Toggle the 'show' class on the menu
-                navMenu.classList.toggle('show');
-              });
+            document.addEventListener("DOMContentLoaded", function () {
+                const hamburger = document.getElementById("hamburger");
+                const navMenu = document.getElementById("nav-menu");
+
+                hamburger.addEventListener("click", () => {
+                    // Toggle the 'show' class on the menu
+                    navMenu.classList.toggle("show");
+                });
             });
-          </script>
-          <script>
+        </script>
+        <script>
             // 1. On page load, read localStorage and set initial display state
             document.addEventListener("DOMContentLoaded", function () {
-              const div = document.getElementById("particles-js");
-              if (!div) return;
-              
-              // If localStorage says "false", hide the particles div
-              const storedPreference = localStorage.getItem("particlesEnabled");
-              if (storedPreference === "false") {
-                div.style.display = "none";
-              } else {
-                // Otherwise default to show
-                div.style.display = "block";
-              }
+                const div = document.getElementById("particles-js");
+                if (!div) return;
+
+                // If localStorage says "false", hide the particles div
+                const storedPreference = localStorage.getItem("particlesEnabled");
+                if (storedPreference === "false") {
+                    div.style.display = "none";
+                } else {
+                    // Otherwise default to show
+                    div.style.display = "block";
+                }
             });
-          
+
             // 2. The original toggle function, but with localStorage
             function toggleParticles() {
-              const div = document.getElementById("particles-js");
-              if (!div) return;
-          
-              // If currently hidden, show and store "true"; otherwise hide and store "false"
-              if (div.style.display === "none") {
-                div.style.display = "block";
-                localStorage.setItem("particlesEnabled", "true");
-              } else {
-                div.style.display = "none";
-                localStorage.setItem("particlesEnabled", "false");
-              }
+                const div = document.getElementById("particles-js");
+                if (!div) return;
+
+                // If currently hidden, show and store "true"; otherwise hide and store "false"
+                if (div.style.display === "none") {
+                    div.style.display = "block";
+                    localStorage.setItem("particlesEnabled", "true");
+                } else {
+                    div.style.display = "none";
+                    localStorage.setItem("particlesEnabled", "false");
+                }
             }
-          </script>
+        </script>
         {% block extra_js %}{% endblock %}
     </body>
 </html>

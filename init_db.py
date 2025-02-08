@@ -1,11 +1,12 @@
+# init_db.py
 import os
 import sqlite3
 from dotenv import load_dotenv
 
 def init_db():
     """
-    Creates (if missing) the core tables needed by the screenshot app.
-    Sets permissions on the database file and directory.
+    Creates (if missing) the core tables needed by the screenshot app,
+    seeds default tags, and sets permissions on the database file and directory.
     """
 
     # 1. Load environment variables
@@ -23,6 +24,8 @@ def init_db():
 
     # 4. Create and connect to the SQLite database
     with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        
         # -- 4a. Create screenshots table
         conn.execute("""
             CREATE TABLE IF NOT EXISTS screenshots (
@@ -99,8 +102,112 @@ def init_db():
             )
         """)
 
+        # 4h. Seed default tags
+        default_tags = [
+            # Game Versions & Modding
+            'vanilla',
+            'modded',
+            'bedrock',
+            'java',
+            
+            # Graphics & Visuals
+            'no shaders',
+            'shaders',
+            'realism',
+            '16x',
+            '32x',
+            '64x',
+            '128x',
+            '256x',
+            '512x or higher',
+            'reflective',
+            'bedrock RTX',
+            
+            # Popular Shader Packs
+            'SEUS',
+            'SEUS GFME',
+            'BSL Shaders',
+            'Bliss',
+            'Complementary',
+            'Complementary + Euphoria Patches',
+            'Shrimple',
+            'Noble',
+            'MollyVX',
+            'Kappa',
+            'KappaPT',
+            'Nostalgia',
+            'NostalgiaVX',
+            'rre36',
+            'Photon',
+            'Rethinking Voxels',
+            'Continuum',
+            
+            # Dimensions & Structures
+            'cave',
+            'underground',
+            'nether',
+            'end',
+            'overworld',
+            'ancient city',
+            'deep dark',
+            
+            # Biomes
+            ' plains biome',
+            ' forest biome',
+            ' jungle biome',
+            ' desert biome',
+            ' taiga biome',
+            ' savanna biome',
+            ' snowy biome',
+            ' warped forest biome',
+            ' crimson forest biome',
+            ' soul sand valley biome',
+            ' basalt deltas biome',
+            
+            # Structures
+            'village',
+            'stronghold',
+            'nether fortress',
+            'end city',
+            'ocean monument',
+            'pillager outpost',
+            'farm',
+            'castle',
+            
+            # Gameplay Elements
+            'survival',
+            'creative',
+            
+            # Blocks & Items
+            'Metal Blocks',
+            'Glass Blocks',
+            'Stone Blocks',
+            'Folliage Blocks',
+            'Ground Blocks',
+            'Desert Blocks',
+            'Nether Blocks',
+            'End Blocks',
+            'Utility Blocks',
+            'Decoration Blocks',
+            'Special Blocks',
+            
+            # Resource Packs
+            'Alex Testria Brickcraft',
+            'Patrix',
+            'Vanilla PBR Styled Pack',
+            'Summit',
+            'MrAAA',
+            'Coven',
+            'Faithful',
+            'Optimum Realism',
+            'SubtlePBR',
+            'Amulet',
+        ]
+        for tag in default_tags:
+            conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))
+        
         conn.commit()
-        print("All tables created or verified successfully.")
+        print("All tables created or verified successfully and default tags seeded.")
 
     # 5. (Optional) Set file permissions
     try:

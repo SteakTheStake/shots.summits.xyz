@@ -71,6 +71,12 @@
                     <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar" />
                     <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
                     <span class="spacer_lr">
+                        <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                            <p class="login_text_mobile solid_1">Gallery</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
                         <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
                             <i class="rounded-0 solid_1 show-overflow">upload</i>
                             <p class="login_text_mobile solid_1">Upload</p>
@@ -92,6 +98,12 @@
                     {% elif 'guest_id' in session %}
                     <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
                     <span class="spacer_lr">
+                        <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                            <p class="login_text_mobile solid_1">Gallery</p>
+                        </a>
+                    </span>
+                    <span class="spacer_lr">
                         <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
                             <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                             <p class="login_text_mobile solid_1">Login With</p>
@@ -111,6 +123,12 @@
                     </span>
                     <!-- Otherwise not logged in -->
                     {% else %}
+                    <span class="spacer_lr">
+                        <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                            <p class="login_text_mobile solid_1">Gallery</p>
+                        </a>
+                    </span>
                     <span class="spacer_lr">
                         <a href="{{ url_for('login') }}" class="btn_better_dsc round large small-padding">
                             <p class="login_text solid_2">Login With</p>
@@ -134,6 +152,12 @@
             <div class="flex row wrap stay_aligned">
                 {% if 'discord_id' in session %} {# Logged-in user links #}
                 <span>
+                    <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                        <p class="login_text_mobile solid_1">Gallery</p>
+                    </a>
+                </span>
+                <span>
                     <a href="{{ url_for('upload') }}" class="btn_better_alt_mobile round large small-padding">
                         <i class="rounded-0 solid_1 show-overflow">upload</i>
                         <p class="login_text_mobile solid_1">Upload</p>
@@ -154,6 +178,12 @@
                 {% elif 'guest_id' in session %} {# Guest user links #}
                 <span class="styled_font_2 text-fit-content">{{ session.guest_username }}</span>
                 <span>
+                    <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                        <p class="login_text_mobile solid_1">Gallery</p>
+                    </a>
+                </span>
+                <span>
                     <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
                         <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                         <p class="login_text_mobile solid_1">Login With</p>
@@ -172,6 +202,12 @@
                     </a>
                 </span>
                 {% else %} {# Not logged in: only show the login button #}
+                <span>
+                    <a href="{{ url_for('index') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">photo_library</i>
+                        <p class="login_text_mobile solid_1">Gallery</p>
+                    </a>
+                </span>
                 <span>
                     <a href="{{ url_for('login') }}" class="btn_better_dsc_mobile round large small-padding">
                         <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>

@@ -793,7 +793,7 @@ def create_app():
             session["username"] = session["guest_username"]
             session.permanent = True
 
-        # Read the tags filter from the URL query parameter.
+        # Read the tag filter from the URL query parameter.
         tags_param = request.args.get("tags", "")
         # Build a list of tag IDs (as strings) if provided.
         filter_ids = [t.strip() for t in tags_param.split(",") if t.strip()] if tags_param else []
@@ -802,25 +802,29 @@ def create_app():
             conn.row_factory = sqlite3.Row
 
             if filter_ids:
-                # Build placeholders for the selected tag IDs.
+                # Build placeholders for the tag IDs.
                 placeholders = ",".join(["?"] * len(filter_ids))
+                # This query returns images that have at least one of the selected tags,
+                # and then uses HAVING to require that the number of distinct matching tags
+                # equals the number of filter tags (i.e. the image has all the selected tags).
                 query = f"""
                     SELECT
                     s.id,
                     s.filename,
                     COALESCE(s.discord_username, s.guest_username) AS uploader_name,
                     g.name AS group_name,
-                    GROUP_CONCAT(t.name) AS tags,
-                    SUM(CASE WHEN st.tag_id IN ({placeholders}) THEN 1 ELSE 0 END) AS match_count
+                    GROUP_CONCAT(DISTINCT t.name) AS tags,
+                    COUNT(DISTINCT CASE WHEN st.tag_id IN ({placeholders}) THEN st.tag_id END) AS match_count
                     FROM screenshots s
                     LEFT JOIN screenshot_groups g ON s.group_id = g.id
                     LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
                     LEFT JOIN tags t ON st.tag_id = t.id
                     GROUP BY s.id
-                    HAVING match_count > 0
+                    HAVING match_count = ?
                     ORDER BY s.upload_date DESC
                 """
-                screenshots = conn.execute(query, tuple(filter_ids)).fetchall()
+                # Append the required count (which should equal the length of filter_ids)
+                screenshots = conn.execute(query, tuple(filter_ids) + (len(filter_ids),)).fetchall()
             else:
                 screenshots = conn.execute(
                     """
@@ -829,7 +833,7 @@ def create_app():
                     s.filename,
                     COALESCE(s.discord_username, s.guest_username) AS uploader_name,
                     g.name AS group_name,
-                    GROUP_CONCAT(t.name) AS tags
+                    GROUP_CONCAT(t.name, ', ') AS tags
                     FROM screenshots s
                     LEFT JOIN screenshot_groups g ON s.group_id = g.id
                     LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
@@ -839,12 +843,11 @@ def create_app():
                     """
                 ).fetchall()
 
-            users = sorted({ screenshot["uploader_name"] for screenshot in screenshots })
             # Query all tags from the tags table for the modal.
             tags = conn.execute("SELECT id, name FROM tags ORDER BY name").fetchall()
 
-        # Pass the current filter (list of tag IDs) so you can optionally display active filters.
-        return render_template("index.html", screenshots=screenshots, preapproved_tags=tags, current_filters=filter_ids)
+        return render_template("index.html", screenshots=screenshots, preapproved_tags=tags)
+
 
 
     # Add this to your app.py temporarily to debug

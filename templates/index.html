@@ -62,30 +62,32 @@
         <div class="image-info">
             {% if screenshot.group_name %}
             <p class="group fancy-text">{{ screenshot.group_name }}</p>
-            {% endif %} {% if screenshot.tags %}
+            {% endif %}
+            
+            {% if screenshot.tags %}
             <div class="tags">
-                {% for tag in screenshot.tags.split(',') %}
-                <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
+                {% for tag in screenshot.tags.split(', ') %}
+                    <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
                 {% endfor %}
             </div>
             {% endif %}
-
+            
             <p class="username bold underline">
-                @{{ screenshot.uploader_name }}
-                <i class="fa-regular fa-user small no-round tiny-padding"></i>
+            @{{ screenshot.uploader_name }}
+            <i class="fa-regular fa-user small no-round tiny-padding"></i>
             </p>
-
+            
             <nav class="auto-width">
-                <div class="image-actions tiny-padding">
-                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
-                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                    {% endif %}
-                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
-                        Report
-                    </button>
-                </div>
+            <div class="image-actions tiny-padding">
+                {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+                <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                {% endif %}
+                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
+                Report
+                </button>
+            </div>
             </nav>
         </div>
     </div>
@@ -139,26 +141,25 @@
       // Global variables for filters.
       let selectedTagIds = new Set();
       let selectedUser = null;
-
+    
       // Our preapprovedTags array built from server data.
       const preapprovedTags = [
         {% for tag in preapproved_tags %}
           { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
         {% endfor %}
       ];
-
+    
       // Our availableUsers array built from server data.
-      // Ensure your index route passes a "users" variable.
       const availableUsers = [
         {% for user in users %}
           "{{ user }}"{% if not loop.last %},{% endif %}
         {% endfor %}
       ];
-
-      // Build tag bubbles.
+    
+      // Build tag bubbles in the modal.
       function buildTagBubbles(filter = '') {
         const container = document.getElementById('tagBubbleContainer');
-        container.innerHTML = '';
+        container.innerHTML = ''; // Clear previous bubbles
         preapprovedTags.forEach(tag => {
           if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
             const bubble = document.createElement('div');
@@ -182,146 +183,128 @@
           }
         });
       }
-
-      // Build user bubbles (only one selection allowed).
-function buildUserBubbles(filter = "") {
-    const container = document.getElementById("userBubbleContainer");
-    container.innerHTML = "";
-    availableUsers.forEach((user) => {
-        if (user.toLowerCase().includes(filter.toLowerCase())) {
-            const bubble = document.createElement("div");
-            bubble.classList.add("user-bubble");
-            bubble.setAttribute("data-user", user);
+    
+      // Build user bubbles in the modal.
+      function buildUserBubbles(filter = '') {
+        const container = document.getElementById('userBubbleContainer');
+        if (!container) return;
+        container.innerHTML = ''; // Clear previous bubbles
+        availableUsers.forEach(user => {
+          if (user.toLowerCase().includes(filter.toLowerCase())) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('user-bubble');
+            bubble.setAttribute('data-user', user);
             bubble.textContent = user;
             if (selectedUser === user) {
-                bubble.classList.add("selected");
+              bubble.classList.add('selected');
             }
-            bubble.addEventListener("click", function () {
-                // Toggle selection: if already selected, deselect.
-                if (selectedUser === user) {
-                    selectedUser = null;
-                } else {
-                    selectedUser = user;
-                }
-                buildUserBubbles(document.getElementById("userSearch").value);
+            bubble.addEventListener('click', function () {
+              // Only one user may be selected.
+              if (selectedUser === user) {
+                selectedUser = null;
+              } else {
+                selectedUser = user;
+              }
+              buildUserBubbles(document.getElementById('userSearch').value);
             });
             container.appendChild(bubble);
+          }
+        });
+      }
+    
+      // On page load, check the URL for filters.
+      const urlParams = new URLSearchParams(window.location.search);
+      const tagsParam = urlParams.get("tags"); // Expected as comma-separated tag IDs.
+      const userParam = urlParams.get("user"); // Expected as a user string.
+      if (tagsParam) {
+        document.getElementById("selectedCommonTags").value = tagsParam;
+        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
+      }
+      if (userParam) {
+        document.getElementById("selectedUser").value = userParam;
+        selectedUser = userParam;
+      }
+      // Build the modal bubbles to reflect any preselected filters.
+      buildTagBubbles();
+      buildUserBubbles();
+    
+      // When the "Select Tags" button is clicked, open the modal.
+      document.getElementById("openTagModalBtn").addEventListener("click", function () {
+        // Reinitialize the selection from the hidden inputs.
+        const hiddenTags = document.getElementById("selectedCommonTags").value;
+        if (hiddenTags) {
+          hiddenTags.split(",").forEach(id => selectedTagIds.add(id.trim()));
         }
-    });
-}
-
-// On page load, check URL for filters.
-const urlParams = new URLSearchParams(window.location.search);
-const tagsParam = urlParams.get("tags"); // Expected as comma-separated tag IDs.
-const userParam = urlParams.get("user"); // Expected as a user string.
-if (tagsParam) {
-    document.getElementById("selectedCommonTags").value = tagsParam;
-    tagsParam.split(",").forEach((id) => selectedTagIds.add(id.trim()));
-}
-if (userParam) {
-    document.getElementById("selectedUser").value = userParam;
-    selectedUser = userParam;
-}
-// Build the modal bubbles with any preselected filters.
-buildTagBubbles();
-buildUserBubbles();
-
-// When "Select Tags" button is clicked, open the modal.
-document.getElementById("openTagModalBtn").addEventListener("click", function () {
-    // Reinitialize selectedTagIds and selectedUser from hidden inputs.
-    const hiddenTags = document.getElementById("selectedCommonTags").value;
-    if (hiddenTags) {
-        hiddenTags.split(",").forEach((id) => selectedTagIds.add(id.trim()));
-    }
-    const hiddenUser = document.getElementById("selectedUser").value;
-    if (hiddenUser) {
-        selectedUser = hiddenUser;
-    }
-    buildTagBubbles();
-    buildUserBubbles();
-    $("#tagModal").modal("show");
-});
-
-// Tag search filtering.
-document.getElementById("tagSearch").addEventListener("input", function () {
-    buildTagBubbles(this.value);
-});
-
-// User search filtering.
-document.getElementById("userSearch").addEventListener("input", function () {
-    buildUserBubbles(this.value);
-});
-
-// Deselect All button for tags.
-document.getElementById("deselectAllBtn").addEventListener("click", function () {
-    selectedTagIds.clear();
-    buildTagBubbles(document.getElementById("tagSearch").value);
-});
-
-// When "Done" is clicked, update hidden inputs and URL.
-document.getElementById("saveFilterSelection").addEventListener("click", function () {
-    // Create a comma-separated string of selected tag IDs.
-    const selectedTagString = Array.from(selectedTagIds).join(",");
-    // Update hidden inputs for tags and user.
-    document.getElementById("selectedCommonTags").value = selectedTagString;
-    document.getElementById("selectedUser").value = selectedUser ? selectedUser : "";
-
-    // Update the summary display using the div with id "selectedTagDisplay".
-    const tagDisplay = document.getElementById("selectedTagDisplay");
-    tagDisplay.innerHTML =
-        Array.from(selectedTagIds)
-            .map((id) => {
-                const tag = preapprovedTags.find((t) => String(t.id) === id);
-                return tag ? tag.name : "";
+        const hiddenUser = document.getElementById("selectedUser").value;
+        if (hiddenUser) {
+          selectedUser = hiddenUser;
+        }
+        buildTagBubbles();
+        buildUserBubbles();
+        $("#tagModal").modal("show");
+      });
+    
+      // Tag search filtering.
+      document.getElementById("tagSearch").addEventListener("input", function () {
+        buildTagBubbles(this.value);
+      });
+    
+      // User search filtering.
+      document.getElementById("userSearch").addEventListener("input", function () {
+        buildUserBubbles(this.value);
+      });
+    
+      // Deselect All button for tags.
+      document.getElementById("deselectAllBtn").addEventListener("click", function () {
+        selectedTagIds.clear();
+        buildTagBubbles(document.getElementById("tagSearch").value);
+      });
+    
+      // When "Done" is clicked in the modal, update hidden inputs, update summary, and update URL.
+      document.getElementById("saveFilterSelection").addEventListener("click", function () {
+        const selectedTagString = Array.from(selectedTagIds).join(",");
+        document.getElementById("selectedCommonTags").value = selectedTagString;
+        document.getElementById("selectedUser").value = selectedUser ? selectedUser : "";
+        const tagDisplay = document.getElementById("selectedTagDisplay");
+        tagDisplay.innerHTML =
+          Array.from(selectedTagIds)
+            .map(id => {
+              const tag = preapprovedTags.find(t => String(t.id) === id);
+              return tag ? tag.name : "";
             })
             .filter(Boolean)
             .join(", ") + (selectedUser ? " | " + selectedUser : "");
-
-        // Close the modal.
         $("#tagModal").modal("hide");
-
-        // Build the new URL with the selected tag IDs (using a simple format)
         let newUrl = window.location.pathname;
         const params = new URLSearchParams();
         if (selectedTagString) {
-            params.set("tags", selectedTagString);
+          params.set("tags", selectedTagString);
         }
         if (selectedUser) {
-            params.set("user", selectedUser);
+          params.set("user", selectedUser);
         }
         if ([...params].length) {
-            newUrl += "?" + params.toString();
+          newUrl += "?" + params.toString();
         }
-        // Redirect to the new URL so that the filters persist.
         window.location.href = newUrl;
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const removeAllBtn = document.getElementById("removeAllTags");
-    if (removeAllBtn) {
+      });
+    
+      // Additional: When the button with id "removeAllTags" is clicked, clear all filters and refresh the page.
+      const removeAllBtn = document.getElementById("removeAllTags");
+      if (removeAllBtn) {
         removeAllBtn.addEventListener("click", function () {
-            // Clear the hidden input that holds the selected tag IDs.
-            document.getElementById("selectedCommonTags").value = "";
-
-            // If you are using a global variable for tag selection (e.g., selectedTagIds),
-            // you might also want to clear it:
-            if (typeof selectedTagIds !== "undefined" && selectedTagIds.clear) {
-                selectedTagIds.clear();
-            }
-
-            // Optionally, update any display elements showing selected tags:
-            const display = document.getElementById("selectedTagDisplay");
-            if (display) {
-                display.innerHTML = "<em>No tags selected</em>";
-            }
-
-            // Refresh the page without query parameters.
-            // This assumes that the base URL should be used when no tags are selected.
-            window.location.href = window.location.pathname;
+          document.getElementById("selectedCommonTags").value = "";
+          document.getElementById("selectedUser").value = "";
+          selectedTagIds.clear();
+          selectedUser = null;
+          const display = document.getElementById("selectedTagDisplay");
+          if (display) {
+            display.innerHTML = "<em>No filters selected</em>";
+          }
+          window.location.href = window.location.pathname;
         });
-    }
-});
-</script>
-
+      }
+    });
+    </script>
+    
 {% endblock %}

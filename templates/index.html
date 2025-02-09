@@ -1,25 +1,37 @@
 {% extends "base.html" %} {% block content %}
-<!-- Modal for Tag Selection with Search and Deselect All -->
+
+<!-- Modal for Tag & User Selection with Search and Deselect All -->
 <div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="tagModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal_centered modal-content bg-dark text-light">
             <div class="modal-header">
-                <h5 class="modal-title" id="tagModalLabel">Select Tags</h5>
+                <h5 class="modal-title" id="tagModalLabel">Select Filters</h5>
                 <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Search Bar & Deselect All Button -->
+                <!-- Tag Filter Section -->
                 <div class="form-group">
+                    <label class="text-light">Filter by Tags</label>
                     <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
-                    <button type="button" class="btn btn-secondary btn-sm mt-2" id="deselectAllBtn">Deselect All</button>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-primary btn-sm" id="saveFilterSelection">Done</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="deselectAllBtn">Deselect All</button>
+                    </div>
                 </div>
                 <!-- Container for Tag Bubbles -->
-                <div id="tagBubbleContainer" class="d-flex flex-wrap"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
+                <div id="tagBubbleContainer" class="d-flex flex-wrap mb-3"></div>
+
+                <hr class="bg-light" />
+
+                <!-- User Filter Section -->
+                <div class="form-group">
+                    <label class="text-light">Filter by User</label>
+                    <input type="text" id="userSearch" class="form-control" placeholder="Search users..." />
+                </div>
+                <!-- Container for User Bubbles -->
+                <div id="userBubbleContainer" class="d-flex flex-wrap"></div>
             </div>
         </div>
     </div>
@@ -28,15 +40,15 @@
 <!-- Filter Menu Section -->
 <div class="filter-menu">
     <div class="filter-section">
-        <!-- Hidden input for modal-based tag selection -->
+        <!-- Hidden inputs to store selected tag IDs and selected user -->
         <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
-        <!-- Button to open modal for selecting tags -->
-        <button type="button" id="openTagModalBtn" class="filter-toggle">
-            <i class="fas fa-filter"></i> Filters
-        </button>
+        <input type="hidden" id="selectedUser" name="user" value="" />
+        <!-- Button to open modal for selecting filters -->
+        <button type="button" id="openTagModalBtn" class="filter-toggle"><i class="fas fa-filter"></i> Filters</button>
     </div>
-    <!-- This container shows a summary of currently selected tags (optional) -->
-    <div id="selectedTagDisplay" class="mt-2 text-light"></div>
+    <!-- Display a summary of currently selected filters (optional) -->
+    <div id="selectedTagDisplay" class="mt-2 text-light bottom_margin"></div>
+    <button type="button" class="btn btn-secondary btn-sm" id="removeAllTags">Remove Filters</button>
 </div>
 
 <!-- Single Grid Container -->
@@ -50,9 +62,7 @@
         <div class="image-info">
             {% if screenshot.group_name %}
             <p class="group fancy-text">{{ screenshot.group_name }}</p>
-            {% endif %} {# Removed the date display #} {#
-            <p class="date small no-padding no-margin">{{ screenshot.upload_date }}</p>
-            #} {% if screenshot.tags %}
+            {% endif %} {% if screenshot.tags %}
             <div class="tags">
                 {% for tag in screenshot.tags.split(',') %}
                 <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
@@ -108,7 +118,7 @@
     {% endfor %}
 </div>
 
-<!-- Lightbox -->
+<!-- Lightbox (unchanged) -->
 <div class="lightbox">
     <div class="close-lightbox">
         <i class="fas fa-times"></i>
@@ -116,165 +126,202 @@
     <div class="lightbox-nav lightbox-prev">
         <i class="fas fa-chevron-left"></i>
     </div>
-
-    <!-- The image displayed in the lightbox -->
     <img src="" alt="Enlarged view" />
-
     <div class="lightbox-nav lightbox-next">
         <i class="fas fa-chevron-right"></i>
     </div>
-
-    <!-- The info container at the bottom of the lightbox -->
     <div class="lightbox-info"></div>
 </div>
+
+<!-- JavaScript for Modal Tag Selection and URL-Based Filtering with Persistent Selection -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Global variable to hold selected tag IDs as strings.
-        let selectedTagIds = new Set();
+      // Global variables for filters.
+      let selectedTagIds = new Set();
+      let selectedUser = null;
 
-        // Our preapprovedTags array is built from the server data:
-        const preapprovedTags = [
+      // Our preapprovedTags array built from server data.
+      const preapprovedTags = [
         {% for tag in preapproved_tags %}
-            { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+          { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
         {% endfor %}
-        ];
+      ];
 
-        /**
-         * Build the tag bubbles into the container, using the global selectedTagIds
-         * to mark which bubbles are selected.
-         * @param {string} filter - Optional filter string to match tag names.
-         */
-        function buildTagBubbles(filter = '') {
-            const container = document.getElementById('tagBubbleContainer');
-            container.innerHTML = ''; // Clear any existing bubbles
+      // Our availableUsers array built from server data.
+      // Ensure your index route passes a "users" variable.
+      const availableUsers = [
+        {% for user in users %}
+          "{{ user }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
 
-            preapprovedTags.forEach(tag => {
-                // Check if tag name matches the filter (case-insensitive)
-                if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
-                    const bubble = document.createElement('div');
-                    bubble.classList.add('tag-bubble');
-                    bubble.setAttribute('data-id', tag.id);
-                    bubble.textContent = tag.name;
-
-                    // Mark as selected if this tag's id is in our global set
-                    if (selectedTagIds.has(String(tag.id))) {
-                        bubble.classList.add('selected');
-                    }
-
-                    // Toggle selection on click and update the global set accordingly
-                    bubble.addEventListener('click', function() {
-                        const tagId = bubble.getAttribute('data-id');
-                        if (bubble.classList.contains('selected')) {
-                            bubble.classList.remove('selected');
-                            selectedTagIds.delete(String(tagId));
-                        } else {
-                            bubble.classList.add('selected');
-                            selectedTagIds.add(String(tagId));
-                        }
-                    });
-
-                    container.appendChild(bubble);
-                }
-            });
-        }
-
-        // When the "Select Tags" button is clicked, open the modal and initialize the selection.
-        document.getElementById('openTagModalBtn').addEventListener('click', function() {
-            // When opening, initialize our global variable from the hidden input (if any).
-            const hiddenVal = document.getElementById('selectedCommonTags').value;
-            if (hiddenVal) {
-                hiddenVal.split(',').forEach(id => selectedTagIds.add(id));
+      // Build tag bubbles.
+      function buildTagBubbles(filter = '') {
+        const container = document.getElementById('tagBubbleContainer');
+        container.innerHTML = '';
+        preapprovedTags.forEach(tag => {
+          if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('tag-bubble');
+            bubble.setAttribute('data-id', tag.id);
+            bubble.textContent = tag.name;
+            if (selectedTagIds.has(String(tag.id))) {
+              bubble.classList.add('selected');
             }
-            buildTagBubbles(); // Build without a filter
-            $('#tagModal').modal('show');
+            bubble.addEventListener('click', function() {
+              const tagId = bubble.getAttribute('data-id');
+              if (bubble.classList.contains('selected')) {
+                bubble.classList.remove('selected');
+                selectedTagIds.delete(String(tagId));
+              } else {
+                bubble.classList.add('selected');
+                selectedTagIds.add(String(tagId));
+              }
+            });
+            container.appendChild(bubble);
+          }
         });
+      }
 
-        // Filter tag bubbles as the user types in the search field.
-        document.getElementById('tagSearch').addEventListener('input', function() {
-            const filter = this.value;
-            buildTagBubbles(filter);
-        });
-
-        // Deselect all button clears the global selection and rebuilds the bubbles.
-        document.getElementById('deselectAllBtn').addEventListener('click', function() {
-            selectedTagIds.clear();
-            const filter = document.getElementById('tagSearch').value;
-            buildTagBubbles(filter);
-        });
-
-        // When the user clicks "Done", update the hidden input and display the selected tag names.
-        document.getElementById('saveTagSelection').addEventListener('click', function() {
-            // Update the hidden input with the selected tag IDs (comma-separated)
-            document.getElementById('selectedCommonTags').value = Array.from(selectedTagIds).join(',');
-
-            // Optionally update a display area with the selected tag names
-            const selectedBubbles = document.querySelectorAll('#tagBubbleContainer .tag-bubble.selected');
-            const display = document.getElementById('selectedTagDisplay');
-            display.innerHTML = selectedBubbles.length
-                ? Array.from(selectedBubbles).map(b => b.textContent).join(', ')
-                : '<em>No tags selected</em>';
-
-            $('#tagModal').modal('hide');
-        });
-    });
-</script>
-<!-- JavaScript to filter images based on selected tags -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Function that applies the tag filters to the image grid
-        function filterImages() {
-            // Get all checked tag filter values (converted to lowercase)
-            const selectedTags = Array.from(document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]:checked')).map((cb) => cb.value.toLowerCase());
-
-            // Get all image grid items (assumed to have a 'data-tags' attribute)
-            const gridItems = document.querySelectorAll(".image-grid .grid-item");
-            gridItems.forEach((item) => {
-                // Split the data-tags attribute into an array and trim whitespace
-                const itemTags = item.getAttribute("data-tags")
-                    ? item
-                          .getAttribute("data-tags")
-                          .split(",")
-                          .map((t) => t.trim().toLowerCase())
-                    : [];
-
-                // If no tags are selected, show the image; otherwise, show only if at least one tag matches.
-                if (selectedTags.length === 0) {
-                    item.style.display = "";
+      // Build user bubbles (only one selection allowed).
+function buildUserBubbles(filter = "") {
+    const container = document.getElementById("userBubbleContainer");
+    container.innerHTML = "";
+    availableUsers.forEach((user) => {
+        if (user.toLowerCase().includes(filter.toLowerCase())) {
+            const bubble = document.createElement("div");
+            bubble.classList.add("user-bubble");
+            bubble.setAttribute("data-user", user);
+            bubble.textContent = user;
+            if (selectedUser === user) {
+                bubble.classList.add("selected");
+            }
+            bubble.addEventListener("click", function () {
+                // Toggle selection: if already selected, deselect.
+                if (selectedUser === user) {
+                    selectedUser = null;
                 } else {
-                    const hasTag = selectedTags.some((tag) => itemTags.includes(tag));
-                    item.style.display = hasTag ? "" : "none";
+                    selectedUser = user;
                 }
+                buildUserBubbles(document.getElementById("userSearch").value);
             });
+            container.appendChild(bubble);
         }
-
-        // Attach change event listeners to each tag checkbox.
-        const tagCheckboxes = document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]');
-        tagCheckboxes.forEach((cb) => {
-            cb.addEventListener("change", filterImages);
-        });
-
-        // Filter the checkboxes based on the search bar input.
-        const tagFilterSearch = document.getElementById("tagFilterSearch");
-        tagFilterSearch.addEventListener("input", function () {
-            const filterValue = this.value.toLowerCase();
-            const checkboxes = document.querySelectorAll("#tagFiltersContainer .tag-checkbox");
-            checkboxes.forEach((cb) => {
-                // Show or hide each checkbox based on whether its label contains the search text.
-                const labelText = cb.textContent.toLowerCase();
-                cb.style.display = labelText.includes(filterValue) ? "block" : "none";
-            });
-            // Reapply the image filter.
-            filterImages();
-        });
-
-        // "Deselect All" button clears all tag checkboxes.
-        document.getElementById("deselectAllTagsBtn").addEventListener("click", function () {
-            document.querySelectorAll('#tagFiltersContainer input[type="checkbox"]').forEach((cb) => {
-                cb.checked = false;
-            });
-            filterImages(); // Show all images when no tags are selected.
-        });
     });
+}
+
+// On page load, check URL for filters.
+const urlParams = new URLSearchParams(window.location.search);
+const tagsParam = urlParams.get("tags"); // Expected as comma-separated tag IDs.
+const userParam = urlParams.get("user"); // Expected as a user string.
+if (tagsParam) {
+    document.getElementById("selectedCommonTags").value = tagsParam;
+    tagsParam.split(",").forEach((id) => selectedTagIds.add(id.trim()));
+}
+if (userParam) {
+    document.getElementById("selectedUser").value = userParam;
+    selectedUser = userParam;
+}
+// Build the modal bubbles with any preselected filters.
+buildTagBubbles();
+buildUserBubbles();
+
+// When "Select Tags" button is clicked, open the modal.
+document.getElementById("openTagModalBtn").addEventListener("click", function () {
+    // Reinitialize selectedTagIds and selectedUser from hidden inputs.
+    const hiddenTags = document.getElementById("selectedCommonTags").value;
+    if (hiddenTags) {
+        hiddenTags.split(",").forEach((id) => selectedTagIds.add(id.trim()));
+    }
+    const hiddenUser = document.getElementById("selectedUser").value;
+    if (hiddenUser) {
+        selectedUser = hiddenUser;
+    }
+    buildTagBubbles();
+    buildUserBubbles();
+    $("#tagModal").modal("show");
+});
+
+// Tag search filtering.
+document.getElementById("tagSearch").addEventListener("input", function () {
+    buildTagBubbles(this.value);
+});
+
+// User search filtering.
+document.getElementById("userSearch").addEventListener("input", function () {
+    buildUserBubbles(this.value);
+});
+
+// Deselect All button for tags.
+document.getElementById("deselectAllBtn").addEventListener("click", function () {
+    selectedTagIds.clear();
+    buildTagBubbles(document.getElementById("tagSearch").value);
+});
+
+// When "Done" is clicked, update hidden inputs and URL.
+document.getElementById("saveFilterSelection").addEventListener("click", function () {
+    // Create a comma-separated string of selected tag IDs.
+    const selectedTagString = Array.from(selectedTagIds).join(",");
+    // Update hidden inputs for tags and user.
+    document.getElementById("selectedCommonTags").value = selectedTagString;
+    document.getElementById("selectedUser").value = selectedUser ? selectedUser : "";
+
+    // Update the summary display using the div with id "selectedTagDisplay".
+    const tagDisplay = document.getElementById("selectedTagDisplay");
+    tagDisplay.innerHTML =
+        Array.from(selectedTagIds)
+            .map((id) => {
+                const tag = preapprovedTags.find((t) => String(t.id) === id);
+                return tag ? tag.name : "";
+            })
+            .filter(Boolean)
+            .join(", ") + (selectedUser ? " | " + selectedUser : "");
+
+        // Close the modal.
+        $("#tagModal").modal("hide");
+
+        // Build the new URL with the selected tag IDs (using a simple format)
+        let newUrl = window.location.pathname;
+        const params = new URLSearchParams();
+        if (selectedTagString) {
+            params.set("tags", selectedTagString);
+        }
+        if (selectedUser) {
+            params.set("user", selectedUser);
+        }
+        if ([...params].length) {
+            newUrl += "?" + params.toString();
+        }
+        // Redirect to the new URL so that the filters persist.
+        window.location.href = newUrl;
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const removeAllBtn = document.getElementById("removeAllTags");
+    if (removeAllBtn) {
+        removeAllBtn.addEventListener("click", function () {
+            // Clear the hidden input that holds the selected tag IDs.
+            document.getElementById("selectedCommonTags").value = "";
+
+            // If you are using a global variable for tag selection (e.g., selectedTagIds),
+            // you might also want to clear it:
+            if (typeof selectedTagIds !== "undefined" && selectedTagIds.clear) {
+                selectedTagIds.clear();
+            }
+
+            // Optionally, update any display elements showing selected tags:
+            const display = document.getElementById("selectedTagDisplay");
+            if (display) {
+                display.innerHTML = "<em>No tags selected</em>";
+            }
+
+            // Refresh the page without query parameters.
+            // This assumes that the base URL should be used when no tags are selected.
+            window.location.href = window.location.pathname;
+        });
+    }
+});
 </script>
 
 {% endblock %}

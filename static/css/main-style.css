@@ -72,6 +72,20 @@
     text-shadow: 0 5px 15px #3dc1d425;
   }
   
+.text-error {
+    color: rgba(255, 0, 0, 0.55);
+    font-size: small;
+}
+
+.bottom_margin {
+    margin-bottom: 4rem;
+}
+
+.width-sel {
+    width: -moz-available; /* WebKit-based browsers will ignore this. */ 
+    width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */ 
+    width: fill-available; /* Mozilla-based browsers will ignore this too :3. */
+}
     /* --- MOBILE STYLES: max-width 993px --- */
 @media (max-width: 1220px) {
     .modal_centered  {

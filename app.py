@@ -786,38 +786,67 @@ def create_app():
     
     @app.route("/")
     def index():
+        # Set up a guest session if no user is logged in.
         if "discord_id" not in session and "guest_id" not in session:
             session["guest_id"] = str(uuid4())
             session["guest_username"] = generate_guest_username()
             session["username"] = session["guest_username"]
             session.permanent = True
+
+        # Read the tags filter from the URL query parameter.
+        tags_param = request.args.get("tags", "")
+        # Build a list of tag IDs (as strings) if provided.
+        filter_ids = [t.strip() for t in tags_param.split(",") if t.strip()] if tags_param else []
+
         with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
-            # Query screenshots as before
-            cursor = conn.execute(
+
+            if filter_ids:
+                # Build placeholders for the selected tag IDs.
+                placeholders = ",".join(["?"] * len(filter_ids))
+                query = f"""
+                    SELECT
+                    s.id,
+                    s.filename,
+                    COALESCE(s.discord_username, s.guest_username) AS uploader_name,
+                    g.name AS group_name,
+                    GROUP_CONCAT(t.name) AS tags,
+                    SUM(CASE WHEN st.tag_id IN ({placeholders}) THEN 1 ELSE 0 END) AS match_count
+                    FROM screenshots s
+                    LEFT JOIN screenshot_groups g ON s.group_id = g.id
+                    LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                    LEFT JOIN tags t ON st.tag_id = t.id
+                    GROUP BY s.id
+                    HAVING match_count > 0
+                    ORDER BY s.upload_date DESC
                 """
-                SELECT
-                s.id,
-                s.filename,
-                COALESCE(s.discord_username, s.guest_username) AS uploader_name,
-                g.name AS group_name,
-                GROUP_CONCAT(t.name) AS tags
-                FROM screenshots s
-                LEFT JOIN screenshot_groups g ON s.group_id = g.id
-                LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
-                LEFT JOIN tags t ON st.tag_id = t.id
-                GROUP BY s.id
-                ORDER BY s.upload_date DESC
-                """
-            )
-            screenshots = cursor.fetchall()
-            # Query all tags from the tags table for the filter options
+                screenshots = conn.execute(query, tuple(filter_ids)).fetchall()
+            else:
+                screenshots = conn.execute(
+                    """
+                    SELECT
+                    s.id,
+                    s.filename,
+                    COALESCE(s.discord_username, s.guest_username) AS uploader_name,
+                    g.name AS group_name,
+                    GROUP_CONCAT(t.name) AS tags
+                    FROM screenshots s
+                    LEFT JOIN screenshot_groups g ON s.group_id = g.id
+                    LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                    LEFT JOIN tags t ON st.tag_id = t.id
+                    GROUP BY s.id
+                    ORDER BY s.upload_date DESC
+                    """
+                ).fetchall()
+
+            users = sorted({ screenshot["uploader_name"] for screenshot in screenshots })
+            # Query all tags from the tags table for the modal.
             tags = conn.execute("SELECT id, name FROM tags ORDER BY name").fetchall()
-        return render_template("index.html", screenshots=screenshots, preapproved_tags=tags)
+
+        # Pass the current filter (list of tag IDs) so you can optionally display active filters.
+        return render_template("index.html", screenshots=screenshots, preapproved_tags=tags, current_filters=filter_ids)
 
 
-    
-    
     # Add this to your app.py temporarily to debug
     @app.route("/config-check")
     def config_check():

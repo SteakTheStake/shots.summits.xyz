@@ -23,13 +23,11 @@
                 <!-- Search Bar & Deselect All Button -->
                 <div class="form-group">
                     <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
+                    <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
                     <button type="button" class="btn btn-secondary btn-sm mt-2" id="deselectAllBtn">Deselect All</button>
                 </div>
                 <!-- Container for Tag Bubbles -->
                 <div id="tagBubbleContainer" class="d-flex flex-wrap"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
             </div>
         </div>
     </div>
@@ -49,11 +47,12 @@
 
                     <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
                         <!-- File Input Section -->
+                        <div class="no-round text-nowrap fancy-text">Choose Files  <span class="text-error medium-text">(required)</span></div>
                         <div class="position-relative responsive form-group mt-3 no-scroll">
                             <label for="screenshots" class="position-relative responsive secondary-container border drophere less_tall">
-                                <i class="middle">upload</i>
+                                <i class="middle">perm_media</i>
                             </label>
-                            <input type="file" class="bg-dark text-light rounded border dot_this cursor_pointer" id="screenshots" name="screenshots[]" multiple accept=".png,.jpg,.jpeg,.webp,.gif" required />
+                            <input type="file" class="form-control bg-dark text-light rounded border dot_this cursor_pointer" id="screenshots" name="screenshots[]" multiple accept=".png,.jpg,.jpeg,.webp,.gif" required />
                         </div>
                         <p class="text-center small-text small-padding alert-dismissible rounded">
                             Supported formats: PNG, JPG, JPEG, WEBP, GIF.<br />
@@ -65,10 +64,10 @@
                             <!-- Common Tags Section (now with modal-based selection) -->
                             <div class="form-group mt-3">
                                 <label class="font-weight-bold large-text">
-                                    <div class="text-nowrap fancy-text">Features: <span class="text-muted medium-text"></span></div>
+                                    <div class="no-round text-nowrap fancy-text">Features <span class="text-error medium-text">(required)</span></div>
                                 </label>
                                 <!-- Button to open the tag selection modal -->
-                                <button type="button" class="btn btn-secondary" id="openTagModalBtn">Select Tags</button>
+                                <button type="button" class="width-sel btn btn-secondary" id="openTagModalBtn">Select Tags</button>
                                 <!-- Hidden input to store selected tag IDs (as a comma-separated list) -->
                                 <input type="hidden" name="common_tags" id="selectedCommonTags" value="" required />
                                 <!-- Display selected tag names -->

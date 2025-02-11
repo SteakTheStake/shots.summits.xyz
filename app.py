@@ -448,21 +448,27 @@ def handle_upload(files, uploader_name):
                     flash(f"Invalid resource link: {resource}", "error")
                     return redirect(request.url)  # Early exit on error
 
-        # 2) Parse the common_tags as IDs
-        common_tag_ids = request.form.getlist("common_tags")  # e.g. ["1", "3", ...]
+        # 2) Parse the common_tags as IDs from a comma-separated string
+        common_tags_str = request.form.get("common_tags", "")
+        if common_tags_str:
+            # Split the string by commas and remove any extra whitespace
+            common_tag_ids = [tag.strip() for tag in common_tags_str.split(",") if tag.strip()]
+        else:
+            common_tag_ids = []
+
         valid_common_tag_ids = _validate_tag_ids(conn, common_tag_ids)
 
         # 3) Process each uploaded file
         for index, file in enumerate(files):
             if not file or not file.filename:
                 continue
-            
+
             filename = secure_filename(
                 f"shot_{datetime.now().timestamp()}_{os.urandom(4).hex()}.webp"
             )
             if filename in processed_files:
                 continue
-            
+
             if allowed_file(file.filename):
                 try:
                     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -529,6 +535,8 @@ def handle_upload(files, uploader_name):
         conn.commit()
 
     return uploaded_files
+
+
 
     
 
@@ -786,77 +794,68 @@ def create_app():
     
     @app.route("/")
     def index():
-        # Set up a guest session if no user is logged in.
-        if "discord_id" not in session and "guest_id" not in session:
-            session["guest_id"] = str(uuid4())
-            session["guest_username"] = generate_guest_username()
-            session["username"] = session["guest_username"]
-            session.permanent = True
-
-        # Read tag and user filters from URL.
-        tags_param = request.args.get("tags", "")
-        filter_ids = [t.strip() for t in tags_param.split(",") if t.strip()] if tags_param else []
+        # When filters are applied via the URL, tag_filters will be a list of tag IDs (as strings)
+        tag_filters = request.args.getlist("tags")
         user_filter = request.args.get("user", "").strip()
 
         with sqlite3.connect(Config.DATABASE_PATH) as conn:
             conn.row_factory = sqlite3.Row
 
-            if filter_ids:
-                placeholders = ",".join(["?"] * len(filter_ids))
-                query = """
-                    WITH TaggedScreenshots AS (
-                        SELECT s.id, s.filename, 
-                            COALESCE(s.discord_username, s.guest_username) AS uploader_name,
-                            g.name AS group_name,
-                            COUNT(DISTINCT st.tag_id) as matching_tags
-                        FROM screenshots s
-                        LEFT JOIN screenshot_groups g ON s.group_id = g.id
-                        LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
-                        WHERE st.tag_id IN ({})
-                        GROUP BY s.id
-                        HAVING matching_tags = ?
-                    )
-                    SELECT ts.*, GROUP_CONCAT(t.name, ', ') AS tags
-                    FROM TaggedScreenshots ts
-                    LEFT JOIN screenshot_tags st ON ts.id = st.screenshot_id
-                    LEFT JOIN tags t ON st.tag_id = t.id
-                    GROUP BY ts.id
-                    ORDER BY ts.id DESC
-                """.format(placeholders)
-                
-                screenshots = conn.execute(query, tuple(filter_ids) + (len(filter_ids),)).fetchall()
-            else:
-                screenshots = conn.execute(
-                    """
-                    SELECT
+            base_query = """
+                SELECT 
                     s.id,
                     s.filename,
                     COALESCE(s.discord_username, s.guest_username) AS uploader_name,
                     g.name AS group_name,
-                    GROUP_CONCAT(t.name, ', ') AS tags
-                    FROM screenshots s
-                    LEFT JOIN screenshot_groups g ON s.group_id = g.id
-                    LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
-                    LEFT JOIN tags t ON st.tag_id = t.id
-                    GROUP BY s.id
-                    ORDER BY s.upload_date DESC
-                    """
-                ).fetchall()
+                    GROUP_CONCAT(t.name) AS tags
+                FROM screenshots s
+                LEFT JOIN screenshot_groups g ON s.group_id = g.id
+                LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
+                LEFT JOIN tags t ON st.tag_id = t.id
+            """
+            params = []
 
+            if tag_filters:
+                # Notice we now compare t2.id (the tag id) instead of t2.name.
+                # Also, we use HAVING COUNT(DISTINCT t2.id) >= 1 so that an image with any of the selected tags shows.
+                base_query += """
+                    WHERE s.id IN (
+                        SELECT screenshot_id 
+                        FROM screenshot_tags st2
+                        JOIN tags t2 ON st2.tag_id = t2.id
+                        WHERE t2.id IN ({})
+                        GROUP BY screenshot_id
+                        HAVING COUNT(DISTINCT t2.id) >= ?
+                    )
+                """.format(','.join(['?'] * len(tag_filters)))
+                params.extend(tag_filters)
+                params.append(1)  # OR filter: image must have at least 1 matching tag
 
-            # Query all tags from the tags table for the modal.
+            if user_filter:
+                # Add filtering by uploader name if provided.
+                base_query += " AND " if tag_filters else " WHERE "
+                base_query += "COALESCE(s.discord_username, s.guest_username) = ?"
+                params.append(user_filter)
+
+            # Finish the query by grouping and ordering
+            base_query += " GROUP BY s.id ORDER BY s.upload_date DESC"
+
+            screenshots = conn.execute(base_query, params).fetchall()
             tags = conn.execute("SELECT id, name FROM tags ORDER BY name").fetchall()
-
-            # Also build a list of unique uploader names for the user filter.
-            # For example, you can extract uploader names from the screenshots:
             users = sorted({row["uploader_name"] for row in screenshots})
 
-        return render_template("index.html",
-                            screenshots=screenshots,
-                            preapproved_tags=tags,
-                            users=users)
+        # Convert comma‐separated tags string into a list
+        screenshots = [
+            dict(row, tags=row["tags"].split(",") if row["tags"] else [])
+            for row in screenshots
+        ]
 
-
+        return render_template(
+            "index.html",
+            screenshots=screenshots,
+            preapproved_tags=tags,
+            users=users
+        )
 
 
     # Add this to your app.py temporarily to debug

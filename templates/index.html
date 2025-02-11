@@ -34,10 +34,6 @@
         <!-- Container for User Bubbles -->
         <div id="userBubbleContainer" class="d-flex flex-wrap"></div>
       </div>
-      <div class="modal-footer">
-        <!-- The Done button will update both tag and user filters in the URL -->
-        <button type="button" class="btn btn-primary btn-sm" id="saveFilterSelection">Done</button>
-      </div>
     </div>
   </div>
 </div>
@@ -78,12 +74,12 @@
           <p class="group fancy-text">{{ screenshot.group_name }}</p>
         {% endif %}
 
-        {% if screenshot.tags is not none and screenshot.tags|length > 0 %}
-        <div class="tags">
-            {% for tag in screenshot.tags.split(',') %}
-            <span class="tag_badge bg-pill">#{{ tag.strip() }}</span>
-            {% endfor %}
-        </div>
+        {% if screenshot.tags %}
+            <div class="tags">
+                {% for tag in screenshot.tags %}
+                    <span class="tag_badge bg-pill">#{{ tag }}</span>
+                {% endfor %}
+            </div>
         {% endif %}
 
         <p class="username bold underline">
@@ -152,170 +148,141 @@
 
 <!-- JavaScript for Modal Tag & User Selection and URL-Based Filtering -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  // Global variables for filters.
-  let selectedTagIds = new Set();
-  let selectedUser = null;
-
-  // Our preapprovedTags array built from server data.
-  const preapprovedTags = [
-    {% for tag in preapproved_tags %}
-      { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
-
-  // Our availableUsers array built from server data.
-  const availableUsers = [
-    {% for user in users %}
-      "{{ user }}"{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
-
-  // Build tag bubbles in the modal.
-  function buildTagBubbles(filter = '') {
-    const container = document.getElementById('tagBubbleContainer');
-    container.innerHTML = '';
-    preapprovedTags.forEach(tag => {
-      if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('tag-bubble');
-        bubble.setAttribute('data-id', tag.id);
-        bubble.textContent = tag.name;
-        if (selectedTagIds.has(String(tag.id))) {
-          bubble.classList.add('selected');
-        }
-        bubble.addEventListener('click', function() {
-          const tagId = bubble.getAttribute('data-id');
-          if (bubble.classList.contains('selected')) {
-            bubble.classList.remove('selected');
-            selectedTagIds.delete(String(tagId));
-          } else {
+  document.addEventListener("DOMContentLoaded", function () {
+    const selectedTagIds = new Set();
+    let selectedUser = null;
+  
+    const preapprovedTags = [
+      {% for tag in preapproved_tags %}
+        { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+  
+    const availableUsers = [
+      {% for user in users %}
+        "{{ user }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+  
+    function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
+      container.innerHTML = '';
+      items.forEach(item => {
+        const itemValue = type === 'tag' ? item.name : item;
+        if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
+          const bubble = document.createElement('div');
+          bubble.classList.add(`${type}-bubble`);
+          bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
+          bubble.textContent = itemValue;
+          
+          if (type === 'tag' && selectedItems.has(String(item.id)) ||
+              type === 'user' && selectedItems === itemValue) {
             bubble.classList.add('selected');
-            selectedTagIds.add(String(tagId));
           }
-        });
-        container.appendChild(bubble);
-      }
-    });
-  }
-
-  // Build user bubbles in the modal.
-  function buildUserBubbles(filter = '') {
-    const container = document.getElementById('userBubbleContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    availableUsers.forEach(user => {
-      if (user.toLowerCase().includes(filter.toLowerCase())) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('user-bubble');
-        bubble.setAttribute('data-user', user);
-        bubble.textContent = user;
-        if (selectedUser === user) {
-          bubble.classList.add('selected');
+  
+          bubble.addEventListener('click', () => {
+            if (type === 'tag') {
+              const tagId = bubble.getAttribute('data-id');
+              if (selectedItems.has(String(tagId))) {
+                selectedItems.delete(String(tagId));
+              } else {
+                selectedItems.add(String(tagId));
+              }
+            } else {
+              selectedUser = selectedUser === itemValue ? null : itemValue;
+            }
+            updateBubbles(container, items, type === 'tag' ? selectedItems : selectedUser, filter, type);
+          });
+          
+          container.appendChild(bubble);
         }
-        bubble.addEventListener('click', function () {
-          if (selectedUser === user) {
-            selectedUser = null;
-          } else {
-            selectedUser = user;
-          }
-          buildUserBubbles(document.getElementById('userSearch').value);
-        });
-        container.appendChild(bubble);
+      });
+    }
+  
+    function initializeFilters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tagsParam = urlParams.get("tags");
+      const userParam = urlParams.get("user");
+  
+      if (tagsParam) {
+        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
+        document.getElementById("selectedCommonTags").value = tagsParam;
       }
+  
+      if (userParam) {
+        selectedUser = userParam;
+        document.getElementById("selectedUser").value = userParam;
+      }
+  
+      updateFilterDisplay();
+    }
+  
+    function updateFilterDisplay() {
+      const tagDisplay = document.getElementById("selectedTagDisplay");
+      const selectedTags = Array.from(selectedTagIds)
+        .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
+        .filter(Boolean);
+      
+      tagDisplay.innerHTML = [
+        ...selectedTags,
+        selectedUser
+      ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
+    }
+  
+    function applyFilters() {
+      const params = new URLSearchParams();
+      if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
+      if (selectedUser) params.set("user", selectedUser);
+  
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+      window.location.href = newUrl;
+    }
+  
+    // Event Listeners
+    document.getElementById("tagSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('tagBubbleContainer'),
+        preapprovedTags,
+        selectedTagIds,
+        this.value,
+        'tag'
+      );
     });
-  }
-
-  // On page load, check the URL for filters.
-  const urlParams = new URLSearchParams(window.location.search);
-  const tagsParam = urlParams.get("tags"); // Expected as comma-separated tag IDs.
-  const userParam = urlParams.get("user"); // Expected as a user string.
-  if (tagsParam) {
-    document.getElementById("selectedCommonTags").value = tagsParam;
-    tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
-  }
-  if (userParam) {
-    document.getElementById("selectedUser").value = userParam;
-    selectedUser = userParam;
-  }
-  buildTagBubbles();
-  buildUserBubbles();
-
-  // When "Select Tags" button is clicked, open the modal.
-  document.getElementById("openTagModalBtn").addEventListener("click", function () {
-    const hiddenTags = document.getElementById("selectedCommonTags").value;
-    if (hiddenTags) {
-      hiddenTags.split(",").forEach(id => selectedTagIds.add(id.trim()));
-    }
-    const hiddenUser = document.getElementById("selectedUser").value;
-    if (hiddenUser) {
-      selectedUser = hiddenUser;
-    }
-    buildTagBubbles();
-    buildUserBubbles();
-    $("#tagModal").modal("show");
-  });
-
-  // Tag search filtering.
-  document.getElementById("tagSearch").addEventListener("input", function () {
-    buildTagBubbles(this.value);
-  });
-
-  // User search filtering.
-  document.getElementById("userSearch").addEventListener("input", function () {
-    buildUserBubbles(this.value);
-  });
-
-  // Deselect All button for tags.
-  document.getElementById("deselectAllBtn").addEventListener("click", function () {
-    selectedTagIds.clear();
-    buildTagBubbles(document.getElementById("tagSearch").value);
-  });
-
-  // When "Done" is clicked in the modal, update hidden inputs, summary display, and URL.
-  document.getElementById("saveFilterSelection").addEventListener("click", function () {
-    const selectedTagString = Array.from(selectedTagIds).join(",");
-    document.getElementById("selectedCommonTags").value = selectedTagString;
-    document.getElementById("selectedUser").value = selectedUser ? selectedUser : "";
-    const tagDisplay = document.getElementById("selectedTagDisplay");
-    tagDisplay.innerHTML =
-      Array.from(selectedTagIds)
-        .map(id => {
-          const tag = preapprovedTags.find(t => String(t.id) === id);
-          return tag ? tag.name : "";
-        })
-        .filter(Boolean)
-        .join(", ") + (selectedUser ? " | " + selectedUser : "");
-    $("#tagModal").modal("hide");
-    let newUrl = window.location.pathname;
-    const params = new URLSearchParams();
-    if (selectedTagString) {
-      params.set("tags", selectedTagString);
-    }
-    if (selectedUser) {
-      params.set("user", selectedUser);
-    }
-    if ([...params].length) {
-      newUrl += "?" + params.toString();
-    }
-    window.location.href = newUrl;
-  });
-
-  // When "Remove Filters" is clicked, clear all filters and refresh the page.
-  const removeAllBtn = document.getElementById("removeAllTags");
-  if (removeAllBtn) {
-    removeAllBtn.addEventListener("click", function () {
-      document.getElementById("selectedCommonTags").value = "";
-      document.getElementById("selectedUser").value = "";
+  
+    document.getElementById("userSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('userBubbleContainer'),
+        availableUsers,
+        selectedUser,
+        this.value,
+        'user'
+      );
+    });
+  
+    document.getElementById("deselectAllBtn").addEventListener("click", () => {
       selectedTagIds.clear();
       selectedUser = null;
-      const display = document.getElementById("selectedTagDisplay");
-      if (display) {
-        display.innerHTML = "<em>No filters selected</em>";
-      }
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+    });
+  
+    document.getElementById("saveFilterSelection").addEventListener("click", () => {
+      $("#tagModal").modal("hide");
+      applyFilters();
+    });
+  
+    document.getElementById("removeAllTags").addEventListener("click", () => {
+      selectedTagIds.clear();
+      selectedUser = null;
       window.location.href = window.location.pathname;
     });
-  }
-});
+  
+    document.getElementById("openTagModalBtn").addEventListener("click", () => {
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+      $("#tagModal").modal("show");
+    });
+  
+    initializeFilters();
+  });
 </script>
 {% endblock %}

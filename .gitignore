@@ -164,3 +164,4 @@ screenshots.db
 static/images/Photos-001.zip
 /static/images
 templates/upload copy.html
+gunicorn-cmd.txt

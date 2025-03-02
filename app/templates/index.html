@@ -185,6 +185,7 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Variables for bubble filtering
     const selectedTagIds = new Set();
     let selectedUser = null;
   
@@ -200,6 +201,7 @@
       {% endfor %}
     ];
   
+    // Function to update tag/user bubbles based on filter text and selection
     function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
       container.innerHTML = '';
       items.forEach(item => {
@@ -210,11 +212,11 @@
           bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
           bubble.textContent = itemValue;
           
-          if (type === 'tag' && selectedItems.has(String(item.id)) ||
-              type === 'user' && selectedItems === itemValue) {
+          if ((type === 'tag' && selectedItems.has(String(item.id))) ||
+              (type === 'user' && selectedItems === itemValue)) {
             bubble.classList.add('selected');
           }
-  
+          
           bubble.addEventListener('click', () => {
             if (type === 'tag') {
               const tagId = bubble.getAttribute('data-id');
@@ -226,7 +228,14 @@
             } else {
               selectedUser = selectedUser === itemValue ? null : itemValue;
             }
-            updateBubbles(container, items, type === 'tag' ? selectedItems : selectedUser, filter, type);
+            updateBubbles(
+              container,
+              items,
+              type === 'tag' ? selectedTagIds : selectedUser,
+              filter,
+              type
+            );
+            updateFilterDisplay();
           });
           
           container.appendChild(bubble);
@@ -234,6 +243,7 @@
       });
     }
   
+    // Initialize filters from URL parameters
     function initializeFilters() {
       const urlParams = new URLSearchParams(window.location.search);
       const tagsParam = urlParams.get("tags");
@@ -252,18 +262,20 @@
       updateFilterDisplay();
     }
   
+    // Update the display showing the current selected filters
     function updateFilterDisplay() {
       const tagDisplay = document.getElementById("selectedTagDisplay");
       const selectedTags = Array.from(selectedTagIds)
         .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
         .filter(Boolean);
-      
+  
       tagDisplay.innerHTML = [
         ...selectedTags,
         selectedUser
       ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
     }
   
+    // Apply filters by updating the URL parameters
     function applyFilters() {
       const params = new URLSearchParams();
       if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
@@ -273,7 +285,7 @@
       window.location.href = newUrl;
     }
   
-    // Event Listeners
+    // Event Listeners for search inputs
     document.getElementById("tagSearch").addEventListener("input", function() {
       updateBubbles(
         document.getElementById('tagBubbleContainer'),
@@ -294,150 +306,13 @@
       );
     });
   
+    // Event Listeners for filter buttons
     document.getElementById("deselectAllBtn").addEventListener("click", () => {
       selectedTagIds.clear();
       selectedUser = null;
       updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
       updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
-    });
-  
-    document.getElementById("saveFilterSelection").addEventListener("click", () => {
-      $("#tagModal").modal("hide");
-      applyFilters();
-    });
-  
-    document.getElementById("removeAllTags").addEventListener("click", () => {
-      selectedTagIds.clear();
-      selectedUser = null;
-      window.location.href = window.location.pathname;
-    });
-  
-    document.getElementById("openTagModalBtn").addEventListener("click", () => {
-      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
-      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
-      $("#tagModal").modal("show");
-    });
-  
-    initializeFilters();
-  });
-</script>
-<!-- JavaScript for Modal Tag & User Selection and URL-Based Filtering -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const selectedTagIds = new Set();
-    let selectedUser = null;
-  
-    const preapprovedTags = [
-      {% for tag in preapproved_tags %}
-        { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ];
-  
-    const availableUsers = [
-      {% for user in users %}
-        "{{ user }}"{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ];
-  
-    function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
-      container.innerHTML = '';
-      items.forEach(item => {
-        const itemValue = type === 'tag' ? item.name : item;
-        if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
-          const bubble = document.createElement('div');
-          bubble.classList.add(`${type}-bubble`);
-          bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
-          bubble.textContent = itemValue;
-          
-          if (type === 'tag' && selectedItems.has(String(item.id)) ||
-              type === 'user' && selectedItems === itemValue) {
-            bubble.classList.add('selected');
-          }
-  
-          bubble.addEventListener('click', () => {
-            if (type === 'tag') {
-              const tagId = bubble.getAttribute('data-id');
-              if (selectedItems.has(String(tagId))) {
-                selectedItems.delete(String(tagId));
-              } else {
-                selectedItems.add(String(tagId));
-              }
-            } else {
-              selectedUser = selectedUser === itemValue ? null : itemValue;
-            }
-            updateBubbles(container, items, type === 'tag' ? selectedItems : selectedUser, filter, type);
-          });
-          
-          container.appendChild(bubble);
-        }
-      });
-    }
-  
-    function initializeFilters() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tagsParam = urlParams.get("tags");
-      const userParam = urlParams.get("user");
-  
-      if (tagsParam) {
-        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
-        document.getElementById("selectedCommonTags").value = tagsParam;
-      }
-  
-      if (userParam) {
-        selectedUser = userParam;
-        document.getElementById("selectedUser").value = userParam;
-      }
-  
       updateFilterDisplay();
-    }
-  
-    function updateFilterDisplay() {
-      const tagDisplay = document.getElementById("selectedTagDisplay");
-      const selectedTags = Array.from(selectedTagIds)
-        .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
-        .filter(Boolean);
-      
-      tagDisplay.innerHTML = [
-        ...selectedTags,
-        selectedUser
-      ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
-    }
-  
-    function applyFilters() {
-      const params = new URLSearchParams();
-      if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
-      if (selectedUser) params.set("user", selectedUser);
-  
-      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
-      window.location.href = newUrl;
-    }
-  
-    // Event Listeners
-    document.getElementById("tagSearch").addEventListener("input", function() {
-      updateBubbles(
-        document.getElementById('tagBubbleContainer'),
-        preapprovedTags,
-        selectedTagIds,
-        this.value,
-        'tag'
-      );
-    });
-  
-    document.getElementById("userSearch").addEventListener("input", function() {
-      updateBubbles(
-        document.getElementById('userBubbleContainer'),
-        availableUsers,
-        selectedUser,
-        this.value,
-        'user'
-      );
-    });
-  
-    document.getElementById("deselectAllBtn").addEventListener("click", () => {
-      selectedTagIds.clear();
-      selectedUser = null;
-      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
-      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
     });
   
     document.getElementById("saveFilterSelection").addEventListener("click", () => {
@@ -457,16 +332,12 @@
       $("#tagModal").modal("show");
     });
   
-    initializeFilters();
-  });
-  // 2) Like Toggle (AJAX)
-  document.addEventListener("DOMContentLoaded", function() {
+    // Like Toggle (AJAX) event listener
     document.body.addEventListener("click", function(e) {
-      if (e.target.closest(".like-toggle")) {
+      const button = e.target.closest(".like-toggle");
+      if (button) {
         e.preventDefault();
-        const button = e.target.closest(".like-toggle");
         const screenshotId = button.dataset.screenshotId;
-
         fetch(`/toggle_like/${screenshotId}`, {
           method: "POST",
           headers: {
@@ -479,18 +350,14 @@
             alert(data.error);
             return;
           }
-
-          // data.status = "liked" or "unliked"
-          // data.like_count = updated count
+          // Update like count
           const likeCountSpan = document.querySelector(`.like-count[data-screenshot-id="${screenshotId}"]`);
           if (likeCountSpan) {
             likeCountSpan.textContent = data.like_count;
           }
-
-          // Switch icon
+          // Update the like icon
           const img = button.querySelector("img");
           if (!img) return;
-
           if (data.status === "liked") {
             img.src = "{{ url_for('static', filename='images/liked.png') }}";
             img.alt = "Unlike";
@@ -504,7 +371,11 @@
         });
       }
     });
+  
+    // Initialize filters on page load
+    initializeFilters();
   });
-</script>
+  </script>
+  
 
 {% endblock %}

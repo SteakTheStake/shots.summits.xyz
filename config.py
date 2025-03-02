@@ -57,7 +57,7 @@ class Config:
     DISCORD_TOKEN_URL = 'https://discord.com/api/oauth2/token'
     
     # Upload settings
-    UPLOAD_FOLDER = "static/images"
+    UPLOAD_FOLDER = "app/static/images"
     # GUEST_UPLOAD_FOLDER = "static/guest_uploads"
     THUMBNAIL_FOLDER = "static/thumbnails"
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}

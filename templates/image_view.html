@@ -4,7 +4,7 @@
     <!-- Add this to image_view.html -->
 <div class="image-actions">
     {% if session.discord_username == image_data.discord_username or user_role in ['admin', 'moderator'] %}
-    <form action="{{ url_for('delete_image', filename=image_filename) }}" method="POST" class="d-inline">
+    <form action="{{ url_for('user_bp.delete_image', filename=image_filename) }}" method="POST" class="d-inline">
         <button type="submit" class="btn btn-danger">Delete Image</button>
     </form>
     {% endif %}
@@ -24,7 +24,7 @@
                     <span>&times;</span>
                 </button>
             </div>
-            <form action="{{ url_for('report_image', filename=image_filename) }}" method="POST">
+            <form action="{{ url_for('user_bp.report_image', filename=image_filename) }}" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="reason">Reason for Report</label>

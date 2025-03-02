@@ -15,7 +15,7 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
-                    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
+                    <form method="POST" action="{{ url_for('main_bp.upload') }}" enctype="multipart/form-data" id="uploadForm">
                         <div class="position-relative responsive form-group mt-3 no-scroll">
                             <label for="screenshots" class="position-relative responsive secondary-container border drophere less_tall">
                                 <i class="middle">upload</i>
@@ -154,7 +154,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         });
         
         if (response.ok) {
-            window.location.href = '{{ url_for("index") }}';
+            window.location.href = '{{ url_for("main_bp.index") }}';
         } else {
             throw new Error('Upload failed');
         }

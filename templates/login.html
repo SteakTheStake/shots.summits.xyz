@@ -15,7 +15,7 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
-                    <form method="POST" action="{{ url_for('login') }}" enctype="multipart/form-data" id="uploadForm">
+                    <form method="POST" action="{{ url_for('user_bp.login') }}" enctype="multipart/form-data" id="uploadForm">
                         <div class="position-relative responsive form-group mt-3 no-scroll">
                         <div class="group-inputs mb-4 p-3 border round">
                             <div class="form-group mt-3">
@@ -42,7 +42,7 @@
                                     required>
                             </div>
                         </div>
-                        <p class="center-align left-align">Need an account? <a href="{{ url_for('register') }}">Register here</a></p>
+                        <p class="center-align left-align">Need an account? <a href="{{ url_for('user_bp.register') }}">Register here</a></p>
                         <br>
                         <button type="submit" class="responsive fill round border" id="submitButton">
                             <i class="no-round me-2">login</i>Login

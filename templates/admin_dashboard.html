@@ -28,7 +28,7 @@
                     <td>{{ upload.discord_username }}</td>
                     <td>{{ upload.upload_date }}</td>
                     <td>
-                        <form action="{{ url_for('delete_image', filename=upload.filename) }}" method="POST" class="d-inline">
+                        <form action="{{ url_for('user_bp.delete_image', filename=upload.filename) }}" method="POST" class="d-inline">
                             <input type="text" name="reason" placeholder="Reason for deletion" required>
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
@@ -57,7 +57,7 @@
                     <td>{{ user.role }}</td>
                     <td>{{ user.upload_count }}</td>
                     <td>
-                        <form action="{{ url_for('manage_roles') }}" method="POST" class="d-inline">
+                        <form action="{{ url_for('admin_bp.manage_roles') }}" method="POST" class="d-inline">
                             <input type="hidden" name="discord_id" value="{{ user.discord_id }}">
                             <select name="role" class="form-control form-control-sm d-inline w-auto">
                                 <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>

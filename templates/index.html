@@ -75,7 +75,7 @@
                 <!-- Image Actions -->
                 <div class="image-actions tiny-padding">
                     {% if session.discord_username == screenshot.discord_username or user_role in ['admin', 'moderator'] %}
-                    <form action="{{ url_for('delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
+                    <form action="{{ url_for('user_bp.delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline">
                         <span type="submit" class="me-2 max medium bg-transparent text-muted">Delete</span>
                     </form>
                     {% endif %}
@@ -97,7 +97,7 @@
                             <span>&times;</span>
                         </button>
                     </div>
-                    <form action="{{ url_for('report_image', filename=screenshot.filename) }}" method="POST">
+                    <form action="{{ url_for('user_bp.report_image', filename=screenshot.filename) }}" method="POST">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="reason text-black-50">Reason for Report</label>

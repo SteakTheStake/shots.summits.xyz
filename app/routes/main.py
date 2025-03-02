@@ -72,7 +72,7 @@ def index():
         # Preapproved tags, users, etc. if needed
         tags = conn.execute("SELECT id, name FROM tags ORDER BY name").fetchall()
         users = sorted({r["uploader_name"] for r in screenshots_rows})
-
+        
     # 5) Pass screenshots_data to the template
     return render_template(
         "index.html",
@@ -81,15 +81,8 @@ def index():
         users=users
     )
 
-
-
-    # 4) Pass screenshots_data (with like counts) into the template
-    return render_template(
-        "index.html",
-        screenshots=screenshots_data,
-        preapproved_tags=tags,
-        users=users,
-    )
+def get_discord_avatar_url(discord_id, avatar):
+    return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
 
 @main_bp.route("/shots/<image_filename>")
 def view_image(image_filename):

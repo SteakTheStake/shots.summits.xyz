@@ -1,0 +1,457 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Modal for Tag & User Selection with Search and Deselect All -->
+<div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="tagModalLabel" aria-hidden="true">
+    <!-- ... (your existing filter modal code) ... -->
+</div>
+
+<!-- Filter Menu Section
+<div class="filter-menu">
+    <div class="filter-section">
+        <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
+        <input type="hidden" id="selectedUser" name="user" value="" />
+        <button type="button" id="openTagModalBtn" class="filter-toggle"><i class="fas fa-filter"></i> Filters</button>
+    </div>
+    <div id="selectedTagDisplay" class="mt-2 text-light bottom_margin"></div>
+    <button type="button" class="btn btn-secondary btn-sm" id="removeAllTags">Remove Filters</button>
+</div>
+ -->
+
+<!-- Screenshot Grid -->
+<div class="image-grid">
+    {% for screenshot in screenshots %}
+    <div class="grid-item loading" data-user="{{ screenshot.uploader_name }}" data-tags="{{ screenshot.tags or '' }}" data-date="{{ screenshot.upload_date or '' }}" data-group="{{ screenshot.group_name or '' }}">
+        <!-- The screenshot image -->
+        <img src="{{ url_for('static', filename='images/' + screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
+
+        <!-- Info overlay -->
+        <div class="image-info">
+            {% if screenshot.group_name %}
+            <p class="group fancy-text">{{ screenshot.group_name }}</p>
+            {% endif %}
+            <div class="grouped">
+              <!-- Like/Unlike (AJAX) -->
+              {% if session.get('discord_id') or session.get('guest_id') %}
+                <div class="like-toggle" data-screenshot-id="{{ screenshot.id }}">
+                  {% if screenshot.user_liked %}
+                    <img src="{{ url_for('static', filename='images/liked.png') }}" alt="Unlike">
+                  {% else %}
+                    <img src="{{ url_for('static', filename='images/like.png') }}" alt="Like">
+                  {% endif %}
+                </div>
+              {% else %}
+                <p><em>Log in to like this screenshot.</em></p>
+              {% endif %}
+              <span class="like-count" data-screenshot-id="{{ screenshot.id }}">
+                {{ screenshot.like_count }}
+              </span>
+
+              <!-- Uploader name -->
+              <p class="username bold underline align-toside">
+                  @{{ screenshot.uploader_name }}
+              </p>
+            </div>
+            <!-- Screenshot's tags -->
+            {% if screenshot.tags %}
+            <div class="tags">
+                {% for tag in screenshot.tags %}
+                <span class="tag_badge bg-pill">#{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <!-- Action buttons: Delete, Report, View Comments -->
+            <nav class="auto-width">
+                <div class="image-actions tiny-padding">
+                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+
+                    <!-- This button triggers the comments modal -->
+                    <button type="button" class="btn btn-comments btn-sm" data-toggle="modal" data-target="#commentsModal-{{ screenshot.id }}">
+                        View Comments
+                    </button>
+                </div>
+            </nav>
+            <div class="no-gap">
+              <form action="{{ url_for('main.delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline align-toside">
+                  <button type="submit" class="btn btn-delete btn-sm">Delete</button>
+              </form>
+              {% endif %}
+
+              <button type="button" class="btn btn-report btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
+                  Report
+              </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORT MODAL (per screenshot) -->
+    <div class="modal fade" id="reportModal-{{ screenshot.id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ screenshot.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel-{{ screenshot.id }}">Report Image</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ url_for('mod.report_image', filename=screenshot.filename) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="reason-{{ screenshot.id }}" class="font-weight-bold">Reason for Report</label>
+                            <textarea class="form-control" name="reason" id="reason-{{ screenshot.id }}" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Submit Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMENTS MODAL (per screenshot) -->
+    <div class="modal fade" id="commentsModal-{{ screenshot.id }}" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel-{{ screenshot.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-light comments-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentsModalLabel-{{ screenshot.id }}">
+                        Comments ({{ screenshot.comments|length if screenshot.comments else 0 }})
+                    </h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Add a new comment (only if logged in) -->
+                    {% if session.get('username') %}
+                    <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" 
+                          method="POST"
+                          class="comment-form"
+                          data-screenshot-id="{{ screenshot.id }}">
+                      <div class="form-group">
+                        <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
+                        <textarea name="comment_text"
+                                  id="comment_text_{{ screenshot.id }}"
+                                  rows="3"
+                                  class="form-control"
+                                  required></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+                    </form>
+                    {% else %}
+                    <p><em>You must be logged in to post comments.</em></p>
+                    {% endif %}
+                    <!-- Show existing comments -->
+                    <div class="comments-section">
+                        {% if screenshot.comments %} {% for comment in screenshot.comments %}
+                        <div class="single-comment mb-3">
+                            <strong class="comment-title-text">{{ comment.username }}:</strong>
+                            <p class="comment-text">{{ comment.comment_text }}</p>
+                            <small class="comment-subtle-text">{{ comment.created_at }}</small>
+                        </div>
+                        {% endfor %} {% else %}
+                        <p><em>No comments yet.</em></p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END COMMENTS MODAL -->
+
+    {% endfor %}
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox">
+    <div class="close-lightbox"><i class="fas fa-times"></i></div>
+    <div class="lightbox-nav lightbox-prev"><i class="fas fa-chevron-left"></i></div>
+    <img src="" alt="Enlarged view" />
+    <div class="lightbox-nav lightbox-next"><i class="fas fa-chevron-right"></i></div>
+    <div class="lightbox-info"></div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+  
+    // 1) SHIFT+ENTER for newline, ENTER to submit
+    document.body.addEventListener("keydown", function(e) {
+      // Only trigger if focus is in a textarea belonging to .comment-form
+      const textarea = e.target.closest("textarea");
+      if (!textarea) return;
+  
+      const form = textarea.closest(".comment-form");
+      if (!form) return;
+  
+      // Check if the key is "Enter"
+      if (e.key === "Enter") {
+        if (e.shiftKey) {
+          // SHIFT+ENTER => allow a new line (default behavior).
+          return;
+        } else {
+          // ENTER alone => submit the form
+          e.preventDefault(); // stop adding a newline
+          form.requestSubmit(); // triggers the "submit" event on this form
+        }
+      }
+    });
+  
+    // 2) AJAX Submit for .comment-form
+    document.body.addEventListener("submit", function(e) {
+      const form = e.target;
+      if (form.matches(".comment-form")) {
+        e.preventDefault(); // Stop normal form submission
+  
+        const screenshotId = form.dataset.screenshotId;  
+        const formData = new FormData(form);
+  
+        fetch(`/comment/${screenshotId}`, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+  
+          // data.comment_count = updated total
+          // data.comment = { id, username, comment_text, created_at }
+          const commentsModal = document.getElementById(`commentsModal-${screenshotId}`);
+          if (!commentsModal) return;
+  
+          // 1) Insert new comment
+          const commentsSection = commentsModal.querySelector(".comments-section");
+          if (commentsSection) {
+            // remove "No comments yet." if present
+            const noCommentsMsg = commentsSection.querySelector("p");
+            if (noCommentsMsg && noCommentsMsg.textContent.includes("No comments yet.")) {
+              noCommentsMsg.remove();
+            }
+  
+            // Build new comment div
+            const newCommentDiv = document.createElement("div");
+            newCommentDiv.classList.add("single-comment", "mb-3");
+            newCommentDiv.innerHTML = `
+              <strong class="comment-title-text">${data.comment.username}:</strong>
+              <p class="comment-text">${data.comment.comment_text}</p>
+              <small class="comment-subtle-text">${data.comment.created_at}</small>
+            `;
+            commentsSection.appendChild(newCommentDiv);
+          }
+  
+          // 2) Update the comment count in the modal title
+          const modalTitle = commentsModal.querySelector(".modal-title");
+          if (modalTitle) {
+            modalTitle.textContent = `Comments (${data.comment_count})`;
+          }
+  
+          // 3) Clear the textarea
+          form.querySelector("[name='comment_text']").value = "";
+        })
+        .catch(err => {
+          console.error("Error posting comment:", err);
+          alert("Something went wrong while posting the comment.");
+        });
+      }
+    });
+  
+  });
+  </script>
+<!-- JavaScript for Modal Tag & User Selection and URL-Based Filtering -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const selectedTagIds = new Set();
+    let selectedUser = null;
+  
+    const preapprovedTags = [
+      {% for tag in preapproved_tags %}
+        { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+  
+    const availableUsers = [
+      {% for user in users %}
+        "{{ user }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+  
+    function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
+      container.innerHTML = '';
+      items.forEach(item => {
+        const itemValue = type === 'tag' ? item.name : item;
+        if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
+          const bubble = document.createElement('div');
+          bubble.classList.add(`${type}-bubble`);
+          bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
+          bubble.textContent = itemValue;
+          
+          if (type === 'tag' && selectedItems.has(String(item.id)) ||
+              type === 'user' && selectedItems === itemValue) {
+            bubble.classList.add('selected');
+          }
+  
+          bubble.addEventListener('click', () => {
+            if (type === 'tag') {
+              const tagId = bubble.getAttribute('data-id');
+              if (selectedItems.has(String(tagId))) {
+                selectedItems.delete(String(tagId));
+              } else {
+                selectedItems.add(String(tagId));
+              }
+            } else {
+              selectedUser = selectedUser === itemValue ? null : itemValue;
+            }
+            updateBubbles(container, items, type === 'tag' ? selectedItems : selectedUser, filter, type);
+          });
+          
+          container.appendChild(bubble);
+        }
+      });
+    }
+  
+    function initializeFilters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tagsParam = urlParams.get("tags");
+      const userParam = urlParams.get("user");
+  
+      if (tagsParam) {
+        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
+        document.getElementById("selectedCommonTags").value = tagsParam;
+      }
+  
+      if (userParam) {
+        selectedUser = userParam;
+        document.getElementById("selectedUser").value = userParam;
+      }
+  
+      updateFilterDisplay();
+    }
+  
+    function updateFilterDisplay() {
+      const tagDisplay = document.getElementById("selectedTagDisplay");
+      const selectedTags = Array.from(selectedTagIds)
+        .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
+        .filter(Boolean);
+      
+      tagDisplay.innerHTML = [
+        ...selectedTags,
+        selectedUser
+      ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
+    }
+  
+    function applyFilters() {
+      const params = new URLSearchParams();
+      if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
+      if (selectedUser) params.set("user", selectedUser);
+  
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+      window.location.href = newUrl;
+    }
+  
+    // Event Listeners
+    document.getElementById("tagSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('tagBubbleContainer'),
+        preapprovedTags,
+        selectedTagIds,
+        this.value,
+        'tag'
+      );
+    });
+  
+    document.getElementById("userSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('userBubbleContainer'),
+        availableUsers,
+        selectedUser,
+        this.value,
+        'user'
+      );
+    });
+  
+    document.getElementById("deselectAllBtn").addEventListener("click", () => {
+      selectedTagIds.clear();
+      selectedUser = null;
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+    });
+  
+    document.getElementById("saveFilterSelection").addEventListener("click", () => {
+      $("#tagModal").modal("hide");
+      applyFilters();
+    });
+  
+    document.getElementById("removeAllTags").addEventListener("click", () => {
+      selectedTagIds.clear();
+      selectedUser = null;
+      window.location.href = window.location.pathname;
+    });
+  
+    document.getElementById("openTagModalBtn").addEventListener("click", () => {
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+      $("#tagModal").modal("show");
+    });
+  
+    initializeFilters();
+  });
+  // 2) Like Toggle (AJAX)
+  document.addEventListener("DOMContentLoaded", function() {
+    document.body.addEventListener("click", function(e) {
+      if (e.target.closest(".like-toggle")) {
+        e.preventDefault();
+        const button = e.target.closest(".like-toggle");
+        const screenshotId = button.dataset.screenshotId;
+
+        fetch(`/toggle_like/${screenshotId}`, {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          // data.status = "liked" or "unliked"
+          // data.like_count = updated count
+          const likeCountSpan = document.querySelector(`.like-count[data-screenshot-id="${screenshotId}"]`);
+          if (likeCountSpan) {
+            likeCountSpan.textContent = data.like_count;
+          }
+
+          // Switch icon
+          const img = button.querySelector("img");
+          if (!img) return;
+
+          if (data.status === "liked") {
+            img.src = "{{ url_for('static', filename='images/liked.png') }}";
+            img.alt = "Unlike";
+          } else {
+            img.src = "{{ url_for('static', filename='images/like.png') }}";
+            img.alt = "Like";
+          }
+        })
+        .catch(err => {
+          console.error("Error toggling like:", err);
+        });
+      }
+    });
+  });
+</script>  
+
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Alert for guest users (if not logged in with Discord) -->
+{% if 'discord_id' not in session %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <strong>Heads up!</strong><br />
+    It's harder to take credit for your own screenshots if you're not logged in with Discord.
+    <button type="button" class="btn btn-primary mt-2" data-dismiss="alert" aria-label="Close">Ok</button>
+</div>
+{% endif %}
+
+<!-- Modal for Tag Selection with Search and Deselect All -->
+<div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="tagModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal_centered modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tagModalLabel">Select Tags</h5>
+                <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Bar & Deselect All Button -->
+                <div class="form-group">
+                    <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
+                    <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" id="deselectAllBtn">Deselect All</button>
+                </div>
+                <!-- Container for Tag Bubbles -->
+                <div id="tagBubbleContainer" class="d-flex flex-wrap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5 scroll-container">
+    <div class="row justify-content-center">
+        <article class="col-md-8 round border small-blur" style="background-color: #ffffff05;">
+            <div class="text-light">
+                <div class="card-header">
+                    <h4 class="mb-0 styled_font">Upload Your Screenshots</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('main.upload') }}" enctype="multipart/form-data" id="uploadForm">
+                        <!-- File Input Section -->
+                        <div class="no-round text-nowrap fancy-text">
+                            Choose Files  <span class="text-error medium-text">(required)</span>
+                        </div>
+                        <div class="position-relative responsive form-group mt-3 no-scroll">
+                            <label for="screenshots" class="position-relative responsive secondary-container border drophere less_tall">
+                                <i class="middle">perm_media</i>
+                            </label>
+                            <input type="file" class="form-control bg-dark text-light rounded border dot_this cursor_pointer" id="screenshots" name="screenshots[]" multiple accept=".png,.jpg,.jpeg,.webp,.gif" required />
+                        </div>
+                        <p class="text-center small-text small-padding alert-dismissible rounded">
+                            Supported formats: PNG, JPG, JPEG, WEBP, GIF.<br />
+                            No more than 10 images and/or over 24MB.
+                        </p>
+
+                        <!-- Shared (Group-Level) Inputs -->
+                        <div class="group-inputs mb-4 p-3 border round">
+                            <!-- Common Tags Section (with modal-based selection) -->
+                            <div class="form-group mt-3">
+                                <label class="font-weight-bold large-text">
+                                    <div class="no-round text-nowrap fancy-text">Features <span class="text-muted medium-text">(Optional)</span></div>
+                                </label>
+                                <!-- Button to open the tag selection modal -->
+                                <button type="button" class="width-sel btn btn-secondary" id="openTagModalBtn">Select Tags</button>
+                                <!-- Hidden input to store selected tag IDs (as a comma-separated list) -->
+                                <input type="hidden" name="common_tags" id="selectedCommonTags" value="" />
+                                <!-- Display selected tag names (live preview) -->
+                                <div id="selectedTagDisplay" class="mt-2 text-light"><em>No tags selected</em></div>
+                            </div>
+                            <!-- Resources Used -->
+                            <div class="form-group mt-3">
+                                <label class="font-weight-bold large-text">
+                                    <div class="text-nowrap fancy-text">Resources Used: <span class="text-muted medium-text">(Optional)</span></div>
+                                </label>
+                                <input type="text" class="form-control bg-dark text-light field textarea bg-dark border round min" name="resources"
+                                    placeholder="List one or more resources"
+                                    pattern="^((https:\/\/modrinth\.com\/[^,\s]+|https:\/\/www\.curseforge\.com\/minecraft\/[^,\s]+)(,\s*(https:\/\/modrinth\.com\/[^,\s]+|https:\/\/www\.curseforge\.com\/minecraft\/[^,\s]+))*)?$" />
+                                <small class="text-muted">
+                                    Only links to <code>https://modrinth.com/</code> and/or <code>https://www.curseforge.com/minecraft/</code> are allowed.
+                                    Separate multiple links with commas.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Per-Image Inputs (Dynamic) -->
+                        <div class="bold text-nowrap">
+                            <h3 class="fancy-text">
+                                Images Chosen: <span class="text-muted medium-text italic">Are you Satisfied? I sure am!</span>
+                            </h3>
+                        </div>
+                        <div id="imageInputsContainer">
+                            <!-- JavaScript will inject per-file tag selectors and image previews here -->
+                        </div>
+
+                        <!-- Progress Bar & Submit Button -->
+                        <progress style="display: none;"></progress>
+                        <br />
+                        <button type="submit" class="responsive fill round border" id="submitButton">
+                            <i class="no-round me-2">upload</i>Upload Screenshots
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<!-- JavaScript Section -->
+<script>
+  // --- IMAGE PREVIEW ---
+
+  /**
+   * Returns HTML for a thumbnail preview with a unique id and filename display.
+   * You can extend this if you wish to add per-image tag selectors.
+   * @param {number} index - The index of the image.
+   * @param {string} filename - The name of the file.
+   * @returns {string} HTML string.
+   */
+  function createImageThumb(index, filename) {
+    return `
+      <div class="image-inputs mb-4 p-3 border round" data-index="${index}">
+        <div class="mb-2">
+          <img id="preview-${index}" class="img-thumbnail mb-2" style="max-height: 200px; max-width: 100%; object-fit: contain;" alt="Preview ${index}">
+          <p class="mb-1 text-light">${filename}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Listen for file input changes and update the preview area immediately.
+  document.getElementById('screenshots').addEventListener('change', function(e) {
+    const container = document.getElementById('imageInputsContainer');
+    container.innerHTML = ''; // Clear any existing previews
+
+    Array.from(this.files).forEach((file, index) => {
+      // Insert the image preview container
+      container.insertAdjacentHTML('beforeend', createImageThumb(index, file.name));
+
+      // Read the file and set the image src to the data URL.
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById(`preview-${index}`);
+        if (preview) {
+          preview.src = e.target.result;
+        }
+      }
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // --- TAG SELECTION & LIVE PREVIEW ---
+
+  // Global variable to hold selected tag IDs (as strings).
+  let selectedTagIds = new Set();
+
+  // Our preapprovedTags array is built from server-side data:
+  const preapprovedTags = [
+    {% for tag in preapproved_tags %}
+      { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  /**
+   * Updates the tag bubble container based on the current filter and selection.
+   * @param {string} filter - Optional filter string to match tag names.
+   */
+  function buildTagBubbles(filter = '') {
+    const container = document.getElementById('tagBubbleContainer');
+    container.innerHTML = ''; // Clear existing bubbles
+
+    preapprovedTags.forEach(tag => {
+      // Only add bubbles that match the search filter (case-insensitive).
+      if (tag.name.toLowerCase().includes(filter.toLowerCase())) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('tag-bubble');
+        bubble.setAttribute('data-id', tag.id);
+        bubble.textContent = tag.name;
+
+        // Mark as selected if this tag's id is in our global set.
+        if (selectedTagIds.has(String(tag.id))) {
+          bubble.classList.add('selected');
+        }
+
+        // Toggle selection on click.
+        bubble.addEventListener('click', function() {
+          const tagId = bubble.getAttribute('data-id');
+          if (bubble.classList.contains('selected')) {
+            bubble.classList.remove('selected');
+            selectedTagIds.delete(String(tagId));
+          } else {
+            bubble.classList.add('selected');
+            selectedTagIds.add(String(tagId));
+          }
+          // Update the live preview of selected tags.
+          updateSelectedTagDisplay();
+        });
+
+        container.appendChild(bubble);
+      }
+    });
+  }
+
+  /**
+   * Updates the display area with the names of the selected tags.
+   */
+  function updateSelectedTagDisplay() {
+    const display = document.getElementById('selectedTagDisplay');
+    const selectedTagNames = preapprovedTags
+      .filter(tag => selectedTagIds.has(String(tag.id)))
+      .map(tag => tag.name);
+    if (selectedTagNames.length) {
+      display.innerHTML = selectedTagNames.join(', ');
+    } else {
+      display.innerHTML = '<em>No tags selected</em>';
+    }
+  }
+
+  // When the "Select Tags" button is clicked, open the modal and initialize tag selection.
+  document.getElementById('openTagModalBtn').addEventListener('click', function() {
+    // If any tags are already stored in the hidden input, load them into our set.
+    const hiddenVal = document.getElementById('selectedCommonTags').value;
+    if (hiddenVal) {
+      hiddenVal.split(',').forEach(id => selectedTagIds.add(id));
+    }
+    buildTagBubbles(); // Build all tag bubbles (no filter).
+    $('#tagModal').modal('show');
+  });
+
+  // Filter tag bubbles as the user types in the search field.
+  document.getElementById('tagSearch').addEventListener('input', function() {
+    const filter = this.value;
+    buildTagBubbles(filter);
+  });
+
+  // Deselect all button clears the global selection and rebuilds the bubbles.
+  document.getElementById('deselectAllBtn').addEventListener('click', function() {
+    selectedTagIds.clear();
+    const filter = document.getElementById('tagSearch').value;
+    buildTagBubbles(filter);
+    updateSelectedTagDisplay();
+  });
+
+  // When the user clicks "Done", update the hidden input and live preview,
+  // then close the modal.
+  document.getElementById('saveTagSelection').addEventListener('click', function() {
+    // Update the hidden input with the selected tag IDs (comma-separated).
+    document.getElementById('selectedCommonTags').value = Array.from(selectedTagIds).join(',');
+    // Ensure the display is updated (it should already be up-to-date via live preview).
+    updateSelectedTagDisplay();
+    $('#tagModal').modal('hide');
+  });
+</script>
+{% endblock %}

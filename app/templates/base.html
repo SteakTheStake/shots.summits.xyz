@@ -62,7 +62,6 @@
                 <div class="links-container">
                     <!-- If user is logged in -->
                     {% if 'discord_id' in session %}
-                    <img src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" alt="Avatar" class="avatar" />
                     <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
                     <span class="spacer_lr">
                         <a href="{{ url_for('main.index') }}" class="btn_better_alt_mobile round large small-padding">
@@ -137,7 +136,6 @@
         <nav class="s m right links-container_mobile" id="nav-menu">
             <header>
                 {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #} {% if 'discord_id' in session %}
-                <img class="circle" src="{{ get_discord_avatar_url(session['discord_id'], session.get('avatar')) }}" />
                 <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
                 {% else %}
                 <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}" />

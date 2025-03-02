@@ -168,106 +168,159 @@
     {% endfor %}
 </div>
 
-<!-- Lightbox -->
+<!-- Lightbox (unchanged) -->
 <div class="lightbox">
-    <div class="close-lightbox"><i class="fas fa-times"></i></div>
-    <div class="lightbox-nav lightbox-prev"><i class="fas fa-chevron-left"></i></div>
-    <img src="" alt="Enlarged view" />
-    <div class="lightbox-nav lightbox-next"><i class="fas fa-chevron-right"></i></div>
-    <div class="lightbox-info"></div>
+  <div class="close-lightbox">
+    <i class="fas fa-times"></i>
+  </div>
+  <div class="lightbox-nav lightbox-prev">
+    <i class="fas fa-chevron-left"></i>
+  </div>
+  <img src="" alt="Enlarged view" />
+  <div class="lightbox-nav lightbox-next">
+    <i class="fas fa-chevron-right"></i>
+  </div>
+  <div class="lightbox-info"></div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
+    const selectedTagIds = new Set();
+    let selectedUser = null;
   
-    // 1) SHIFT+ENTER for newline, ENTER to submit
-    document.body.addEventListener("keydown", function(e) {
-      // Only trigger if focus is in a textarea belonging to .comment-form
-      const textarea = e.target.closest("textarea");
-      if (!textarea) return;
+    const preapprovedTags = [
+      {% for tag in preapproved_tags %}
+        { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
   
-      const form = textarea.closest(".comment-form");
-      if (!form) return;
+    const availableUsers = [
+      {% for user in users %}
+        "{{ user }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
   
-      // Check if the key is "Enter"
-      if (e.key === "Enter") {
-        if (e.shiftKey) {
-          // SHIFT+ENTER => allow a new line (default behavior).
-          return;
-        } else {
-          // ENTER alone => submit the form
-          e.preventDefault(); // stop adding a newline
-          form.requestSubmit(); // triggers the "submit" event on this form
-        }
-      }
-    });
-  
-    // 2) AJAX Submit for .comment-form
-    document.body.addEventListener("submit", function(e) {
-      const form = e.target;
-      if (form.matches(".comment-form")) {
-        e.preventDefault(); // Stop normal form submission
-  
-        const screenshotId = form.dataset.screenshotId;  
-        const formData = new FormData(form);
-  
-        fetch(`/comment/${screenshotId}`, {
-          method: "POST",
-          body: formData,
-          headers: {
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            alert(data.error);
-            return;
+    function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
+      container.innerHTML = '';
+      items.forEach(item => {
+        const itemValue = type === 'tag' ? item.name : item;
+        if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
+          const bubble = document.createElement('div');
+          bubble.classList.add(`${type}-bubble`);
+          bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
+          bubble.textContent = itemValue;
+          
+          if (type === 'tag' && selectedItems.has(String(item.id)) ||
+              type === 'user' && selectedItems === itemValue) {
+            bubble.classList.add('selected');
           }
   
-          // data.comment_count = updated total
-          // data.comment = { id, username, comment_text, created_at }
-          const commentsModal = document.getElementById(`commentsModal-${screenshotId}`);
-          if (!commentsModal) return;
-  
-          // 1) Insert new comment
-          const commentsSection = commentsModal.querySelector(".comments-section");
-          if (commentsSection) {
-            // remove "No comments yet." if present
-            const noCommentsMsg = commentsSection.querySelector("p");
-            if (noCommentsMsg && noCommentsMsg.textContent.includes("No comments yet.")) {
-              noCommentsMsg.remove();
+          bubble.addEventListener('click', () => {
+            if (type === 'tag') {
+              const tagId = bubble.getAttribute('data-id');
+              if (selectedItems.has(String(tagId))) {
+                selectedItems.delete(String(tagId));
+              } else {
+                selectedItems.add(String(tagId));
+              }
+            } else {
+              selectedUser = selectedUser === itemValue ? null : itemValue;
             }
+            updateBubbles(container, items, type === 'tag' ? selectedItems : selectedUser, filter, type);
+          });
+          
+          container.appendChild(bubble);
+        }
+      });
+    }
   
-            // Build new comment div
-            const newCommentDiv = document.createElement("div");
-            newCommentDiv.classList.add("single-comment", "mb-3");
-            newCommentDiv.innerHTML = `
-              <strong class="comment-title-text">${data.comment.username}:</strong>
-              <p class="comment-text">${data.comment.comment_text}</p>
-              <small class="comment-subtle-text">${data.comment.created_at}</small>
-            `;
-            commentsSection.appendChild(newCommentDiv);
-          }
+    function initializeFilters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tagsParam = urlParams.get("tags");
+      const userParam = urlParams.get("user");
   
-          // 2) Update the comment count in the modal title
-          const modalTitle = commentsModal.querySelector(".modal-title");
-          if (modalTitle) {
-            modalTitle.textContent = `Comments (${data.comment_count})`;
-          }
-  
-          // 3) Clear the textarea
-          form.querySelector("[name='comment_text']").value = "";
-        })
-        .catch(err => {
-          console.error("Error posting comment:", err);
-          alert("Something went wrong while posting the comment.");
-        });
+      if (tagsParam) {
+        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
+        document.getElementById("selectedCommonTags").value = tagsParam;
       }
+  
+      if (userParam) {
+        selectedUser = userParam;
+        document.getElementById("selectedUser").value = userParam;
+      }
+  
+      updateFilterDisplay();
+    }
+  
+    function updateFilterDisplay() {
+      const tagDisplay = document.getElementById("selectedTagDisplay");
+      const selectedTags = Array.from(selectedTagIds)
+        .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
+        .filter(Boolean);
+      
+      tagDisplay.innerHTML = [
+        ...selectedTags,
+        selectedUser
+      ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
+    }
+  
+    function applyFilters() {
+      const params = new URLSearchParams();
+      if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
+      if (selectedUser) params.set("user", selectedUser);
+  
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+      window.location.href = newUrl;
+    }
+  
+    // Event Listeners
+    document.getElementById("tagSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('tagBubbleContainer'),
+        preapprovedTags,
+        selectedTagIds,
+        this.value,
+        'tag'
+      );
     });
   
+    document.getElementById("userSearch").addEventListener("input", function() {
+      updateBubbles(
+        document.getElementById('userBubbleContainer'),
+        availableUsers,
+        selectedUser,
+        this.value,
+        'user'
+      );
+    });
+  
+    document.getElementById("deselectAllBtn").addEventListener("click", () => {
+      selectedTagIds.clear();
+      selectedUser = null;
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+    });
+  
+    document.getElementById("saveFilterSelection").addEventListener("click", () => {
+      $("#tagModal").modal("hide");
+      applyFilters();
+    });
+  
+    document.getElementById("removeAllTags").addEventListener("click", () => {
+      selectedTagIds.clear();
+      selectedUser = null;
+      window.location.href = window.location.pathname;
+    });
+  
+    document.getElementById("openTagModalBtn").addEventListener("click", () => {
+      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
+      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
+      $("#tagModal").modal("show");
+    });
+  
+    initializeFilters();
   });
-  </script>
+</script>
 <!-- JavaScript for Modal Tag & User Selection and URL-Based Filtering -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {

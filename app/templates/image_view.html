@@ -1,71 +1,72 @@
-{% extends "base.html" %}
-{% block content %}
-
-<!-- Actions for Deletion (if user is uploader, admin, or moderator) -->
+{% extends "base.html" %} {% block content %}
+<!-- Image Actions -->
 <div class="image-actions">
-  {% if session.get('username') == image_data.uploader_name or user_role in ['admin', 'moderator'] %}
-    <form action="{{ url_for('main.delete_image', filename=image_filename) }}" method="POST" class="d-inline">
-      <button type="submit" class="btn btn-danger">Delete Image</button>
+    {% if session.get('username') == image_data.uploader_name or user_role in ['admin', 'moderator'] %}
+    <form action="{{ url_for('delete_image', filename=image_filename) }}" method="POST" class="d-inline">
+        <button type="submit" class="btn btn-danger">Delete Image</button>
     </form>
-  {% endif %}
-</div>
+    {% endif %}
 
-<!-- Comments Section -->
-<h4>Comments ({{ comments|length }})</h4>
-<div class="comments-section">
-  {% for comment in comments %}
-    <div class="single-comment">
-      <strong>{{ comment.username }}</strong> said:
-      <p>{{ comment.comment_text }}</p>
-      <small>{{ comment.created_at }}</small>
-    </div>
-  {% endfor %}
+    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#reportModal">
+        Report Image
+    </button>
 </div>
-
-<!-- New Comment Form (only if user is logged in) -->
-{% if session.get('username') %}
-  <form action="{{ url_for('main.add_comment', screenshot_id=image_data.id) }}" method="POST">
+<div class="modal-body">
+  <!-- Add a new comment (only if logged in) -->
+  {% if session.get('username') %}
+  <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" 
+        method="POST"
+        class="comment-form"
+        data-screenshot-id="{{ screenshot.id }}">
     <div class="form-group">
-      <label for="comment_text">Add a Comment:</label>
-      <textarea name="comment_text" id="comment_text" rows="3" class="form-control" required></textarea>
+      <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
+      <textarea name="comment_text"
+                id="comment_text_{{ screenshot.id }}"
+                rows="3"
+                class="form-control"
+                required></textarea>
     </div>
     <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
   </form>
-{% else %}
+  {% else %}
   <p><em>You must be logged in to post comments.</em></p>
-{% endif %}
-
-<!-- Report Image (only if user is logged in) -->
-{% if session.get('username') %}
-  <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#reportModal">
-    Report Image
-  </button>
-{% endif %}
-
-<!-- Report Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reportModalLabel">Report Image</h5>
-        <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+  {% endif %}
+  <!-- Show existing comments -->
+  <div class="comments-section">
+      {% if screenshot.comments %} {% for comment in screenshot.comments %}
+      <div class="single-comment mb-3">
+          <strong class="comment-title-text">{{ comment.username }}:</strong>
+          <p class="comment-text">{{ comment.comment_text }}</p>
+          <small class="comment-subtle-text">{{ comment.created_at }}</small>
       </div>
-      <form action="{{ url_for('mod.report_image', filename=image_filename) }}" method="POST">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="reason" class="font-weight-bold">Reason for Report</label>
-            <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Submit Report</button>
-        </div>
-      </form>
-    </div>
+      {% endfor %} {% else %}
+      <p><em>No comments yet.</em></p>
+      {% endif %}
   </div>
 </div>
-
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Image</h5>
+                <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ url_for('report_image', filename=image_filename) }}" method="POST">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="reason" class="font-weight-bold">Reason for Report</label>
+                        <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

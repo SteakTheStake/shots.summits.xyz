@@ -5,7 +5,7 @@
     <!-- ... (your existing filter modal code) ... -->
 </div>
 
-<!-- Filter Menu Section
+<!-- Filter Menu Section -->
 <div class="filter-menu">
     <div class="filter-section">
         <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
@@ -15,7 +15,6 @@
     <div id="selectedTagDisplay" class="mt-2 text-light bottom_margin"></div>
     <button type="button" class="btn btn-secondary btn-sm" id="removeAllTags">Remove Filters</button>
 </div>
- -->
 
 <!-- Screenshot Grid -->
 <div class="image-grid">
@@ -30,26 +29,29 @@
             <p class="group fancy-text">{{ screenshot.group_name }}</p>
             {% endif %}
             <div class="grouped">
-              <!-- Like/Unlike (AJAX) -->
-              {% if session.get('discord_id') or session.get('guest_id') %}
-                <div class="like-toggle" data-screenshot-id="{{ screenshot.id }}">
-                  {% if screenshot.user_liked %}
-                    <img src="{{ url_for('static', filename='images/liked.png') }}" alt="Unlike">
-                  {% else %}
-                    <img src="{{ url_for('static', filename='images/like.png') }}" alt="Like">
-                  {% endif %}
+                <!-- Like/Unlike (AJAX) -->
+                {% if session.get('discord_id') or session.get('guest_id') %}
+                <div class="like-toggle" 
+                    data-screenshot-id="{{ screenshot.id }}"
+                    data-liked-url="{{ url_for('static', filename='ui/liked.png') }}"
+                    data-like-url="{{ url_for('static', filename='ui/like.png') }}">
+                    {% if screenshot.user_liked %}
+                    <img src="{{ url_for('static', filename='ui/liked.png') }}" alt="Unlike" />
+                    {% else %}
+                    <img src="{{ url_for('static', filename='ui/like.png') }}" alt="Like" />
+                    {% endif %}
                 </div>
-              {% else %}
+                {% else %}
                 <p><em>Log in to like this screenshot.</em></p>
-              {% endif %}
-              <span class="like-count" data-screenshot-id="{{ screenshot.id }}">
-                {{ screenshot.like_count }}
-              </span>
+                {% endif %}
+                <span class="like-count" data-screenshot-id="{{ screenshot.id }}">
+                    {{ screenshot.like_count }}
+                </span>
 
-              <!-- Uploader name -->
-              <p class="username bold underline align-toside">
-                  @{{ screenshot.uploader_name }}
-              </p>
+                <!-- Uploader name -->
+                <p class="username bold underline align-toside">
+                    @{{ screenshot.uploader_name }}
+                </p>
             </div>
             <!-- Screenshot's tags -->
             {% if screenshot.tags %}
@@ -71,14 +73,14 @@
                 </div>
             </nav>
             <div class="no-gap">
-              <form action="{{ url_for('main.delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline align-toside">
-                  <button type="submit" class="btn btn-delete btn-sm">Delete</button>
-              </form>
-              {% endif %}
+                <form action="{{ url_for('main.delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline align-toside">
+                    <button type="submit" class="btn btn-delete btn-sm">Delete</button>
+                </form>
+                {% endif %}
 
-              <button type="button" class="btn btn-report btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
-                  Report
-              </button>
+                <button type="button" class="btn btn-report btn-sm" data-toggle="modal" data-target="#reportModal-{{ screenshot.id }}">
+                    Report
+                </button>
             </div>
         </div>
     </div>
@@ -125,19 +127,12 @@
                 <div class="modal-body">
                     <!-- Add a new comment (only if logged in) -->
                     {% if session.get('username') %}
-                    <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" 
-                          method="POST"
-                          class="comment-form"
-                          data-screenshot-id="{{ screenshot.id }}">
-                      <div class="form-group">
-                        <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
-                        <textarea name="comment_text"
-                                  id="comment_text_{{ screenshot.id }}"
-                                  rows="3"
-                                  class="form-control"
-                                  required></textarea>
-                      </div>
-                      <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+                    <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" method="POST" class="comment-form" data-screenshot-id="{{ screenshot.id }}">
+                        <div class="form-group">
+                            <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
+                            <textarea name="comment_text" id="comment_text_{{ screenshot.id }}" rows="3" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
                     </form>
                     {% else %}
                     <p><em>You must be logged in to post comments.</em></p>
@@ -154,7 +149,6 @@
                         <p><em>No comments yet.</em></p>
                         {% endif %}
                     </div>
-
                 </div>
 
                 <div class="modal-footer">
@@ -170,257 +164,290 @@
 
 <!-- Lightbox (unchanged) -->
 <div class="lightbox">
-  <div class="close-lightbox">
-    <i class="fas fa-times"></i>
-  </div>
-  <div class="lightbox-nav lightbox-prev">
-    <i class="fas fa-chevron-left"></i>
-  </div>
-  <img src="" alt="Enlarged view" />
-  <div class="lightbox-nav lightbox-next">
-    <i class="fas fa-chevron-right"></i>
-  </div>
-  <div class="lightbox-info"></div>
+    <div class="close-lightbox">
+        <i class="fas fa-times"></i>
+    </div>
+    <div class="lightbox-nav lightbox-prev">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <img src="" alt="Enlarged view" />
+    <div class="lightbox-nav lightbox-next">
+        <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="lightbox-info"></div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Variables for bubble filtering
-    const selectedTagIds = new Set();
-    let selectedUser = null;
-  
-    const preapprovedTags = [
-      {% for tag in preapproved_tags %}
-        { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ];
-  
-    const availableUsers = [
-      {% for user in users %}
-        "{{ user }}"{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ];
-  
-    // Function to update tag/user bubbles based on filter text and selection
-    function updateBubbles(container, items, selectedItems, filter = '', type = 'tag') {
-      container.innerHTML = '';
-      items.forEach(item => {
-        const itemValue = type === 'tag' ? item.name : item;
-        if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
-          const bubble = document.createElement('div');
-          bubble.classList.add(`${type}-bubble`);
-          bubble.setAttribute('data-id', type === 'tag' ? item.id : item);
-          bubble.textContent = itemValue;
-          
-          if ((type === 'tag' && selectedItems.has(String(item.id))) ||
-              (type === 'user' && selectedItems === itemValue)) {
-            bubble.classList.add('selected');
-          }
-          
-          bubble.addEventListener('click', () => {
-            if (type === 'tag') {
-              const tagId = bubble.getAttribute('data-id');
-              if (selectedItems.has(String(tagId))) {
-                selectedItems.delete(String(tagId));
-              } else {
-                selectedItems.add(String(tagId));
-              }
-            } else {
-              selectedUser = selectedUser === itemValue ? null : itemValue;
+    document.addEventListener("DOMContentLoaded", function () {
+      // === Bubble Filtering Code ===
+      const selectedTagIds = new Set();
+      let selectedUser = null;
+
+      const preapprovedTags = [
+        {% for tag in preapproved_tags %}
+          { id: "{{ tag['id'] }}", name: "{{ tag['name'] }}" }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+      const availableUsers = [
+        {% for user in users %}
+          "{{ user }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      // updateBubbles function for tag/user bubble UI
+      function updateBubbles(container, items, selectedItems, filter = "", type = "tag") {
+        container.innerHTML = "";
+        items.forEach(item => {
+          const itemValue = type === "tag" ? item.name : item;
+          if (itemValue.toLowerCase().includes(filter.toLowerCase())) {
+            const bubble = document.createElement("div");
+            bubble.classList.add(`${type}-bubble`);
+            bubble.setAttribute("data-id", type === "tag" ? item.id : item);
+            bubble.textContent = itemValue;
+
+            if ((type === "tag" && selectedItems.has(String(item.id))) ||
+                (type === "user" && selectedItems === itemValue)) {
+              bubble.classList.add("selected");
             }
-            updateBubbles(
-              container,
-              items,
-              type === 'tag' ? selectedTagIds : selectedUser,
-              filter,
-              type
-            );
-            updateFilterDisplay();
-          });
-          
-          container.appendChild(bubble);
-        }
-      });
-    }
-  
-    // Initialize filters from URL parameters
-    function initializeFilters() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tagsParam = urlParams.get("tags");
-      const userParam = urlParams.get("user");
-  
-      if (tagsParam) {
-        tagsParam.split(",").forEach(id => selectedTagIds.add(id.trim()));
-        document.getElementById("selectedCommonTags").value = tagsParam;
+
+            bubble.addEventListener("click", () => {
+              if (type === "tag") {
+                const tagId = bubble.getAttribute("data-id");
+                if (selectedItems.has(String(tagId))) {
+                  selectedItems.delete(String(tagId));
+                } else {
+                  selectedItems.add(String(tagId));
+                }
+              } else {
+                selectedUser = selectedUser === itemValue ? null : itemValue;
+              }
+              updateBubbles(
+                container,
+                items,
+                type === "tag" ? selectedTagIds : selectedUser,
+                filter,
+                type
+              );
+              updateFilterDisplay();
+            });
+
+            container.appendChild(bubble);
+          }
+        });
       }
-  
-      if (userParam) {
-        selectedUser = userParam;
-        document.getElementById("selectedUser").value = userParam;
+
+      function updateFilterDisplay() {
+        const tagDisplay = document.getElementById("selectedTagDisplay");
+        const selectedTags = Array.from(selectedTagIds)
+          .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
+          .filter(Boolean);
+
+        tagDisplay.innerHTML =
+          [...selectedTags, selectedUser].filter(Boolean).join(" | ") ||
+          "<em>No filters selected</em>";
       }
-  
-      updateFilterDisplay();
-    }
-  
-    // Update the display showing the current selected filters
-    function updateFilterDisplay() {
-      const tagDisplay = document.getElementById("selectedTagDisplay");
-      const selectedTags = Array.from(selectedTagIds)
-        .map(id => preapprovedTags.find(t => String(t.id) === id)?.name)
-        .filter(Boolean);
-  
-      tagDisplay.innerHTML = [
-        ...selectedTags,
-        selectedUser
-      ].filter(Boolean).join(" | ") || "<em>No filters selected</em>";
-    }
-  
-    // Apply filters by updating the URL parameters
-    function applyFilters() {
-      const params = new URLSearchParams();
-      if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
-      if (selectedUser) params.set("user", selectedUser);
-  
-      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
-      window.location.href = newUrl;
-    }
-  
-    // Event Listeners for search inputs
-    document.getElementById("tagSearch").addEventListener("input", function() {
-      updateBubbles(
-        document.getElementById('tagBubbleContainer'),
-        preapprovedTags,
-        selectedTagIds,
-        this.value,
-        'tag'
-      );
-    });
-  
-    document.getElementById("userSearch").addEventListener("input", function() {
-      updateBubbles(
-        document.getElementById('userBubbleContainer'),
-        availableUsers,
-        selectedUser,
-        this.value,
-        'user'
-      );
-    });
-  
-    // Event Listeners for filter buttons
-    document.getElementById("deselectAllBtn").addEventListener("click", () => {
-      selectedTagIds.clear();
-      selectedUser = null;
-      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
-      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
-      updateFilterDisplay();
-    });
-  
-    document.getElementById("saveFilterSelection").addEventListener("click", () => {
-      $("#tagModal").modal("hide");
-      applyFilters();
-    });
-  
-    document.getElementById("removeAllTags").addEventListener("click", () => {
-      selectedTagIds.clear();
-      selectedUser = null;
-      window.location.href = window.location.pathname;
-    });
-  
-    document.getElementById("openTagModalBtn").addEventListener("click", () => {
-      updateBubbles(document.getElementById('tagBubbleContainer'), preapprovedTags, selectedTagIds, '', 'tag');
-      updateBubbles(document.getElementById('userBubbleContainer'), availableUsers, selectedUser, '', 'user');
-      $("#tagModal").modal("show");
-    });
-    
-    document.addEventListener("DOMContentLoaded", function() {
-    
-      // 1) SHIFT+ENTER for newline, ENTER to submit
-      document.body.addEventListener("keydown", function(e) {
-        // Only trigger if focus is in a textarea belonging to .comment-form
-        const textarea = e.target.closest("textarea");
-        if (!textarea) return;
-    
-        const form = textarea.closest(".comment-form");
-        if (!form) return;
-    
-        // Check if the key is "Enter"
-        if (e.key === "Enter") {
-          if (e.shiftKey) {
-            // SHIFT+ENTER => allow a new line (default behavior).
-            return;
+
+      function applyFilters() {
+        const params = new URLSearchParams();
+        if (selectedTagIds.size) params.set("tags", Array.from(selectedTagIds).join(","));
+        if (selectedUser) params.set("user", selectedUser);
+
+        const newUrl =
+          window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+        window.location.href = newUrl;
+      }
+
+      // Bind bubble filtering events if elements exist
+      if (document.getElementById("tagSearch")) {
+        document.getElementById("tagSearch").addEventListener("input", function () {
+          updateBubbles(
+            document.getElementById("tagBubbleContainer"),
+            preapprovedTags,
+            selectedTagIds,
+            this.value,
+            "tag"
+          );
+        });
+      }
+
+      if (document.getElementById("userSearch")) {
+        document.getElementById("userSearch").addEventListener("input", function () {
+          updateBubbles(
+            document.getElementById("userBubbleContainer"),
+            availableUsers,
+            selectedUser,
+            this.value,
+            "user"
+          );
+        });
+      }
+
+      if (document.getElementById("deselectAllBtn")) {
+        document.getElementById("deselectAllBtn").addEventListener("click", () => {
+          selectedTagIds.clear();
+          selectedUser = null;
+          updateBubbles(
+            document.getElementById("tagBubbleContainer"),
+            preapprovedTags,
+            selectedTagIds,
+            "",
+            "tag"
+          );
+          updateBubbles(
+            document.getElementById("userBubbleContainer"),
+            availableUsers,
+            selectedUser,
+            "",
+            "user"
+          );
+          updateFilterDisplay();
+        });
+      }
+
+      if (document.getElementById("saveFilterSelection")) {
+        document.getElementById("saveFilterSelection").addEventListener("click", () => {
+          $("#tagModal").modal("hide");
+          applyFilters();
+        });
+      }
+
+      if (document.getElementById("removeAllTags")) {
+        document.getElementById("removeAllTags").addEventListener("click", () => {
+          selectedTagIds.clear();
+          selectedUser = null;
+          window.location.href = window.location.pathname;
+        });
+      }
+
+      if (document.getElementById("openTagModalBtn")) {
+        document.getElementById("openTagModalBtn").addEventListener("click", () => {
+          updateBubbles(
+            document.getElementById("tagBubbleContainer"),
+            preapprovedTags,
+            selectedTagIds,
+            "",
+            "tag"
+          );
+          updateBubbles(
+            document.getElementById("userBubbleContainer"),
+            availableUsers,
+            selectedUser,
+            "",
+            "user"
+          );
+          $("#tagModal").modal("show");
+        });
+      }
+
+        // === Like/Unlike Feature ===
+        function updateLikeToggle(toggle, isLiked, likeCount) {
+          const img = toggle.querySelector("img");
+          const likedUrl = toggle.getAttribute("data-liked-url");
+          const likeUrl = toggle.getAttribute("data-like-url");
+          const timestamp = new Date().getTime();
+          if (isLiked) {
+            img.src = likedUrl + "?t=" + timestamp;
+            img.alt = "Unlike";
           } else {
-            // ENTER alone => submit the form
-            e.preventDefault(); // stop adding a newline
-            form.requestSubmit(); // triggers the "submit" event on this form
+            img.src = likeUrl + "?t=" + timestamp;
+            img.alt = "Like";
+          }
+          const screenshotId = toggle.getAttribute("data-screenshot-id");
+          const likeCountSpan = document.querySelector(
+            `.like-count[data-screenshot-id="${screenshotId}"]`
+          );
+          if (likeCountSpan) {
+            likeCountSpan.textContent = likeCount;
           }
         }
-      });
-    
-      // 2) AJAX Submit for .comment-form
-      document.body.addEventListener("submit", function(e) {
+
+        document.querySelectorAll(".like-toggle").forEach(function (toggle) {
+          toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            const screenshotId = toggle.getAttribute("data-screenshot-id");
+            fetch(`/toggle_like/${screenshotId}`, {
+              method: "POST",
+              headers: { "X-Requested-With": "XMLHttpRequest" },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.error) {
+                  alert(data.error);
+                  return;
+                }
+                // interpret data.status === "liked" as a boolean
+                const isLiked = data.status === "liked";
+                updateLikeToggle(toggle, isLiked, data.like_count);
+              })
+              .catch((err) => {
+                console.error("Error toggling like:", err);
+                alert("Error toggling like. Please try again.");
+              });
+          });
+        });
+
+      // === Comment AJAX Submission and Enter Key Handling ===
+      // Intercept comment form submission and send via AJAX
+      document.body.addEventListener("submit", function (e) {
         const form = e.target;
         if (form.matches(".comment-form")) {
-          e.preventDefault(); // Stop normal form submission
-    
-          const screenshotId = form.dataset.screenshotId;  
+          e.preventDefault();
+          const screenshotId = form.dataset.screenshotId;
           const formData = new FormData(form);
-    
-          fetch(`/comment/${screenshotId}`, {
+          fetch(form.action, {
             method: "POST",
             body: formData,
             headers: {
               "X-Requested-With": "XMLHttpRequest"
             }
           })
-          .then(response => response.json())
-          .then(data => {
-            if (data.error) {
-              alert(data.error);
-              return;
-            }
-    
-            // data.comment_count = updated total
-            // data.comment = { id, username, comment_text, created_at }
-            const commentsModal = document.getElementById(`commentsModal-${screenshotId}`);
-            if (!commentsModal) return;
-    
-            // 1) Insert new comment
-            const commentsSection = commentsModal.querySelector(".comments-section");
-            if (commentsSection) {
-              // remove "No comments yet." if present
-              const noCommentsMsg = commentsSection.querySelector("p");
-              if (noCommentsMsg && noCommentsMsg.textContent.includes("No comments yet.")) {
-                noCommentsMsg.remove();
+            .then(response => response.json())
+            .then(data => {
+              if (data.error) {
+                alert(data.error);
+                return;
               }
-    
-              // Build new comment div
-              const newCommentDiv = document.createElement("div");
-              newCommentDiv.classList.add("single-comment", "mb-3");
-              newCommentDiv.innerHTML = `
-                <strong class="comment-title-text">${data.comment.username}:</strong>
-                <p class="comment-text">${data.comment.comment_text}</p>
-                <small class="comment-subtle-text">${data.comment.created_at}</small>
-              `;
-              commentsSection.appendChild(newCommentDiv);
-            }
-    
-            // 2) Update the comment count in the modal title
-            const modalTitle = commentsModal.querySelector(".modal-title");
-            if (modalTitle) {
-              modalTitle.textContent = `Comments (${data.comment_count})`;
-            }
-    
-            // 3) Clear the textarea
-            form.querySelector("[name='comment_text']").value = "";
-          })
-          .catch(err => {
-            console.error("Error posting comment:", err);
-            alert("Something went wrong while posting the comment.");
-          });
+              const commentsModal = document.getElementById(`commentsModal-${screenshotId}`);
+              if (commentsModal) {
+                const commentsSection = commentsModal.querySelector(".comments-section");
+                const noCommentsMsg = commentsSection.querySelector("p");
+                if (noCommentsMsg && noCommentsMsg.textContent.includes("No comments yet.")) {
+                  noCommentsMsg.remove();
+                }
+                const newCommentDiv = document.createElement("div");
+                newCommentDiv.classList.add("single-comment", "mb-3");
+                newCommentDiv.innerHTML = `
+                  <strong class="comment-title-text">${data.comment.username}:</strong>
+                  <p class="comment-text">${data.comment.comment_text}</p>
+                  <small class="comment-subtle-text">${data.comment.created_at}</small>
+                `;
+                commentsSection.appendChild(newCommentDiv);
+                const modalTitle = commentsModal.querySelector(".modal-title");
+                if (modalTitle) {
+                  modalTitle.textContent = `Comments (${data.comment_count})`;
+                }
+              }
+              // Clear the comment textarea
+              form.querySelector("[name='comment_text']").value = "";
+            })
+            .catch(err => {
+              console.error("Error posting comment:", err);
+              alert("Something went wrong while posting the comment.");
+            });
         }
       });
-    
+
+      // Allow SHIFT+ENTER for newline and ENTER (without shift) to submit comment
+      document.body.addEventListener("keydown", function (e) {
+        const textarea = e.target;
+        if (textarea.matches(".comment-form textarea")) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            textarea.closest("form").dispatchEvent(new Event("submit", { cancelable: true }));
+          }
+        }
+      });
     });
-    </script>
-    
+</script>
+
 {% endblock %}

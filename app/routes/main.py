@@ -271,14 +271,14 @@ def toggle_like(screenshot_id):
                 "DELETE FROM likes WHERE screenshot_id=? AND user_id=?",
                 (screenshot_id, user_id)
             )
-            status = "unliked"
+            status = False
         else:
             # Not yet liked => insert a like row
             conn.execute(
                 "INSERT INTO likes (screenshot_id, user_id) VALUES (?, ?)",
                 (screenshot_id, user_id)
             )
-            status = "liked"
+            status = True
 
         conn.commit()
 

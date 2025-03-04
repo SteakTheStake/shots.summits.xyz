@@ -61,17 +61,6 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if user_role in ['admin','moderator'] %}
-              <form action="{{ url_for('main.manage_tags', screenshot_id=screenshot.id) }}" method="POST" class="my-2">
-                <label for="tags_to_add_{{ screenshot.id }}">Add Tags (comma-separated):</label>
-                <input type="text" name="tags_to_add" id="tags_to_add_{{ screenshot.id }}" class="form-control form-control-sm">
-                
-                <label for="tags_to_remove_{{ screenshot.id }}">Remove Tags (comma-separated):</label>
-                <input type="text" name="tags_to_remove" id="tags_to_remove_{{ screenshot.id }}" class="form-control form-control-sm">
-
-                <button type="submit" class="btn btn-primary btn-sm">Update Tags</button>
-              </form>
-            {% endif %}
             <!-- Action buttons: Delete, Report, View Comments -->
             <nav class="auto-width">
                 <div class="image-actions tiny-padding">
@@ -82,6 +71,22 @@
                         View Comments
                     </button>
                 </div>
+                {% if user_role in ['admin','moderator'] %}
+                <details>
+                  <summary>Add/Remove Tags</summary>
+                  <ul class="list border">
+                    <form action="{{ url_for('main.manage_tags', screenshot_id=screenshot.id) }}" method="POST" class="my-2">
+                      <label for="tags_to_add_{{ screenshot.id }}">Add Tags (comma-separated):</label>
+                      <input type="text" name="tags_to_add" id="tags_to_add_{{ screenshot.id }}" class="form-control form-control-sm">
+                      
+                      <label for="tags_to_remove_{{ screenshot.id }}">Remove Tags (comma-separated):</label>
+                      <input type="text" name="tags_to_remove" id="tags_to_remove_{{ screenshot.id }}" class="form-control form-control-sm">
+      
+                      <button type="submit" class="btn btn-primary btn-sm">Update Tags</button>
+                    </form>
+                  </ul>
+                </details>
+                {% endif %}
             </nav>
             <div class="no-gap">
                 <form action="{{ url_for('main.delete_image', filename=screenshot.filename) }}" method="POST" class="d-inline align-toside">

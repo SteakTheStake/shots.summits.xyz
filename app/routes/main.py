@@ -484,20 +484,19 @@ def profile():
     )
 
 
-@main_bp.context_processor
+@app.context_processor
 def inject_notifications():
     user_id = session.get("discord_id") or session.get("guest_id")
     if not user_id:
-        return dict(unread_notifications=0)
+        return {"unread_notifications": 0}
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
-        row = conn.execute("""
-            SELECT COUNT(*) AS cnt 
-            FROM notifications 
-            WHERE user_id=? AND is_read=0
-        """, (user_id,)).fetchone()
+        row = conn.execute(
+            "SELECT COUNT(*) AS cnt FROM notifications WHERE user_id=? AND is_read=0",
+            (user_id,)
+        ).fetchone()
         count = row["cnt"] if row else 0
-    return dict(unread_notifications=count)
+    return {"unread_notifications": count}
 
 @main_bp.route("/manage_tags/<int:screenshot_id>", methods=["POST"])
 @login_required

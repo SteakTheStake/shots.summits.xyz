@@ -546,6 +546,7 @@ progress {
     transition: opacity 0.3s;
     border-radius: 0;
     cursor: default;
+    max-height: 80%;
 }
 
 .fancy-text {

@@ -108,6 +108,14 @@
                             <p class="login_text_mobile solid_1">Upload</p>
                         </a>
                     </span>
+                    {% if user_role in ['admin', 'moderator'] %}
+                    <span>
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">admin_panel_settings</i>
+                            <p class="login_text_mobile solid_1">Dashboard</p>
+                        </a>
+                    </span>
+                    {% endif %}
                     <span class="spacer_lr">
                         <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
                             <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
@@ -187,13 +195,21 @@
                         <p class="login_text_mobile solid_1">Upload</p>
                     </a>
                 </span>
+                {% if user_role in ['admin', 'moderator'] %}
+                <span class="spacer_lr">
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">admin_panel_settings</i>
+                        <p class="login_text_mobile solid_1">Dashboard</p>
+                    </a>
+                </span>
+                {% endif %}
                 <span>
                     <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
                         <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
                         <p class="login_text_mobile solid_1">Toggle Particles</p>
                     </a>
                 </span>
-                {% else %} {# Not logged in: only show the login button #}
+                {% else %}
                 <span>
                     <a href="{{ url_for('main.index') }}" class="btn_better_alt_mobile round large small-padding">
                         <i class="rounded-0 solid_1 show-overflow">photo_library</i>

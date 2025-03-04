@@ -21,11 +21,6 @@ def inject_notifications():
         count = 0
     return {"unread_notifications": count}
 
-# Make sure to register your blueprints after creating the app
-from app.routes import main_bp, admin_bp
-app.register_blueprint(main_bp)
-app.register_blueprint(admin_bp, url_prefix='/admin')
-
 if __name__ == "__main__":
     # Typically you'd set host and port here, or rely on .env config:
     app.run(host="0.0.0.0", port=8001)

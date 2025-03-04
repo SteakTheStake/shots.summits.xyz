@@ -121,6 +121,14 @@ def init_db():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS banned_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                ban_reason TEXT,
+                banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
 
         # 4h. Seed default tags
         default_tags = [

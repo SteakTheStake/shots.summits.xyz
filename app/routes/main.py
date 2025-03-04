@@ -683,9 +683,6 @@ def ban_user():
 def init_db():
     import sqlite3
     from config import Config
-    
-        # 1. Load environment variables
-    load_dotenv()
 
     # 2. Provide a default path if DATABASE_PATH is not in the environment
     default_db_path = "/var/www/summitmc.xyz/f2/f2.db"

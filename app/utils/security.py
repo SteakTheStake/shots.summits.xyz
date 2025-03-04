@@ -7,16 +7,27 @@ import sqlite3
 from config import Config
 
 def login_required(f):
-    """
-    Decorator to require login from either Discord or Guest session.
-    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "discord_id" not in session and "guest_id" not in session:
-            flash("Please log in or continue as guest.", "warning")
-            return redirect(url_for("main.index"))  # Adjust blueprint endpoint name
+        if not session.get("discord_id") and not session.get("guest_id"):
+            flash("You must be logged in", "danger")
+            return redirect(url_for("login"))
+
+        # Check if this user is banned
+        user_id = session.get("discord_id") or session.get("guest_id")
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
+            conn.row_factory = sqlite3.Row
+            is_banned = conn.execute(
+                "SELECT 1 FROM banned_users WHERE user_id=?",
+                (str(user_id),)
+            ).fetchone()
+            if is_banned:
+                flash("You are banned and cannot perform this action.", "danger")
+                return redirect(url_for("main.index"))
+
         return f(*args, **kwargs)
     return decorated_function
+
 
 
 def get_user_role(discord_id=None, guest_id=None):

@@ -387,3 +387,183 @@ def report_image(filename):
 
     flash("Your report was submitted successfully.", "success")
     return redirect(request.referrer or url_for("main.index"))
+
+@main_bp.route("/manage_tags/<int:screenshot_id>", methods=["POST"])
+@login_required
+def manage_tags(screenshot_id):
+    """
+    Allows an admin or moderator to ADD or REMOVE tags from an existing screenshot.
+    Expects form data: 'tags_to_add' (comma-separated or repeated form fields),
+                       'tags_to_remove' (optional).
+    """
+    discord_id = session.get("discord_id")
+    guest_id = session.get("guest_id")
+    user_role = get_user_role(discord_id, guest_id)
+
+    # Only admins or mods can do this (unless you want to allow the uploader also).
+    if user_role not in ["admin", "moderator"]:
+        flash("You do not have permission to modify tags.", "danger")
+        return redirect(request.referrer or url_for("main.index"))
+
+    tags_to_add = request.form.get("tags_to_add", "").strip()
+    tags_to_remove = request.form.get("tags_to_remove", "").strip()
+
+    # Split on commas or spaces – adjust as you prefer
+    tags_to_add_list = [t.strip() for t in tags_to_add.split(",") if t.strip()]
+    tags_to_remove_list = [t.strip() for t in tags_to_remove.split(",") if t.strip()]
+
+    with sqlite3.connect(Config.DATABASE_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+
+        # 1) Check if screenshot exists
+        row = conn.execute("SELECT id FROM screenshots WHERE id=?", (screenshot_id,)).fetchone()
+        if not row:
+            flash("Screenshot not found.", "danger")
+            return redirect(url_for("main.index"))
+
+        # 2) Insert any new tags into the `tags` table if they do not exist
+        for tag_name in tags_to_add_list:
+            if not tag_name:
+                continue
+            # Check if the tag already exists
+            existing_tag = conn.execute("SELECT id FROM tags WHERE name=?", (tag_name,)).fetchone()
+            if existing_tag:
+                tag_id = existing_tag["id"]
+            else:
+                # Insert new tag
+                cur = conn.execute("INSERT INTO tags (name) VALUES (?)", (tag_name,))
+                tag_id = cur.lastrowid
+
+            # Now ensure a row in `screenshot_tags`
+            # Check if row already exists
+            existing_link = conn.execute("""
+                SELECT 1 FROM screenshot_tags
+                WHERE screenshot_id=? AND tag_id=?
+            """, (screenshot_id, tag_id)).fetchone()
+            if not existing_link:
+                conn.execute("""
+                    INSERT INTO screenshot_tags (screenshot_id, tag_id)
+                    VALUES (?, ?)
+                """, (screenshot_id, tag_id))
+
+        # 3) Remove tags if specified
+        for tag_name in tags_to_remove_list:
+            if not tag_name:
+                continue
+            # Find the tag's id
+            existing_tag = conn.execute("SELECT id FROM tags WHERE name=?", (tag_name,)).fetchone()
+            if existing_tag:
+                tag_id = existing_tag["id"]
+                # Remove link
+                conn.execute("""
+                    DELETE FROM screenshot_tags
+                    WHERE screenshot_id=? AND tag_id=?
+                """, (screenshot_id, tag_id))
+                # Potentially also remove the tag entirely if you want
+                # but only if it's not used by any other screenshot
+                # conn.execute("""
+                #     DELETE FROM tags WHERE id=? AND NOT EXISTS (
+                #         SELECT 1 FROM screenshot_tags WHERE tag_id=?
+                #     )
+                # """, (tag_id, tag_id))
+
+        conn.commit()
+
+    flash("Tags updated successfully.", "success")
+    return redirect(request.referrer or url_for("main.index"))
+
+
+@main_bp.route("/remove_comment/<int:comment_id>", methods=["POST"])
+@login_required
+def remove_comment(comment_id):
+    """
+    Allows an admin or moderator to remove any comment,
+    or the original commenter to remove their own comment (optional).
+    """
+    discord_id = session.get("discord_id")
+    guest_id = session.get("guest_id")
+    user_role = get_user_role(discord_id, guest_id)
+    current_user = session.get("username")
+
+    with sqlite3.connect(Config.DATABASE_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        comment_row = conn.execute("""
+            SELECT user_id, username, comment_text
+            FROM comments
+            WHERE id=?
+        """, (comment_id,)).fetchone()
+
+        if not comment_row:
+            flash("Comment not found.", "danger")
+            return redirect(url_for("main.index"))
+
+        comment_user_id = comment_row["user_id"]
+        comment_username = comment_row["username"]
+
+        # Check permission:
+        # - If admin or moderator => okay
+        # - OR if you want to allow the original commenter to remove it:
+        #   if user_id == comment_user_id
+        #   (i.e. current_user_id or username matches)
+        if user_role not in ["admin", "moderator"]:
+            # If you want to allow the user themself to remove their own comment:
+            # user_id = discord_id or guest_id
+            # if str(user_id) != str(comment_user_id):
+            #     flash("You don't have permission to remove this comment.", "danger")
+            #     return redirect(request.referrer or url_for("main.index"))
+            #
+            # else:
+            #    # allow
+            #    pass
+            flash("Only admins or moderators can remove comments.", "danger")
+            return redirect(request.referrer or url_for("main.index"))
+
+        # If we reach here, proceed to delete
+        conn.execute("DELETE FROM comments WHERE id=?", (comment_id,))
+        conn.commit()
+
+    flash("Comment removed successfully.", "success")
+    return redirect(request.referrer or url_for("main.index"))
+
+
+@main_bp.route("/ban_user", methods=["POST"])
+@login_required
+def ban_user():
+    """
+    Allows admin or moderator to ban a user by user_id (discord or guest).
+    Expects form data: 'user_id_to_ban'.
+    """
+    from datetime import datetime
+
+    discord_id = session.get("discord_id")
+    guest_id = session.get("guest_id")
+    user_role = get_user_role(discord_id, guest_id)
+    if user_role not in ["admin", "moderator"]:
+        flash("You do not have permission to ban users.", "danger")
+        return redirect(request.referrer or url_for("main.index"))
+
+    user_id_to_ban = request.form.get("user_id_to_ban", "").strip()
+    if not user_id_to_ban:
+        flash("No user ID provided to ban.", "danger")
+        return redirect(request.referrer or url_for("main.index"))
+
+    # Optional: prevent banning yourself or other weird checks
+    if str(user_id_to_ban) == str(discord_id) or str(user_id_to_ban) == str(guest_id):
+        flash("You cannot ban yourself.", "danger")
+        return redirect(request.referrer or url_for("main.index"))
+
+    with sqlite3.connect(Config.DATABASE_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        # Check if user is already banned
+        existing_ban = conn.execute("""
+            SELECT 1 FROM banned_users WHERE user_id=?
+        """, (user_id_to_ban,)).fetchone()
+
+        if existing_ban:
+            flash("That user is already banned.", "warning")
+        else:
+            conn.execute("INSERT INTO banned_users (user_id) VALUES (?)", (user_id_to_ban,))
+            conn.commit()
+            flash("User has been banned.", "success")
+
+    return redirect(request.referrer or url_for("main.index"))

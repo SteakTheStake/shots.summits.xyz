@@ -61,6 +61,17 @@
                 {% endfor %}
             </div>
             {% endif %}
+            {% if user_role in ['admin','moderator'] %}
+              <form action="{{ url_for('main.manage_tags', screenshot_id=screenshot.id) }}" method="POST" class="my-2">
+                <label for="tags_to_add_{{ screenshot.id }}">Add Tags (comma-separated):</label>
+                <input type="text" name="tags_to_add" id="tags_to_add_{{ screenshot.id }}" class="form-control form-control-sm">
+                
+                <label for="tags_to_remove_{{ screenshot.id }}">Remove Tags (comma-separated):</label>
+                <input type="text" name="tags_to_remove" id="tags_to_remove_{{ screenshot.id }}" class="form-control form-control-sm">
+
+                <button type="submit" class="btn btn-primary btn-sm">Update Tags</button>
+              </form>
+            {% endif %}
             <!-- Action buttons: Delete, Report, View Comments -->
             <nav class="auto-width">
                 <div class="image-actions tiny-padding">
@@ -140,10 +151,15 @@
                     <div class="comments-section">
                         {% if screenshot.comments %} {% for comment in screenshot.comments %}
                         <div class="single-comment mb-3">
-                            <strong class="comment-title-text">{{ comment.username }}:</strong>
-                            <p class="comment-text">{{ comment.comment_text }}</p>
-                            <small class="comment-subtle-text">{{ comment.created_at }}</small>
-                        </div>
+                          <strong class="comment-title-text">{{ comment.username }}:</strong>
+                          <p class="comment-text">{{ comment.comment_text }}</p>
+                          <small class="comment-subtle-text">{{ comment.created_at }}</small>
+                          {% if user_role in ['admin','moderator'] %}
+                            <form action="{{ url_for('main.remove_comment', comment_id=comment.id) }}" method="POST" style="display:inline">
+                              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                          {% endif %}
+                        </div>                        
                         {% endfor %} {% else %}
                         <p><em>No comments yet.</em></p>
                         {% endif %}
@@ -339,51 +355,41 @@
       }
 
         // === Like/Unlike Feature ===
-        document.addEventListener("DOMContentLoaded", function () {
-          // We attach an event listener to each .like-toggle container
-          document.querySelectorAll(".like-toggle").forEach(function (toggle) {
-            toggle.addEventListener("click", function (e) {
-              e.preventDefault(); // Only really needed if it's inside a link or form
+        document.addEventListener("DOMContentLoaded", function() {
+          document.querySelectorAll(".like-toggle").forEach(function(toggle) {
+            toggle.addEventListener("click", function(e) {
+              e.preventDefault();
               const screenshotId = toggle.getAttribute("data-screenshot-id");
-      
+        
               fetch(`/toggle_like/${screenshotId}`, {
                 method: "POST",
                 headers: {
                   "X-Requested-With": "XMLHttpRequest"
-                  // If your backend requires a CSRF token or JSON header, you'd add it here
-                  // "Content-Type": "application/json",
-                  // "X-CSRFToken": "<your-csrf-token>"
                 }
               })
-                .then((response) => response.json())
-                .then((data) => {
-                  // Debugging line (optional): see exactly what the server sends
-                  console.log("Server response to toggle_like:", data);
-      
-                  if (data.error) {
-                    alert(data.error);
-                    return;
-                  }
-      
-                  // If your server sends "status": "liked" or "unliked",
-                  // interpret that as a boolean:
-                  const isLiked = data.status === "liked";
-                  updateLikeToggle(toggle, isLiked, data.like_count);
-                })
-                .catch((err) => {
-                  console.error("Error toggling like:", err);
-                  alert("Error toggling like. Please try again.");
-                });
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("toggle_like response", data);
+                if (data.error) {
+                  alert(data.error);
+                  return;
+                }
+                const isLiked = (data.status === "liked");
+                updateLikeToggle(toggle, isLiked, data.like_count);
+              })
+              .catch((err) => {
+                console.error("Error toggling like:", err);
+                alert("Could not toggle like. Please try again.");
+              });
             });
           });
-      
-          // The helper that actually swaps the icon & updates the count
+        
           function updateLikeToggle(toggle, isLiked, likeCount) {
             const img = toggle.querySelector("img");
             const likedUrl = toggle.getAttribute("data-liked-url");
             const likeUrl = toggle.getAttribute("data-like-url");
-      
-            // Bust the cache so that the new icon always shows
+        
+            // bust the cache
             const timestamp = new Date().getTime();
             if (isLiked) {
               img.src = likedUrl + "?t=" + timestamp;
@@ -392,8 +398,7 @@
               img.src = likeUrl + "?t=" + timestamp;
               img.alt = "Like";
             }
-      
-            // Update the numeric like count next to it
+        
             const screenshotId = toggle.getAttribute("data-screenshot-id");
             const likeCountSpan = document.querySelector(
               `.like-count[data-screenshot-id="${screenshotId}"]`

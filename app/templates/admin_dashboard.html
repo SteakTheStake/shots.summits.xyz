@@ -1,77 +1,186 @@
 {% extends "base.html" %}
 {% block content %}
-<article  class="large-margin bg-transparent">
-<div class="admin-dashboard">
-    <h2>Admin Dashboard</h2>
-
-    <div class="stats-panel">
-        <h3>Statistics</h3>
-        <p>Total Images: {{ stats.total_images }}</p>
-        <p>Total Users: {{ stats.total_users }}</p>
-    </div>
-
-    <div class="recent-uploads">
-        <h3>Recent Uploads</h3>
-        <table class="table white-text">
-            <thead>
-                <tr>
-                    <th>Filename</th>
-                    <th>Uploader</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for upload in stats.recent_uploads %}
-                <tr>
-                    <td>{{ upload.filename }}</td>
-                    <td>{{ upload.discord_username }}</td>
-                    <td>{{ upload.upload_date }}</td>
-                    <td>
-                        <form action="{{ url_for('main.delete_image', filename=upload.filename) }}" method="POST" class="d-inline">
-                            <input type="text" name="reason" placeholder="Reason for deletion" required>
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<article class="large-margin bg-transparent">
+  <div class="container">
+    <h1 class="my-3">Admin / Moderator Dashboard</h1>
     
-    <div class="user-management">
-        <h3>User Management</h3>
-        <table class="table white-text">
+    <!-- Example: Using nav-tabs for different sections -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="stats-tab" data-toggle="tab" href="#stats" role="tab">
+          <strong>Statistics</strong>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="uploads-tab" data-toggle="tab" href="#uploads" role="tab">
+          <strong>Recent Uploads</strong>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="users-tab" data-toggle="tab" href="#users" role="tab">
+          <strong>User Management</strong>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="bans-tab" data-toggle="tab" href="#bans" role="tab">
+          <strong>Banned Users</strong>
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+      <!-- STATS TAB -->
+      <div class="tab-pane fade show active py-3" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+        <h3>Site Statistics</h3>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <div class="card text-light bg-dark shadow">
+              <div class="card-body">
+                <h5 class="card-title">Total Images</h5>
+                <p class="card-text display-4">{{ stats.total_images }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card text-light bg-dark shadow">
+              <div class="card-body">
+                <h5 class="card-title">Total Users</h5>
+                <p class="card-text display-4">{{ stats.total_users }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Add more stat cards as needed (e.g. total likes, total comments, etc.) -->
+        </div>
+      </div>
+
+      <!-- RECENT UPLOADS TAB -->
+      <div class="tab-pane fade py-3" id="uploads" role="tabpanel" aria-labelledby="uploads-tab">
+        <h3>Recent Uploads</h3>
+        <p class="text-muted">Here you can quickly delete or review newly uploaded images.</p>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-sm">
             <thead>
-                <tr>
-                    <th>Discord ID</th>
-                    <th>Current Role</th>
-                    <th>Upload Count</th>
-                    <th>Actions</th>
-                </tr>
+              <tr>
+                <th>Filename</th>
+                <th>Uploader</th>
+                <th>Date</th>
+                <th>Reason for Deletion</th>
+                <th>Actions</th>
+              </tr>
             </thead>
             <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.discord_id }}</td>
-                    <td>{{ user.role }}</td>
-                    <td>{{ user.upload_count }}</td>
-                    <td>
-                        <form action="{{ url_for('admin.manage_roles') }}" method="POST" class="d-inline">
-                            <input type="hidden" name="discord_id" value="{{ user.discord_id }}">
-                            <select name="role" class="form-control form-control-sm d-inline w-auto">
-                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
-                                <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>Moderator</option>
-                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
+              {% for upload in stats.recent_uploads %}
+              <tr>
+                <td>{{ upload.filename }}</td>
+                <td>{{ upload.discord_username }}</td>
+                <td>{{ upload.upload_date }}</td>
+                <td>
+                  <form action="{{ url_for('main.delete_image', filename=upload.filename) }}"
+                        method="POST" class="form-inline d-inline">
+                    <div class="form-group mb-2">
+                      <input type="text" class="form-control form-control-sm"
+                             name="reason" placeholder="Reason" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-sm ml-2">Delete</button>
+                  </form>
+                </td>
+                <td>
+                  <!-- If you wanted additional moderation actions on each upload, place them here -->
+                  <a href="{{ url_for('main.view_image', image_filename=upload.filename) }}"
+                     class="btn btn-secondary btn-sm">View</a>
+                </td>
+              </tr>
+              {% endfor %}
             </tbody>
-        </table>
+          </table>
+        </div>
+      </div>
+
+      <!-- USER MANAGEMENT TAB -->
+      <div class="tab-pane fade py-3" id="users" role="tabpanel" aria-labelledby="users-tab">
+        <h3>User Management</h3>
+        <p class="text-muted">Manage user roles or ban specific users.</p>
+        
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Discord ID</th>
+                <th>Current Role</th>
+                <th>Upload Count</th>
+                <th>Ban User</th>
+                <th>Change Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>{{ user.discord_id }}</td>
+                <td>{{ user.role }}</td>
+                <td>{{ user.upload_count }}</td>
+                <td>
+                  <!-- Ban form -->
+                  <form action="{{ url_for('main.ban_user') }}" method="POST" class="form-inline">
+                    <input type="hidden" name="user_id_to_ban" value="{{ user.discord_id }}">
+                    <input type="text" name="ban_reason" class="form-control form-control-sm"
+                           placeholder="Ban reason" required>
+                    <button type="submit" class="btn btn-warning btn-sm ml-2">Ban</button>
+                  </form>
+                </td>
+                <td>
+                  <!-- Update role form -->
+                  <form action="{{ url_for('admin.manage_roles') }}" method="POST" class="form-inline">
+                    <input type="hidden" name="discord_id" value="{{ user.discord_id }}">
+                    <select name="role" class="form-control form-control-sm">
+                      <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                      <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>Moderator</option>
+                      <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm ml-2">Update</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BANNED USERS TAB -->
+      <div class="tab-pane fade py-3" id="bans" role="tabpanel" aria-labelledby="bans-tab">
+        <h3>Banned Users</h3>
+        <p class="text-muted">Below is a list of users currently banned. You can unban them if needed.</p>
+        
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Discord (or Guest) ID</th>
+                <th>Banned At</th>
+                <th>Ban Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for banned in banned_users %}
+              <tr>
+                <td>{{ banned.user_id }}</td>
+                <td>{{ banned.banned_at }}</td>
+                <td>{{ banned.ban_reason or 'N/A' }}</td>
+                <td>
+                  <!-- Unban form (if you want to allow unbanning) -->
+                  <form action="{{ url_for('main.unban_user') }}" method="POST" class="form-inline">
+                    <input type="hidden" name="user_id_to_unban" value="{{ banned.user_id }}">
+                    <button type="submit" class="btn btn-success btn-sm">Unban</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 </article>
 {% endblock %}

@@ -409,87 +409,70 @@ def report_image(filename):
 @main_bp.route("/profile")
 @login_required
 def profile():
-    user_id = session.get("discord_id") or session.get("guest_id")
-    if not user_id:
-        flash("You need to be logged in to view your profile.", "danger")
+    # Use session username for filtering uploads
+    current_username = session.get("username")
+    if not current_username:
+        flash("You must be logged in to view your profile.", "danger")
         return redirect(url_for("main.index"))
 
-    # We'll collect stats in a dictionary
     stats = {
         "likes_received": 0,
         "likes_given": 0,
         "comments_received": 0,
         "comments_posted": 0,
     }
-
     notifications = []
     unread_notifications_count = 0
 
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
 
-        # 1) Likes RECEIVED (count how many times others liked screenshots by user_id)
-        #    We assume screenshots.user_id = <this user_id>
-        #    and likes.user_id = <the person who liked it>
-        #    We'll exclude the user liking their own images if you want to count that or not.
+        # 1) Likes RECEIVED on user's uploads
+        # Use COALESCE to match the uploader name as stored in your index route.
         row = conn.execute("""
             SELECT COUNT(*) AS cnt
             FROM likes l
             JOIN screenshots s ON l.screenshot_id = s.id
-            WHERE s.user_id = ?
-        """, (user_id,)).fetchone()
+            WHERE COALESCE(s.discord_username, s.guest_username) = ?
+        """, (current_username,)).fetchone()
         stats["likes_received"] = row["cnt"] if row else 0
 
-        # 2) Likes GIVEN (count how many likes the user left on others’ screenshots)
+        # 2) Likes GIVEN by this user (stored in likes.user_id)
         row = conn.execute("""
             SELECT COUNT(*) AS cnt
             FROM likes
             WHERE user_id = ?
-        """, (user_id,)).fetchone()
+        """, (session.get("discord_id") or session.get("guest_id"),)).fetchone()
         stats["likes_given"] = row["cnt"] if row else 0
 
-        # 3) Comments RECEIVED (comments left on this user’s screenshots)
+        # 3) Comments RECEIVED on this user's uploads
         row = conn.execute("""
             SELECT COUNT(*) AS cnt
             FROM comments c
             JOIN screenshots s ON c.screenshot_id = s.id
-            WHERE s.user_id = ?
-        """, (user_id,)).fetchone()
+            WHERE COALESCE(s.discord_username, s.guest_username) = ?
+        """, (current_username,)).fetchone()
         stats["comments_received"] = row["cnt"] if row else 0
 
-        # 4) Comments POSTED (comments this user wrote on any screenshot)
+        # 4) Comments POSTED by this user.
+        # Assuming the comments table stores the poster’s username in the "username" column.
         row = conn.execute("""
             SELECT COUNT(*) AS cnt
             FROM comments
-            WHERE user_id = ?
-        """, (user_id,)).fetchone()
+            WHERE username = ?
+        """, (current_username,)).fetchone()
         stats["comments_posted"] = row["cnt"] if row else 0
 
-        # 5) Possibly fetch notifications from a “notifications” table
-        #    e.g. new likes, new comments, etc. 
-        #    This is optional – you can store them in the DB or generate them dynamically.
-        #    Example if we had a notifications table:
+        # 5) Fetch notifications (if using a notifications table)
         noti_rows = conn.execute("""
             SELECT id, message, created_at, is_read
             FROM notifications
             WHERE user_id = ?
             ORDER BY created_at DESC
-        """, (user_id,)).fetchall()
-        
-        conn.execute("""
-            UPDATE notifications
-            SET is_read=1
-            WHERE user_id=? AND is_read=0
-        """, (user_id,))
-        conn.commit()
-
-        # Convert to list of dict
-        notifications = [dict(row) for row in noti_rows]
-
-        # Count how many are unread
+        """, (session.get("discord_id") or session.get("guest_id"),)).fetchall()
+        notifications = [dict(r) for r in noti_rows]
         unread_notifications_count = sum(1 for n in notifications if not n["is_read"])
 
-    # Provide user_role for the template if needed
     user_role = get_user_role(session.get("discord_id"), session.get("guest_id"))
 
     return render_template(
@@ -499,6 +482,7 @@ def profile():
         unread_count=unread_notifications_count,
         user_role=user_role
     )
+
 
 @main_bp.context_processor
 def inject_notifications():

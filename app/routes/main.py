@@ -75,6 +75,7 @@ def index():
     return render_template(
         "index.html",
         screenshots=screenshots_data,
+        screenshots=rows,
         preapproved_tags=tags,
         users=users,
         user_role=get_user_role(session.get('discord_id'), session.get('guest_id'))
@@ -83,10 +84,10 @@ def index():
 def get_discord_avatar_url(discord_id, avatar):
     return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
 
-@main_bp.route("/app/static/images/<image_filename>")
+@main_bp.route("/shots/<image_filename>")  # instead of /app/static/images/<image_filename>
 def view_image(image_filename):
     """
-    Adjusted to also fetch the like count and comments for this screenshot.
+    Adjusted to also fetch like count and comments for this screenshot.
     """
     image_path = os.path.join(Config.UPLOAD_FOLDER, image_filename)
     if not os.path.exists(image_path):
@@ -133,6 +134,7 @@ def view_image(image_filename):
         comments=comments_list,
         user_role=get_user_role(session.get('discord_id'), session.get('guest_id'))
     )
+
 
 
 @main_bp.route("/delete/<filename>", methods=["POST"])

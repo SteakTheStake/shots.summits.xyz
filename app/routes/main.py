@@ -9,6 +9,8 @@ from flask import (
 )
 from app.utils.security import login_required, get_user_role
 from app.utils.file_utils import handle_upload, allowed_file
+app.register_blueprint(main_bp)
+app.register_blueprint(admin_bp, url_prefix='/admin')
 
 main_bp = Blueprint('main', __name__, template_folder='../templates')
 

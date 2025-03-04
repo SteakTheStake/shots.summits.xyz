@@ -87,8 +87,8 @@
                         <a href="{{ url_for('main.profile') }}" class="btn_better_alt_mobile round large small-padding">
                             <i class="rounded-0 solid_1 show-overflow">notifications</i>
                             <p class="login_text_mobile solid_1">Notifications</p>
-                            {% if unread_count > 0 %}
-                                <span class="badge badge-danger">{{ unread_count }}</span>
+                            {% if unread_notifications > 0 %}
+                                <span class="badge badge-danger">{{ unread_notifications }}</span>
                             {% endif %}
                         </a>
                     </span>
@@ -189,8 +189,8 @@
                     <a href="{{ url_for('main.profile') }}" class="btn_better_alt_mobile round large small-padding">
                         <i class="rounded-0 solid_1 show-overflow">notifications</i>
                         <p class="login_text_mobile solid_1">Notifications</p>
-                        {% if unread_count > 0 %}
-                            <span class="badge badge-danger">{{ unread_count }}</span>
+                        {% if unread_notifications > 0 %}
+                            <span class="badge badge-danger">{{ unread_notifications }}</span>
                         {% endif %}
                     </a>
                 </span>

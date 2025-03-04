@@ -894,6 +894,6 @@ if __name__ == "__main__":
     print("Database initialized successfully!")
 
 # Register this function to run before the first request.
-@main_bp.before_app_first_request
+@main_bp.before_app_request
 def initialize_database():
     init_db()

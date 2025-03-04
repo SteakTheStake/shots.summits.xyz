@@ -547,6 +547,7 @@ progress {
     border-radius: 0;
     cursor: default;
     max-height: 80%;
+    overflow-y: scroll;
 }
 
 .fancy-text {

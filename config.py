@@ -39,8 +39,14 @@ class Config:
     DATABASE_PATH = os.path.abspath(
         os.getenv("DATABASE_PATH", "C:/var/www/summitmc.xyz/f2/f2.db")
     )
-    # Your existing configuration
-    SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev')
+    ADMIN_IDS = set(
+        id_str.strip() for id_str in os.environ.get("ADMIN_IDS", "").split(",") if id_str.strip()
+    )
+    MODERATOR_IDS = set(
+        id_str.strip() for id_str in os.environ.get("MODERATOR_IDS", "").split(",") if id_str.strip()
+    )
+
+    SECRET_KEY = os.environ.get("SECRET_KEY", "some-random-key")
     
     # Discord OAuth2
     DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
@@ -57,7 +63,7 @@ class Config:
     DISCORD_TOKEN_URL = 'https://discord.com/api/oauth2/token'
     
     # Upload settings
-    UPLOAD_FOLDER = "app/static/images"
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "images")
     # GUEST_UPLOAD_FOLDER = "static/guest_uploads"
     THUMBNAIL_FOLDER = "static/thumbnails"
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}

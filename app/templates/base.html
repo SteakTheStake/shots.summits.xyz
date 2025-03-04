@@ -83,6 +83,15 @@
                       </a>
                     </span>
                     {% endif %}
+                    <span class="spacer">
+                        <a href="{{ url_for('main.profile') }}" class="btn_better_alt_mobile round large small-padding">
+                            <i class="rounded-0 solid_1 show-overflow">notifications</i>
+                            <p class="login_text_mobile solid_1">Notifications</p>
+                            {% if unread_notifications > 0 %}
+                                <span class="badge badge-danger">{{ unread_notifications }}</span>
+                            {% endif %}
+                        </a>
+                    </span>
                     <span class="spacer_lr">
                         <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
                             <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
@@ -176,6 +185,15 @@
                 </a>
                 </span>
                 {% endif %}
+                <span>
+                    <a href="{{ url_for('main.profile') }}" class="btn_better_alt_mobile round large small-padding">
+                        <i class="rounded-0 solid_1 show-overflow">notifications</i>
+                        <p class="login_text_mobile solid_1">Notifications</p>
+                        {% if unread_notifications > 0 %}
+                            <span class="badge badge-danger">{{ unread_notifications }}</span>
+                        {% endif %}
+                    </a>
+                </span>
                 <span>
                     <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
                         <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>

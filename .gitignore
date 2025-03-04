@@ -166,3 +166,4 @@ static/images/Photos-001.zip
 templates/upload copy.html
 gunicorn-cmd.txt
 f2.db
+/app/static/images

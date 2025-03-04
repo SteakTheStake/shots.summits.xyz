@@ -131,6 +131,8 @@ def init_db():
             
             # Graphics & Visuals
             'no shaders',
+            'Ray Tracing',
+            'Distant Horizons',
             'realism',
             'styleized',
             'high res',
@@ -140,16 +142,10 @@ def init_db():
             'survival',
             
             # Resource Packs
-            'Brickcraft',
+            'stylized pack',
             'Patrix',
             'Vanilla PBR Styled Pack',
             'Summit',
-            'MrAAA',
-            'Coven',
-            'Faithful',
-            'Optimum Realism',
-            'SubtlePBR',
-            'Amulet',
         ]
         for tag in default_tags:
             conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))

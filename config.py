@@ -63,9 +63,9 @@ class Config:
     DISCORD_TOKEN_URL = 'https://discord.com/api/oauth2/token'
     
     # Upload settings
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "images")
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "app", "static", "images")
     # GUEST_UPLOAD_FOLDER = "static/guest_uploads"
-    THUMBNAIL_FOLDER = "static/thumbnails"
+    THUMBNAIL_FOLDER = "app/static/thumbnails"
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     MAX_CONTENT_LENGTH = 24 * 1024 * 1024  # 10MB limit
     

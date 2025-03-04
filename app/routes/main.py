@@ -484,7 +484,7 @@ def profile():
     )
 
 
-@app.context_processor
+@main_bp.context_processor
 def inject_notifications():
     user_id = session.get("discord_id") or session.get("guest_id")
     if not user_id:

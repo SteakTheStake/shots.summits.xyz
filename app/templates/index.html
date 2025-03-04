@@ -44,14 +44,10 @@
                 <span class="like-count" data-screenshot-id="{{ screenshot.id }}">
                     {{ screenshot.like_count }}
                 </span>
-                <div class="image-actions tiny-padding">
-                    {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
-
-                    <!-- This button triggers the comments modal -->
-                    <button type="button" class="btn btn-comments btn-sm" data-toggle="modal" data-target="#commentsModal-{{ screenshot.id }}">
-                        View Comments
-                    </button>
-                </div>
+                <!-- This button triggers the comments modal -->
+                <button type="button" class="btn btn-comments btn-sm" data-toggle="modal" data-target="#commentsModal-{{ screenshot.id }}">
+                    View Comments
+                </button>
                 {% else %}
                 <p class="muted-text">Log in to interact.&nbsp;</p>
                 {% endif %}
@@ -71,6 +67,9 @@
             {% endif %}
             <!-- Action buttons: Delete, Report, View Comments -->
             <nav class="auto-width">
+              <div class="image-actions tiny-padding">
+                  {% if session.get('username') == screenshot.uploader_name or user_role in ['admin', 'moderator'] %}
+              </div>
                 {% if user_role in ['admin','moderator'] %}
                 <details>
                   <summary>Add/Remove Tags</summary>

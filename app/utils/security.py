@@ -11,7 +11,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if not session.get("discord_id") and not session.get("guest_id"):
             flash("You must be logged in", "danger")
-            return redirect(url_for("login"))
+            return redirect(url_for("auth.login"))
 
         # Check if this user is banned
         user_id = session.get("discord_id") or session.get("guest_id")

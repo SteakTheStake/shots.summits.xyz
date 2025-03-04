@@ -926,7 +926,7 @@ body.dark {
     padding-top: 1rem;
     padding-bottom: 1rem;
     outline-style: none;
-    z-index: 1000;
+    z-index: 999;
     display: inline-flex;
 	}
 	.filter-section {

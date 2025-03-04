@@ -10,8 +10,6 @@ from flask import (
 from app.utils.security import login_required, get_user_role
 from app.utils.file_utils import handle_upload, allowed_file
 
-main_bp.register_blueprint(main_bp)
-main_bp.register_blueprint(admin_bp, url_prefix='/admin')
 main_bp = Blueprint('main', __name__, template_folder='../templates')
 
 @main_bp.route("/")
@@ -236,23 +234,6 @@ def upload():
 
     return render_template("upload_form.html", preapproved_tags=preapproved_tags)
 
-@main_bp.context_processor
-def inject_notification_count():
-    user_id = session.get("discord_id") or session.get("guest_id")
-    if not user_id:
-        return dict(unread_notifications=0)
-
-    # Query DB for unread notifications
-    with sqlite3.connect(Config.DATABASE_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        row = conn.execute("""
-            SELECT COUNT(*) AS cnt
-            FROM notifications
-            WHERE user_id=? AND is_read=0
-        """, (user_id,)).fetchone()
-        count = row["cnt"] if row else 0
-
-    return dict(unread_notifications=count)
 
 @main_bp.route("/toggle_like/<int:screenshot_id>", methods=["POST"])
 @login_required

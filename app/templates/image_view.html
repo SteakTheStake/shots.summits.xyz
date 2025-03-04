@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <!-- Image Actions -->
 <div class="image-actions">
     {% if session.get('username') == image_data.uploader_name or user_role in ['admin', 'moderator'] %}
@@ -10,17 +11,19 @@
         Report Image
     </button>
 </div>
+
+<!-- Comments Section -->
 <div class="modal-body">
   <!-- Add a new comment (only if logged in) -->
   {% if session.get('username') %}
-  <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" 
+  <form action="{{ url_for('main.add_comment', screenshot_id=image_data.id) }}" 
         method="POST"
         class="comment-form"
-        data-screenshot-id="{{ screenshot.id }}">
+        data-screenshot-id="{{ image_data.id }}">
     <div class="form-group">
-      <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
+      <label for="comment_text_{{ image_data.id }}">Add a Comment:</label>
       <textarea name="comment_text"
-                id="comment_text_{{ screenshot.id }}"
+                id="comment_text_{{ image_data.id }}"
                 rows="3"
                 class="form-control"
                 required></textarea>
@@ -30,19 +33,23 @@
   {% else %}
   <p><em>You must be logged in to post comments.</em></p>
   {% endif %}
+
   <!-- Show existing comments -->
   <div class="comments-section">
-      {% if screenshot.comments %} {% for comment in screenshot.comments %}
-      <div class="single-comment mb-3">
-          <strong class="comment-title-text">{{ comment.username }}:</strong>
-          <p class="comment-text">{{ comment.comment_text }}</p>
-          <small class="comment-subtle-text">{{ comment.created_at }}</small>
-      </div>
-      {% endfor %} {% else %}
-      <p><em>No comments yet.</em></p>
+      {% if image_data.comments %}
+        {% for comment in image_data.comments %}
+        <div class="single-comment mb-3">
+            <strong class="comment-title-text">{{ comment.username }}:</strong>
+            <p class="comment-text">{{ comment.comment_text }}</p>
+            <small class="comment-subtle-text">{{ comment.created_at }}</small>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p><em>No comments yet.</em></p>
       {% endif %}
   </div>
 </div>
+
 <!-- Report Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -53,6 +60,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <!-- For the 'report_image' route, make sure you pass 'filename=image_filename' or rename accordingly. -->
             <form action="{{ url_for('report_image', filename=image_filename) }}" method="POST">
                 <div class="modal-body">
                     <div class="form-group">

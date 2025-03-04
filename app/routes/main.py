@@ -83,7 +83,7 @@ def index():
 def get_discord_avatar_url(discord_id, avatar):
     return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
 
-@main_bp.route("/shots/<image_filename>")
+@main_bp.route("/app/static/images/<image_filename>")
 def view_image(image_filename):
     """
     Adjusted to also fetch the like count and comments for this screenshot.

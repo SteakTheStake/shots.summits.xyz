@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Enlarged Image -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='images/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                {% if screenshot.comments %}
+                    {% for comment in screenshot.comments %}
+                        <div class="single-comment mb-3 p-2 comment-background">
+                            <div class="comment-rank-{{ comment.user_rank|lower }}">
+                                [{{ comment.user_rank }}] <strong>{{ comment.username }}</strong> » <span class="comment-message">{{ comment.comment_text }}</span>
+                            </div>
+                            <small class="comment-subtle-text">{{ comment.created_at }}</small>
+                            {% if user_role in ['admin','moderator'] %}
+                                <form action="{{ url_for('main.remove_comment', comment_id=comment.id) }}" method="POST" style="display:inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p><em>No comments yet.</em></p>
+                {% endif %}
+            </div>
+
+            <!-- Add a New Comment -->
+            {% if session.get('screenshot.uploader_name') %}
+            <form action="{{ url_for('main.comment', screenshot_id=screenshot.id) }}" method="POST" class="comment-form">
+                <div class="form-group">
+                    <label for="comment_text">Add a Comment:</label>
+                    <textarea name="comment_text" id="comment_text" rows="3" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+            </form>
+            {% else %}
+            <p><em>You must be logged in to post comments.</em></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

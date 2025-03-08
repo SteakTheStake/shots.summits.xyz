@@ -83,8 +83,8 @@ def index():
 def get_discord_avatar_url(discord_id, avatar):
     return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
 
-@main_bp.route("/shots/<image_filename>")
-def view_image(image_filename):
+@main_bp.route("/<username>/<image_filename>")
+def view_image(username, image_filename):
     """
     Adjusted to also fetch like count and comments for this screenshot.
     """
@@ -125,12 +125,27 @@ def view_image(image_filename):
         """, (screenshot_id,)).fetchall()
         comments_list = [dict(cr) for cr in comment_rows]
 
+        # 4) Check if current user liked
+        current_user_id = session.get('discord_id') or session.get('guest_id')
+        if current_user_id:
+            is_liked = conn.execute("""
+                SELECT 1 FROM likes WHERE screenshot_id=? AND user_id=?
+            """, (screenshot_id, current_user_id)).fetchone()
+            image_data["user_liked"] = (is_liked is not None)
+        else:
+            image_data["user_liked"] = False
+            
+    screenshot = Screenshot.query.get_or_404(image_filename)
+    if screenshot.username != username:
+        abort(404)
+        
     return render_template(
-        "image_view.html",
+        "image_detail.html",
         image_filename=image_filename,
         image_data=image_data,
         like_count=like_count,
         comments=comments_list,
+        screenshot=screenshot,
         user_role=get_user_role(session.get('discord_id'), session.get('guest_id'))
     )
 
@@ -281,55 +296,63 @@ def toggle_like(screenshot_id):
 
 @main_bp.route("/comment/<int:screenshot_id>", methods=["POST"])
 @login_required
-def add_comment(screenshot_id):
+def comment(screenshot_id):
     """
     Inserts a new comment. If it's an AJAX request, return JSON with the new comment;
     otherwise, redirect back (for non-JS fallback).
     """
     from flask import request, jsonify, session
     import sqlite3
+    from datetime import datetime, timezone
 
     user_id = session.get("discord_id") or session.get("guest_id")
     username = session.get("username")
+    user_rank = session.get("user_rank", "User")  # Default to "User" if rank is not set
     comment_text = request.form.get("comment_text", "").strip()
 
     if not comment_text:
-        # In a real app, you'd handle this more gracefully
+        # Handle empty comment text
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify({"error": "Comment text cannot be empty."}), 400
         else:
             flash("Comment text cannot be empty.", "danger")
             return redirect(request.referrer or url_for("main.index"))
 
+    # Get the current time in UTC
+    created_at_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
     # Insert the comment into DB
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
-        conn.execute("""
-            INSERT INTO comments (screenshot_id, user_id, username, comment_text)
-            VALUES (?, ?, ?, ?)
-        """, (screenshot_id, user_id, username, comment_text))
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO comments (screenshot_id, user_id, username, comment_text, user_rank, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (screenshot_id, user_id, username, comment_text, user_rank, created_at_utc))
         conn.commit()
 
         # Retrieve the newly inserted comment
-        new_comment_row = conn.execute("""
-            SELECT id, username, comment_text, created_at
+        new_comment_row = cursor.execute("""
+            SELECT id, username, comment_text, created_at, user_rank
             FROM comments
             WHERE rowid = last_insert_rowid()
         """).fetchone()
 
         # Count how many total comments this screenshot now has
-        comment_count = conn.execute("""
+        comment_count = cursor.execute("""
             SELECT COUNT(*) FROM comments WHERE screenshot_id = ?
         """, (screenshot_id,)).fetchone()[0]
 
     # If AJAX:
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return jsonify({
+            "status": "success",
             "comment": {
                 "id": new_comment_row["id"],
                 "username": new_comment_row["username"],
                 "comment_text": new_comment_row["comment_text"],
-                "created_at": new_comment_row["created_at"]
+                "created_at": new_comment_row["created_at"],  # Return UTC time
+                "user_rank": new_comment_row["user_rank"]
             },
             "comment_count": comment_count
         })
@@ -337,7 +360,6 @@ def add_comment(screenshot_id):
     # Otherwise, fallback for non-JS case:
     flash("Comment posted successfully!", "success")
     return redirect(request.referrer or url_for("main.index"))
-
 
 @main_bp.route("/report/<filename>", methods=["POST"])
 @login_required
@@ -629,7 +651,7 @@ def ban_user():
     Allows admin or moderator to ban a user by user_id (discord or guest).
     Expects form data: 'user_id_to_ban'.
     """
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     discord_id = session.get("discord_id")
     guest_id = session.get("guest_id")

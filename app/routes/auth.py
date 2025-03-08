@@ -58,7 +58,7 @@ def callback():
         user = discord.get(f"{Config.DISCORD_API_BASE_URL}/users/@me").json()
 
         session["discord_id"] = user["id"]
-        session["username"] = f"{user['username']}#{user['discriminator']}"
+        session["username"] = f"{user['username']}"
         session["avatar"] = user["avatar"]
 
         # Optionally send a webhook
@@ -70,3 +70,21 @@ def callback():
     except Exception as e:
         flash(f"Login failed: {str(e)}", "danger")
         return redirect(url_for("main.index"))
+
+@auth_bp.route("/dev")
+def dev_login():
+    # Ensure this route is only accessible if DEVELOPER_MODE is True
+    if not Config.DEVELOPER_MODE:
+        flash("Developer login is only available in developer mode.", "danger")
+        return redirect(url_for("main.index"))
+
+    # Simulate a Discord user login
+    session["discord_id"] = "278344153761316864"  # Example Discord ID
+    session["username"] = "Developer"
+    session["avatar"] = "https://cdn.discordapp.com/embed/avatars/0.png"  # Example avatar URL
+
+    # Optionally send a webhook
+    send_discord_webhook(session["username"], "Developer Login")
+
+    flash("Developer login successful!", "success")
+    return redirect(url_for("main.index"))

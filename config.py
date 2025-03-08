@@ -48,6 +48,9 @@ class Config:
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "some-random-key")
     
+    # Developer mode
+    DEVELOPER_MODE = os.getenv("DEVELOPER_MODE", "False").lower() == "true"
+    
     # Discord OAuth2
     DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
     DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')

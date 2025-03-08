@@ -5,7 +5,7 @@
     <!-- ... (your existing filter modal code) ... -->
 </div>
 
-<!-- Filter Menu Section -->
+<!-- Filter Menu Section
 <div class="filter-menu">
     <div class="filter-section">
         <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
@@ -14,7 +14,7 @@
     </div>
     <div id="selectedTagDisplay" class="mt-2 text-light bottom_margin"></div>
     <button type="button" class="btn btn-secondary btn-sm" id="removeAllTags">Remove Filters</button>
-</div>
+</div> -->
 
 <!-- Screenshot Grid -->
 <div class="image-grid">
@@ -46,7 +46,9 @@
                 </span>
                 <!-- This button triggers the comments modal -->
                 <button type="button" class="btn btn-comments btn-sm" data-toggle="modal" data-target="#commentsModal-{{ screenshot.id }}">
-                    View Comments
+                  <i class="fa-regular fa-comment"></i> <div class="comment-count">{{ screenshot.comments|length if screenshot.comments else 0 }}</div>
+                    {{ screenshot.comment_count }}
+                  </span>
                 </button>
                 {% else %}
                 <p class="muted-text">Log in to interact.&nbsp;</p>
@@ -127,54 +129,57 @@
 
     <!-- COMMENTS MODAL (per screenshot) -->
     <div class="modal fade" id="commentsModal-{{ screenshot.id }}" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel-{{ screenshot.id }}" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content bg-dark text-light comments-modal">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="commentsModalLabel-{{ screenshot.id }}">
-                        Comments ({{ screenshot.comments|length if screenshot.comments else 0 }})
-                    </h5>
-                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-dark text-light comments-modal">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="commentsModalLabel-{{ screenshot.id }}">
+                      Comments {{ screenshot.comments|length if screenshot.comments else 0 }}
+                  </h5>
+                  <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
 
-                <div class="modal-body">
-                    <!-- Add a new comment (only if logged in) -->
-                    {% if session.get('username') %}
-                    <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" method="POST" class="comment-form" data-screenshot-id="{{ screenshot.id }}">
-                        <div class="form-group">
-                            <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
-                            <textarea name="comment_text" id="comment_text_{{ screenshot.id }}" rows="3" class="form-control" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
-                    </form>
-                    {% else %}
-                    <p><em>You must be logged in to post comments.</em></p>
-                    {% endif %}
-                    <!-- Show existing comments -->
-                    <div class="comments-section">
-                        {% if screenshot.comments %} {% for comment in screenshot.comments %}
-                        <div class="single-comment mb-3">
-                          <strong class="comment-title-text">{{ comment.username }}:</strong>
-                          <p class="comment-text">{{ comment.comment_text }}</p>
-                          <small class="comment-subtle-text">{{ comment.created_at }}</small>
-                          {% if user_role in ['admin','moderator'] %}
-                            <form action="{{ url_for('main.remove_comment', comment_id=comment.id) }}" method="POST" style="display:inline">
-                              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                            </form>
-                          {% endif %}
-                        </div>                        
-                        {% endfor %} {% else %}
-                        <p><em>No comments yet.</em></p>
-                        {% endif %}
-                    </div>
-                </div>
+              <div class="modal-body">
+                  <!-- Add a new comment (only if logged in) -->
+                  {% if session.get('username') %}
+                  <form action="{{ url_for('main.add_comment', screenshot_id=screenshot.id) }}" method="POST" class="comment-form" data-screenshot-id="{{ screenshot.id }}">
+                      <div class="form-group">
+                          <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
+                          <textarea name="comment_text" id="comment_text_{{ screenshot.id }}" rows="3" class="form-control" required></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+                  </form>
+                  {% else %}
+                  <p><em>You must be logged in to post comments.</em></p>
+                  {% endif %}
+                  <!-- Show existing comments -->
+                  <div class="comments-section">
+                      {% if screenshot.comments %}
+                          {% for comment in screenshot.comments %}
+                              <div class="single-comment mb-3 p-2 comment-background">
+                                  <div class="comment-rank-{{ comment.user_rank|lower }}">
+                                      [{{ comment.user_rank }}] <strong>{{ comment.username }}</strong> » <span class="comment-message">{{ comment.comment_text }}</span>
+                                  </div>
+                                  <small class="comment-subtle-text">{{ comment.created_at }}</small>
+                                  {% if user_role in ['admin','moderator'] %}
+                                      <form action="{{ url_for('main.remove_comment', comment_id=comment.id) }}" method="POST" style="display:inline">
+                                          <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                      </form>
+                                  {% endif %}
+                              </div>
+                          {% endfor %}
+                      {% else %}
+                          <p><em>No comments yet.</em></p>
+                      {% endif %}
+                  </div>
+              </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
     </div>
     <!-- END COMMENTS MODAL -->
 

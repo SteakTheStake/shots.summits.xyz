@@ -827,13 +827,16 @@ def init_db():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                screenshot_id INTEGER,
-                user_id TEXT,
-                username TEXT,
-                comment_text TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
+                screenshot_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                username TEXT NOT NULL,
+                comment_text TEXT NOT NULL,
+                user_rank TEXT DEFAULT 'User',
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (screenshot_id) REFERENCES screenshots(id)
+            )
         """)
+        conn.commit()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS notifications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -844,7 +847,7 @@ def init_db():
             );
         """)
         conn.commit()
-
+        
         # 4h. Seed default tags
         default_tags = [
             # Game Versions & Modding

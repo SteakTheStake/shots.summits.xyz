@@ -5,7 +5,7 @@
         <div class="col-md-8 offset-md-2">
             <!-- Enlarged Image -->
             <div class="text-center mb-4">
-                <img src="{{ url_for('static', filename='images/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
+                <img src="{{ url_for('static', filename='images/' ~ screenshot.uploader_name ~ '/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
             </div>
 
             <!-- Comments Section -->

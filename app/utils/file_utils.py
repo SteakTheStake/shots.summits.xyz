@@ -71,58 +71,74 @@ def handle_upload(files, uploader_name, session):
             common_tag_ids = []
 
         valid_common_tag_ids = _validate_tag_ids(conn, common_tag_ids)
+        
+        group_name = request.form.get("group_name", "").strip()
+        group_id = None
+        if group_name:
+            cursor = conn.execute(
+                """
+                INSERT INTO screenshot_groups (name, created_by)
+                VALUES (?, ?) RETURNING id
+                """,
+                (group_name, uploader_name)
+            )
+            group_id = cursor.fetchone()["id"]
+        
+        # Determine uploader's username and type
+        if "discord_id" in session:
+            uploader_type = "discord"
+            username = session["username"]
+        else:
+            uploader_type = "guest"
+            username = session.get("guest_username")
 
-        # 3) Process each uploaded file
+        # Sanitize username for directory
+        sanitized_username = secure_filename(username)
+        user_dir = os.path.join(Config.UPLOAD_FOLDER, sanitized_username)
+        os.makedirs(user_dir, exist_ok=True)
+
+        # Get current count of user's uploads
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT COUNT(*) FROM screenshots WHERE discord_username = ? OR guest_username = ?",
+            (username, username)
+        )
+        current_count = cursor.fetchone()[0]
+
+        # Process each file
         for index, file in enumerate(files):
             if not file or not file.filename:
                 continue
 
-            # Construct a unique filename
-            new_filename = secure_filename(
-                f"shot_{datetime.now().timestamp()}_{os.urandom(4).hex()}.webp"
-            )
+            # Generate sequential number and filename
+            seq_number = current_count + index + 1
+            date_str = datetime.now().strftime("%m-%d-%Y")
+            new_filename = f"{date_str}_{seq_number:04d}.webp".lstrip("/\\")
+            filepath = os.path.join(user_dir, new_filename)
+
             if new_filename in processed_files:
                 continue
 
             if allowed_file(file.filename):
-                try:
-                    filepath = os.path.join(Config.UPLOAD_FOLDER, new_filename)
-                    # Convert to webp
+                try:  # <- START OF TRY BLOCK
+                    # Convert and save the image
                     with Image.open(file) as img:
-                        file.seek(0)
-                        img.save(filepath, "WEBP", quality=85)
+                        img.save(filepath, "WEBP", quality=95)
 
-                    # Distinguish user type
-                    if "discord_id" in session:
-                        uploader_type = "discord"
-                        discord_user = session["username"]  # e.g. "Foo#1234"
-                        guest_user = None
-                    else:
-                        uploader_type = "guest"
-                        discord_user = None
-                        guest_user = session.get("guest_username")
-
-                    # Possibly store group if provided
-                    group_name = request.form.get("group_name", "")
-                    group_id = None
-                    if group_name:
-                        cursor = conn.execute(
-                            """
-                            INSERT INTO screenshot_groups (name, created_by)
-                            VALUES (?, ?) RETURNING id
-                            """,
-                            (group_name, uploader_name),
-                        )
-                        group_id = cursor.fetchone()[0]
-
-                    # Insert screenshot record
-                    cursor = conn.execute(
+                    # Database insertion
+                    cursor.execute(
                         """
                         INSERT INTO screenshots
                             (filename, discord_username, guest_username, group_id, uploader_type)
                         VALUES (?, ?, ?, ?, ?)
                         """,
-                        (new_filename, discord_user, guest_user, group_id, uploader_type),
+                        (
+                            f"{sanitized_username}/{new_filename}",
+                            username if uploader_type == "discord" else None,
+                            username if uploader_type == "guest" else None,
+                            group_id,
+                            uploader_type
+                        )
                     )
                     screenshot_id = cursor.lastrowid
 
@@ -135,22 +151,22 @@ def handle_upload(files, uploader_name, session):
 
                     # Insert screenshot_tags
                     for tag_id in all_tag_ids:
-                        conn.execute(
+                        cursor.execute(
                             """
-                            INSERT INTO screenshot_tags (screenshot_id, tag_id)
+                            INSERT INTO screenshot_tags
+                                (screenshot_id, tag_id)
                             VALUES (?, ?)
                             """,
-                            (screenshot_id, tag_id),
+                            (screenshot_id, tag_id)
                         )
 
-                    uploaded_files.append(new_filename)
-                    processed_files.add(new_filename)
-
-                except Exception as e:
-                    print(f"Error processing file {file.filename}: {str(e)}")
+                except Exception as e:  # <- EXCEPT MUST ALIGN WITH TRY
+                    print(f"Saving to: {filepath}")
+                    print(f"Saving file as: {sanitized_username}/{new_filename}")
+                    print(f"Error processing {file.filename}: {e}")
+                    flash(f"Failed to upload {file.filename}: {e}", "danger")
+                    conn.rollback()
                     continue
-
-        # Commit all changes
-        conn.commit()
-
+                conn.commit()
+    
     return uploaded_files

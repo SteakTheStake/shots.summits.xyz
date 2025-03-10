@@ -294,56 +294,57 @@ def toggle_like(screenshot_id):
 
     return jsonify({"status": new_status, "like_count": like_count})
 
-@main_bp.route("/comment/<int:screenshot_id>", methods=["POST"])
+@main_bp.route("/comment/<username>/<filename>", methods=["POST"])
 @login_required
-def comment(screenshot_id):
-    """
-    Inserts a new comment. If it's an AJAX request, return JSON with the new comment;
-    otherwise, redirect back (for non-JS fallback).
-    """
-    from flask import request, jsonify, session
+def comment(username, filename):
+    from flask import request, jsonify, session, flash, redirect, url_for
     import sqlite3
     from datetime import datetime, timezone
 
-    user_id = session.get("discord_id") or session.get("guest_id")
-    username = session.get("username")
-    user_rank = session.get("user_rank", "User")  # Default to "User" if rank is not set
     comment_text = request.form.get("comment_text", "").strip()
-
     if not comment_text:
-        # Handle empty comment text
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify({"error": "Comment text cannot be empty."}), 400
-        else:
-            flash("Comment text cannot be empty.", "danger")
-            return redirect(request.referrer or url_for("main.index"))
+        flash("Comment cannot be empty.", "danger")
+        return redirect(url_for("main.view_image", username=username, filename=filename))
 
-    # Get the current time in UTC
+    user_id = session.get("discord_id") or session.get("guest_id")
+    username_session = session.get("username")
+    user_rank = session.get("user_rank", "User")
     created_at_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
-    # Insert the comment into DB
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
+
+        # Get screenshot_id using filename (assuming filename is unique)
+        screenshot_row = cursor.execute("""
+            SELECT id FROM screenshots WHERE filename = ?
+        """, (filename,)).fetchone()
+
+        if not screenshot_row:
+            flash("Screenshot not found.", "danger")
+            return redirect(request.referrer or url_for("main.index"))
+
+        screenshot_id = screenshot_row["id"]
+
+        # Insert the comment
         cursor.execute("""
             INSERT INTO comments (screenshot_id, user_id, username, comment_text, user_rank, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (screenshot_id, user_id, username, comment_text, user_rank, created_at_utc))
+        """, (screenshot_id, user_id, username_session, comment_text, user_rank, created_at_utc))
         conn.commit()
 
-        # Retrieve the newly inserted comment
         new_comment_row = cursor.execute("""
             SELECT id, username, comment_text, created_at, user_rank
             FROM comments
             WHERE rowid = last_insert_rowid()
         """).fetchone()
 
-        # Count how many total comments this screenshot now has
         comment_count = cursor.execute("""
             SELECT COUNT(*) FROM comments WHERE screenshot_id = ?
         """, (screenshot_id,)).fetchone()[0]
 
-    # If AJAX:
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return jsonify({
             "status": "success",
@@ -351,15 +352,16 @@ def comment(screenshot_id):
                 "id": new_comment_row["id"],
                 "username": new_comment_row["username"],
                 "comment_text": new_comment_row["comment_text"],
-                "created_at": new_comment_row["created_at"],  # Return UTC time
+                "created_at": new_comment_row["created_at"],
                 "user_rank": new_comment_row["user_rank"]
             },
             "comment_count": comment_count
         })
 
-    # Otherwise, fallback for non-JS case:
     flash("Comment posted successfully!", "success")
-    return redirect(request.referrer or url_for("main.index"))
+    return redirect(url_for("main.view_image", username=username, filename=filename))
+
+
 
 @main_bp.route("/report/<filename>", methods=["POST"])
 @login_required
@@ -878,7 +880,14 @@ def init_db():
         
         conn.commit()
         print("All tables created or verified successfully and default tags seeded.")
-
+        
+    # Check if user_rank column exists and add if missing
+        cursor.execute("PRAGMA table_info(comments)")
+        columns = [column[1] for column in cursor.fetchall()]
+        if 'user_rank' not in columns:
+            cursor.execute("ALTER TABLE comments ADD COLUMN user_rank TEXT DEFAULT 'User'")
+            print("Added 'user_rank' column to comments table.")
+            
     # 5. (Optional) Set file permissions
     try:
         os.chmod(db_path, 0o666)  # rw-rw-rw-

@@ -249,3 +249,18 @@ fetch(`/comment/${screenshotId}`, {
     }
 })
 .catch(error => console.error('Error:', error));
+
+document.querySelectorAll('.btn-report').forEach(button => {
+  button.addEventListener('click', function() {
+      const filename = this.dataset.imageFilename;
+      const imageUrl = `${window.location.origin}/uploads/${filename}`;
+      navigator.clipboard.writeText(imageUrl)
+          .then(() => {
+              // Optional: Show a toast or alert instead of a generic alert
+              alert('Image URL copied to clipboard!');
+          })
+          .catch(err => {
+              console.error('Failed to copy URL:', err);
+          });
+  });
+});

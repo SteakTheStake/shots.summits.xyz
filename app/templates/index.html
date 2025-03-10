@@ -97,7 +97,7 @@
                     Report
                 </button>
                 <!-- Share Button -->
-                <button type="button" class="btn btn-report btn-sm" data-image-id="{{ screenshot.id }}" data-username="{{ screenshot.username }}">
+                <button type="button" class="btn btn-report btn-sm" data-image-filename="{{ screenshot.filename }}">
                     Share
                 </button>
                 {% endif %}
@@ -137,7 +137,7 @@
           <div class="modal-content bg-dark text-light">
               <div class="modal-header">
                   <h5 class="modal-title" id="imageModalLabel-{{ screenshot.id }}">
-                      By: {{ screenshot.username }}
+                      By: {{ screenshot.uploader_name }}
                   </h5>
                   <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
@@ -148,7 +148,6 @@
                   <div class="text-center mb-4">
                     <img class="image-enlarged" src="{{ url_for('static', filename='images/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
                   </div>
-
                   <!-- Comments Section -->
                   <div class="comments-section">
                       {% if screenshot.comments %}
@@ -176,7 +175,8 @@
 
                   <!-- Add a New Comment -->
                   {% if session.get('username') %}
-                  <form action="{{ url_for('main.comment', screenshot_id=screenshot.id) }}" method="POST" class="comment-form">
+                  <form action="{{ url_for('main.comment', username=screenshot.username, filename=screenshot.filename) }}" method="POST" class="comment-form">
+
                       <div class="form-group">
                           <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
                           <textarea name="comment_text" id="comment_text_{{ screenshot.id }}" rows="3" class="form-control" required></textarea>

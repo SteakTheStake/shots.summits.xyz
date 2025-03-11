@@ -85,9 +85,6 @@ def get_discord_avatar_url(discord_id, avatar):
 
 @main_bp.route("/<username>/<image_filename>")
 def view_image(username, image_filename):
-    """
-    Adjusted to also fetch like count and comments for this screenshot.
-    """
     image_path = os.path.join(Config.UPLOAD_FOLDER, image_filename)
     if not os.path.exists(image_path):
         return "Image not found", 404
@@ -108,6 +105,16 @@ def view_image(username, image_filename):
 
         if not image_data:
             return "Image data not found in DB", 404
+        
+    with sqlite3.connect(Config.DATABASE_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        screenshot = conn.execute("""
+            SELECT * FROM screenshots 
+            WHERE filename = ? AND uploader_username = ?
+        """, (filename, username)).fetchone()
+
+    if not screenshot:
+        abort(404)
 
         screenshot_id = image_data["id"]
 
@@ -146,6 +153,7 @@ def view_image(username, image_filename):
         like_count=like_count,
         comments=comments_list,
         screenshot=screenshot,
+        username=username,
         user_role=get_user_role(session.get('discord_id'), session.get('guest_id'))
     )
 
@@ -393,16 +401,6 @@ def report_image(filename):
             return redirect(url_for("main.index"))
 
         screenshot_id = row["id"]
-
-        # Insert into your 'reports' table. Example schema:
-        # CREATE TABLE reports (
-        #   id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #   screenshot_id INTEGER,
-        #   user_id TEXT,
-        #   username TEXT,
-        #   reason TEXT,
-        #   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        # );
         conn.execute("""
             INSERT INTO reports (screenshot_id, user_id, username, reason)
             VALUES (?, ?, ?, ?)

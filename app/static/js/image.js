@@ -171,3 +171,33 @@ document.addEventListener("DOMContentLoaded", function () {
     updateFilters(); // Initialize visible images array
     initLightbox(); // Setup lightbox functionality
 });
+
+const mobileMenu = document.querySelector('.links-container_mobile');
+const menuToggle = document.querySelector('.burger'); // Replace with your button selector
+
+function toggleMenu() {
+  if (mobileMenu.classList.contains('show')) {
+    // Start closing animation
+    mobileMenu.classList.remove('show');
+    mobileMenu.classList.add('hiding');
+    
+    // After animation completes, remove classes and hide
+    mobileMenu.addEventListener('animationend', function handler() {
+      mobileMenu.classList.remove('hiding');
+      mobileMenu.style.display = 'none';
+      mobileMenu.removeEventListener('animationend', handler);
+    }, { once: true });
+  } else {
+    // Open menu
+    mobileMenu.style.display = 'flex';
+    mobileMenu.classList.add('show');
+  }
+}
+
+// Add click event to your hamburger button
+menuToggle.addEventListener('click', toggleMenu);
+
+// Add click event to close when clicking a link (optional)
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', toggleMenu);
+});

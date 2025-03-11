@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
 
 # Load environment variables from .env
 load_dotenv()
@@ -20,7 +21,9 @@ def create_app():
 
     # Initialize DB schema if needed
     db.init_app(app)
-
+    csrf = CSRFProtect(app)
+    
+    
     # If you need an init_db() routine (like for migrations or ensuring tables):
     from init_db import init_db
     with app.app_context():

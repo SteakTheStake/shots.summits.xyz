@@ -1,28 +1,10 @@
 {% extends "base.html" %} {% block content %}
-
-<!-- Modal for Tag & User Selection with Search and Deselect All -->
-<div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="tagModalLabel" aria-hidden="true">
-    <!-- ... (your existing filter modal code) ... -->
-</div>
-
-<!-- Filter Menu Section
-<div class="filter-menu">
-    <div class="filter-section">
-        <input type="hidden" id="selectedCommonTags" name="common_tags" value="" />
-        <input type="hidden" id="selectedUser" name="user" value="" />
-        <button type="button" id="openTagModalBtn" class="filter-toggle"><i class="fas fa-filter"></i> Filters</button>
-    </div>
-    <div id="selectedTagDisplay" class="mt-2 text-light bottom_margin"></div>
-    <button type="button" class="btn btn-secondary btn-sm" id="removeAllTags">Remove Filters</button>
-</div> -->
-
 <!-- Screenshot Grid -->
 <div class="image-grid">
     {% for screenshot in screenshots %}
     <div class="grid-item loading" data-user="{{ screenshot.uploader_name }}" data-tags="{{ screenshot.tags or '' }}" data-date="{{ screenshot.upload_date or '' }}" data-group="{{ screenshot.group_name or '' }}">
         <!-- The screenshot image -->
-        <img src="{{ url_for('static', filename='images/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" />
-
+        <img class="image-box" src="{{ url_for('static', filename='images/' ~ screenshot.filename) }}" alt="Shot by {{ screenshot.uploader_name }}" loading="lazy" onload="this.parentElement.classList.remove('loading')" data-toggle="modal" data-target="#imageModal-{{ screenshot.id }}" />
         <!-- Info overlay -->
         <div class="image-info">
             {% if screenshot.group_name %}
@@ -53,7 +35,7 @@
                 {% else %}
                 <p class="muted-text">Log in to interact.&nbsp;</p>
                 {% endif %}
-
+    
                 <!-- Uploader name -->
                 <p class="username bold underline align-toside">
                     @{{ screenshot.uploader_name }}
@@ -104,7 +86,6 @@
             </div>
         </div>
     </div>
-
     <!-- REPORT MODAL (per screenshot) -->
     <div class="modal fade" id="reportModal-{{ screenshot.id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ screenshot.id }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -174,18 +155,19 @@
                   </div>
 
                   <!-- Add a New Comment -->
-                  {% if session.get('username') %}
-                  <form action="{{ url_for('main.comment', username=screenshot.username, filename=screenshot.filename) }}" method="POST" class="comment-form">
-
-                      <div class="form-group">
-                          <label for="comment_text_{{ screenshot.id }}">Add a Comment:</label>
-                          <textarea name="comment_text" id="comment_text_{{ screenshot.id }}" rows="3" class="form-control" required></textarea>
-                      </div>
-                      <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
-                  </form>
-                  {% else %}
-                  <p><em>You must be logged in to post comments.</em></p>
-                  {% endif %}
+                {% if session.get('username') %}
+                <form action="{{ url_for('main.comment', username=username, filename=screenshot['filename']) }}" method="POST" class="comment-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="form-group">
+                        <label for="commenttext{{ screenshot.id }}">Add a Comment:</label>
+                        <textarea name="comment_text" id="commenttext{{ screenshot.id }}" rows="3" class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+                </form>
+                {% else %}
+                <p><em>You must be logged in to post comments.</em></p>
+                {% endif %}
               </div>
               <div class="modal-footer">
                   <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>

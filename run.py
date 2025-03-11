@@ -2,7 +2,7 @@
 from app import create_app
 from flask import session
 import sqlite3
-from config import Config  # or wherever you're pulling Config from
+from config import Config
 
 app = create_app()
 

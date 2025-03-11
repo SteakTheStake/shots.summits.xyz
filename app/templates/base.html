@@ -145,6 +145,12 @@
                             <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                         </a>
                     </span>
+                    <span class="spacer_lr">
+                        <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                            <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                            <p class="login_text_mobile solid_1">Toggle Particles</p>
+                        </a>
+                    </span>
                     {% endif %}
                 </div>
             </nav>
@@ -238,6 +244,12 @@
                     <a href="{{ url_for('auth.login') }}" class="btn_better_dsc_mobile round large small-padding">
                         <i class="fab fa-discord rounded-0 solid_2 show-overflow"></i>
                         <p class="login_text_mobile solid_1">Login With</p>
+                    </a>
+                </span>
+                <span>
+                    <a onclick="toggleParticles()" class="btn_better_alt_mobile round large small-padding">
+                        <i class="fa-solid fa-hand-sparkles rounded-0 solid_1 show-overflow"></i>
+                        <p class="login_text_mobile solid_1">Toggle Particles</p>
                     </a>
                 </span>
                 {% endif %}

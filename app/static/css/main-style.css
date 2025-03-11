@@ -120,12 +120,12 @@
         display: flex;
         animation: hamburger-in 0.3s ease-in-out forwards;
         z-index: 1000;
-        top: 6.555rem;
+        top: 5.555rem;
     }
 
     /* Closing animation */
     .links-container_mobile.hiding {
-        top: 6.555rem;
+        top: 5.555rem;
         display: flex;
         animation: hamburger-out 0.3s ease-in-out forwards;
     }

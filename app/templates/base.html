@@ -152,11 +152,11 @@
         <!-- MOBILE ONLY -->
         <nav class="s m right links-container_mobile" id="nav-menu">
             <header>
-                {# If a Discord user is logged in, show their avatar; otherwise, use the default favicon #} {% if 'discord_id' in session %}
+                <!-- {% if 'discord_id' in session %}
                 <span class="styled_font_2 text-fit-content">{{ session['discord_username'] }}</span>
                 {% else %}
                 <img class="circle" src="{{ url_for('static', filename='default-user-profile.jpg') }}" />
-                {% endif %}
+                {% endif %} -->
             </header>
             <div class="flex row wrap stay_aligned">
                 {% if 'discord_id' in session %} {# Logged-in user links #}

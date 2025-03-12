@@ -742,6 +742,7 @@ body.dark {
     bottom: 0; left: 0; right: 0;
     padding: 5px;
     background: rgba(73, 80, 80, 0.7);
+    margin-top: -14%;
   }
   
   /* Responsive tweak for smaller screens if needed */

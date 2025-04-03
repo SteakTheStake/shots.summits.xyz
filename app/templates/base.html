@@ -4,6 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{% block title %}SummitMC F2{% endblock %}</title>
 
         <!-- Favicon -->
@@ -84,7 +85,7 @@
                       </a>
                     </span>
                     {% endif %}
-                    <span class="spacer">
+                    <span class="spacer_lr">
                         <a href="{{ url_for('main.profile') }}" class="btn_better_alt_mobile round large small-padding">
                             <i class="rounded-0 solid_1 show-overflow">notifications</i>
                             <p class="login_text_mobile solid_1">Notifications</p>

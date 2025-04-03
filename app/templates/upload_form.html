@@ -15,7 +15,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal_centered modal-content bg-dark text-light">
             <div class="modal-header">
-                <h5 class="modal-title" id="tagModalLabel">Select Tags</h5>
+                <h5 class="modal-title auto-width" id="tagModalLabel">Select Tags</h5>
                 <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -23,12 +23,15 @@
             <div class="modal-body">
                 <!-- Search Bar & Deselect All Button -->
                 <div class="form-group">
-                    <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
+                  <input type="text" id="tagSearch" class="form-control" placeholder="Search tags..." />
                     <button type="button" class="btn btn-primary" id="saveTagSelection">Done</button>
                     <button type="button" class="btn btn-secondary btn-sm mt-2" id="deselectAllBtn">Deselect All</button>
                 </div>
                 <!-- Container for Tag Bubbles -->
                 <div id="tagBubbleContainer" class="d-flex flex-wrap"></div>
+                <input type="text" id="tagRequest" class="form-control" placeholder="Request more tags" />
+                <button type="button" class="btn btn-primary" id="saveTagRequest">Request</button>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             </div>
         </div>
     </div>
@@ -51,19 +54,20 @@
                     {% endwith %}
 
                     <form method="POST" action="{{ url_for('main.upload') }}" enctype="multipart/form-data" id="uploadForm">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <!-- File Input Section -->
                         <div class="no-round text-nowrap fancy-text">
                             Choose Files  <span class="text-error medium-text">(required)</span>
                         </div>
                         <div class="position-relative responsive form-group mt-3 no-scroll">
-                            <label for="screenshots" class="position-relative responsive secondary-container border drophere less_tall">
+                            <label for="screenshots" class="position-relative responsive bg-dark2 border drophere less_tall">
                                 <i class="middle">perm_media</i>
                             </label>
-                            <input type="file" class="form-control bg-dark text-light rounded border dot_this cursor_pointer" id="screenshots" name="screenshots[]" multiple accept=".png,.jpg,.jpeg,.webp,.gif" required />
+                            <input type="file" class="form-control bg-dark2 text-light rounded border dot_this cursor_pointer" id="screenshots" name="screenshots[]" multiple accept=".png,.jpg,.jpeg,.webp,.gif" required />
                         </div>
                         <p class="text-center small-text small-padding alert-dismissible rounded">
                             Supported formats: PNG, JPG, JPEG, WEBP, GIF.<br />
-                            No more than 10 images and/or over 24MB.
+                            No more than 10 images and/or over 1GB.
                         </p>
 
                         <!-- Shared (Group-Level) Inputs -->
@@ -80,18 +84,16 @@
                                 <!-- Display selected tag names (live preview) -->
                                 <div id="selectedTagDisplay" class="mt-2 text-light"><em>No tags selected</em></div>
                             </div>
-                            <!-- Resources Used -->
+                            <!-- Resources Used section in upload_form.html -->
                             <div class="form-group mt-3">
-                                <label class="font-weight-bold large-text">
-                                    <div class="text-nowrap fancy-text">Resources Used: <span class="text-muted medium-text">(Optional)</span></div>
-                                </label>
-                                <input type="text" class="form-control bg-dark text-light field textarea bg-dark border round min" name="resources"
-                                    placeholder="List one or more resources"
-                                    pattern="^((https:\/\/modrinth\.com\/[^,\s]+|https:\/\/www\.curseforge\.com\/minecraft\/[^,\s]+)(,\s*(https:\/\/modrinth\.com\/[^,\s]+|https:\/\/www\.curseforge\.com\/minecraft\/[^,\s]+))*)?$" />
-                                <small class="text-muted">
-                                    Only links to <code>https://modrinth.com/</code> and/or <code>https://www.curseforge.com/minecraft/</code> are allowed.
-                                    Separate multiple links with commas.
-                                </small>
+                              <label class="font-weight-bold large-text">
+                                  <div class="text-nowrap fancy-text">Post Title: <span class="text-muted medium-text">(Optional)</span></div>
+                              </label>
+                              <input type="text" class="form-control bg-dark text-light field textarea bg-dark border round min" name="post_title"
+                                  placeholder="Give your post a title"/>
+                              <small class="text-muted">
+                                  If you decide to skip setting a title, your post will be titled by the amount of posts you've made.
+                              </small>
                             </div>
                         </div>
 
@@ -263,5 +265,63 @@
     updateSelectedTagDisplay();
     $('#tagModal').modal('hide');
   });
+// Ensure CSRF token is available for AJAX requests
+const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+// --- TAG REQUESTS ---
+document.getElementById('saveTagRequest').addEventListener('click', function() {
+  const tagRequestInput = document.getElementById('tagRequest');
+  const requestedTag = tagRequestInput.value.trim();
+  
+  if (!requestedTag) {
+      alert('Please enter a tag name');
+      return;
+  }
+
+  fetch('/request_tag', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({ tag_name: requestedTag })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          alert('Tag request submitted successfully!');
+          tagRequestInput.value = '';
+      } else {
+          alert('Error: ' + data.message);
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to submit tag request');
+  });
+});
+
+// Add form validation before submission
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+  const fileInput = document.getElementById('screenshots');
+  
+  if (fileInput.files.length === 0) {
+    e.preventDefault();
+    alert('Please select at least one file to upload');
+    return false;
+  }
+  
+  if (fileInput.files.length > 10) {
+    e.preventDefault();
+    alert('Maximum 10 files allowed per upload');
+    return false;
+  }
+  
+  // Show progress indicator
+  document.querySelector('progress').style.display = 'block';
+  document.getElementById('submitButton').disabled = true;
+  
+  return true;
+});
 </script>
 {% endblock %}

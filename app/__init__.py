@@ -3,10 +3,12 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 
 # Load environment variables from .env
 load_dotenv()
+
+csrf = CSRFProtect()
 
 # Import your configuration
 from config import Config
@@ -47,5 +49,10 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(mod_bp)
+    
+    @app.after_request
+    def set_csrf_cookie(response):
+        response.set_cookie('csrf_token', generate_csrf())
+        return response
 
     return app

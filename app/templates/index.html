@@ -26,7 +26,6 @@
                 <span class="like-count" data-screenshot-id="{{ screenshot.id }}">
                     {{ screenshot.like_count }}
                 </span>
-                <!-- This button triggers the comments modal -->
                 <button type="button" class="btn btn-comments btn-sm" data-toggle="modal" data-target="#imageModal-{{ screenshot.id }}">
                   <i class="fa-regular fa-comment"></i> <div class="comment-count">{{ screenshot.comments|length if screenshot.comments else 0 }}</div>
                     {{ screenshot.comment_count }}
@@ -117,7 +116,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
           <div class="modal-content bg-dark text-light">
               <div class="modal-header">
-                  <h5 class="modal-title" id="imageModalLabel-{{ screenshot.id }}">
+                  <h5 class="modal-title" id="imageModalLabel-{{ screenshot ~ 'images/' ~ screenshot.filename }}">
                       By: {{ screenshot.uploader_name }}
                   </h5>
                   <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">

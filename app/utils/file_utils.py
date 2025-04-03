@@ -53,6 +53,12 @@ def handle_upload(files, uploader_name, session):
 
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        
+        # Don't overwrite passed uploader_name
+        if not uploader_name:
+            uploader_name = session.get("username", "guest")
+            
+        uploader_type = "discord" if 'discord_id' in session else "guest"
 
         # 1) Validate & store "Resources Used" from request form
         resources_input = request.form.get("resources", "").strip()
@@ -77,20 +83,16 @@ def handle_upload(files, uploader_name, session):
         if group_name:
             cursor = conn.execute(
                 """
-                INSERT INTO screenshot_groups (name, created_by)
-                VALUES (?, ?) RETURNING id
+                INSERT INTO screenshot_groups (name, created_by, created_at)
+                VALUES (?, ?, datetime('now'))
+                RETURNING id
                 """,
                 (group_name, uploader_name)
             )
             group_id = cursor.fetchone()["id"]
         
-        # Determine uploader's username and type
-        if "discord_id" in session:
-            uploader_type = "discord"
-            username = session["username"]
-        else:
-            uploader_type = "guest"
-            username = session.get("guest_username")
+        # Use already determined uploader info instead of recalculating
+        username = uploader_name
 
         # Sanitize username for directory
         sanitized_username = secure_filename(username)
@@ -120,10 +122,13 @@ def handle_upload(files, uploader_name, session):
                 continue
 
             if allowed_file(file.filename):
-                try:  # <- START OF TRY BLOCK
+                try:
                     # Convert and save the image
                     with Image.open(file) as img:
                         img.save(filepath, "WEBP", quality=95)
+
+                    # Track successfully uploaded file path
+                    uploaded_files.append(f"{sanitized_username}/{new_filename}")
 
                     # Database insertion
                     cursor.execute(
@@ -160,13 +165,17 @@ def handle_upload(files, uploader_name, session):
                             (screenshot_id, tag_id)
                         )
 
-                except Exception as e:  # <- EXCEPT MUST ALIGN WITH TRY
+                    # Track processed files to avoid duplicates
+                    processed_files.add(new_filename)
+
+                except Exception as e:
                     print(f"Saving to: {filepath}")
                     print(f"Saving file as: {sanitized_username}/{new_filename}")
                     print(f"Error processing {file.filename}: {e}")
                     flash(f"Failed to upload {file.filename}: {e}", "danger")
                     conn.rollback()
                     continue
+                
                 conn.commit()
     
     return uploaded_files

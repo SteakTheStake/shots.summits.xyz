@@ -49,6 +49,18 @@ def init_db():
             )
         """)
 
+        # -- 4b. Create tag_request table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tag_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tag_name TEXT NOT NULL,
+                requester_id TEXT NOT NULL,
+                requester_type TEXT NOT NULL,
+                requested_at DATETIME NOT NULL,
+                status TEXT DEFAULT 'pending'
+            );
+        """)
+
         # -- 4c. Create tags table
         conn.execute("""
             CREATE TABLE IF NOT EXISTS tags (

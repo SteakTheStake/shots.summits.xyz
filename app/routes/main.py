@@ -85,45 +85,36 @@ def get_discord_avatar_url(discord_id, avatar):
 
 @main_bp.route("/<username>/<image_filename>")
 def view_image(username, image_filename):
-    image_path = os.path.join(Config.UPLOAD_FOLDER, image_filename)
+    # Correct image path to include username subdirectory
+    image_path = os.path.join(Config.UPLOAD_FOLDER, username, image_filename)
     if not os.path.exists(image_path):
         return "Image not found", 404
 
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
 
-        # 1) Basic screenshot data
+        # Modified query to check both filename and username
         image_data = conn.execute("""
             SELECT s.*, g.name as group_name, GROUP_CONCAT(t.name) as tags
             FROM screenshots s
             LEFT JOIN screenshot_groups g ON s.group_id = g.id
             LEFT JOIN screenshot_tags st ON s.id = st.screenshot_id
             LEFT JOIN tags t ON st.tag_id = t.id
-            WHERE s.filename = ?
+            WHERE s.filename = ? AND s.discord_username = ?
             GROUP BY s.id
-        """, (image_filename,)).fetchone()
+        """, (image_filename, username)).fetchone()
 
         if not image_data:
             return "Image data not found in DB", 404
         
-    with sqlite3.connect(Config.DATABASE_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        screenshot = conn.execute("""
-            SELECT * FROM screenshots 
-            WHERE filename = ? AND uploader_username = ?
-        """, (filename, username)).fetchone()
-
-    if not screenshot:
-        abort(404)
-
         screenshot_id = image_data["id"]
 
-        # 2) Like count
+        # Fetch like count
         like_count = conn.execute("""
             SELECT COUNT(*) FROM likes WHERE screenshot_id=?
         """, (screenshot_id,)).fetchone()[0]
 
-        # 3) Fetch comments
+        # Fetch comments
         comment_rows = conn.execute("""
             SELECT c.* 
             FROM comments c
@@ -132,7 +123,7 @@ def view_image(username, image_filename):
         """, (screenshot_id,)).fetchall()
         comments_list = [dict(cr) for cr in comment_rows]
 
-        # 4) Check if current user liked
+        # Check if current user liked
         current_user_id = session.get('discord_id') or session.get('guest_id')
         if current_user_id:
             is_liked = conn.execute("""
@@ -142,17 +133,12 @@ def view_image(username, image_filename):
         else:
             image_data["user_liked"] = False
             
-    screenshot = Screenshot.query.get_or_404(image_filename)
-    if screenshot.username != username:
-        abort(404)
-        
     return render_template(
         "image_detail.html",
         image_filename=image_filename,
         image_data=image_data,
         like_count=like_count,
         comments=comments_list,
-        screenshot=screenshot,
         username=username,
         user_role=get_user_role(session.get('discord_id'), session.get('guest_id'))
     )
@@ -191,7 +177,7 @@ def delete_image(filename):
                 # Log the deletion
                 conn.execute(
                     """
-                    INSERT INTO deletion_log (filename, deleted_by, original_uploader, reason)
+                    INSERT INTO deletion_log (filename, deleted_by, username, reason)
                     VALUES (?, ?, ?, ?)
                     """,
                     (
@@ -220,43 +206,119 @@ def delete_image(filename):
 @main_bp.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
-    """
-    Handles uploading new screenshots (with your existing handle_upload logic).
-    """
     if request.method == "POST":
-        if "screenshots[]" not in request.files:
+        if "screenshots" not in request.files:
             flash("No files uploaded", "danger")
             return redirect(request.url)
-
-        files = request.files.getlist("screenshots[]")
+        
+        files = request.files.getlist("screenshots")
         uploader_name = session.get("username")
-
+        
+        # Check maximum files limit
+        if len(files) > 10:
+            flash(f"Too many files. Maximum is 10 files per upload.", "danger")
+            return redirect(request.url)
+        
+        # Check each file
+        total_size = 0
         for file in files:
-            if file and not allowed_file(file.filename):
+            if not file.filename:
+                continue
+                
+            if not allowed_file(file.filename):
                 flash(f"Invalid file type: {file.filename}", "danger")
                 return redirect(request.url)
-            if file.content_length and file.content_length > 24 * 1024 * 1024:
+            
+            # Check file size
+            file.seek(0, os.SEEK_END)
+            size = file.tell()
+            file.seek(0)  # Reset file pointer
+            total_size += size
+            
+            if size > Config.MAX_CONTENT_LENGTH:  # Individual file size limit
                 flash(f"File too large: {file.filename}", "danger")
                 return redirect(request.url)
-
+        
+        # Check total upload size
+        if total_size > 1024 * 1024 * 1024:  # 1GB total
+            flash(f"Total upload size too large", "danger")
+            return redirect(request.url)
+        
         try:
+            # Get post title (previously referred to as "resources" in your code)
+            post_title = request.form.get("post_title", "").strip()
+            
+            # Call the handle_upload function with fixed parameters
             uploaded_files = handle_upload(files, uploader_name, session)
-            flash(f"Successfully uploaded {len(uploaded_files)} files", "success")
+            
+            if uploaded_files:
+                flash(f"Successfully uploaded {len(uploaded_files)} files", "success")
+            else:
+                flash("No files were uploaded", "warning")
+                
         except Exception as e:
             flash(f"Error uploading files: {str(e)}", "danger")
             return redirect(request.url)
-
+        
         return redirect(url_for("main.index"))
-
-    # If GET, show a form or something:
+    
+    # GET request handling
     with sqlite3.connect(Config.DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         preapproved_tags = conn.execute(
             "SELECT id, name FROM tags ORDER BY name"
         ).fetchall()
-
+    
     return render_template("upload_form.html", preapproved_tags=preapproved_tags)
 
+@main_bp.route('/request_tag', methods=['POST'])
+@login_required
+def request_tag():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'Invalid JSON'}), 400
+           
+        tag_name = data.get('tag_name', '').strip()
+       
+        if not tag_name:
+            return jsonify({'success': False, 'message': 'Tag name cannot be empty'}), 400
+            
+        with sqlite3.connect(Config.DATABASE_PATH) as conn:
+            # Check if tag already exists
+            existing = conn.execute(
+                "SELECT id FROM tags WHERE LOWER(name) = ?",
+                (tag_name.lower(),)
+            ).fetchone()
+           
+            if existing:
+                return jsonify({'success': False, 'message': 'Tag already exists'})
+            # Check if already requested
+            existing_request = conn.execute(
+                "SELECT id FROM tag_requests WHERE LOWER(tag_name) = ?",
+                (tag_name.lower(),)
+            ).fetchone()
+           
+            if existing_request:
+                return jsonify({'success': False, 'message': 'Tag already requested'})
+            # Get requester info
+            requester_id = session.get('discord_id') or session.get('guest_id', 'guest')
+            requester_type = 'discord' if 'discord_id' in session else 'guest'
+            # Insert new request
+            conn.execute(
+                """
+                INSERT INTO tag_requests
+                (tag_name, requester_id, requester_type, requested_at)
+                VALUES (?, ?, ?, datetime('now'))
+                """,
+                (tag_name, requester_id, requester_type)
+            )
+           
+            return jsonify({'success': True, 'message': 'Tag request submitted for review'})
+       
+    except Exception as e:
+        app.logger.error(f"Tag request error: {str(e)}")
+        return jsonify({'success': False, 'message': 'Server error processing request'}), 500
 
 @main_bp.route("/toggle_like/<int:screenshot_id>", methods=["POST"])
 @login_required
@@ -621,7 +683,7 @@ def remove_comment(comment_id):
         # Check permission:
         # - If admin or moderator => okay
         # - OR if you want to allow the original commenter to remove it:
-        #   if user_id == comment_user_id
+        #   if user_id == 
         #   (i.e. current_user_id or username matches)
         if user_role not in ["admin", "moderator"]:
             # If you want to allow the user themself to remove their own comment:
@@ -794,7 +856,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 screenshot_id INTEGER NOT NULL,
                 user_id TEXT,
-                username TEXT,
+                original_uploader TEXT,
                 comment_text TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );

@@ -638,6 +638,10 @@ progress {
     --text-light: #ffffff;
 }
 
+.bg-dark2 {
+    background: #2c2c2c;
+}
+
 body.dark {
     background-color: var(--bg-dark);
     color: var(--text-light);
@@ -667,7 +671,6 @@ body.dark {
     /* On larger screens, exactly 3 columns (each at least 280px wide if possible) */
     grid-template-columns: repeat(6, minmax(280px, 1fr));
     margin: 2rem;
-    padding: 2rem;
   }
   
   /* The regular grid items */
